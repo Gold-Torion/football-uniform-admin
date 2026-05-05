@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -13,10 +14,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import * as ImagePicker from 'expo-image-picker';
 
 import { ListingsApi } from '../../api/listings';
 import { useAuthStore } from '../../store/auth.store';
 import type { MainTabParamList } from '../../navigation/types';
+
+const MAX_PHOTOS = 8;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -305,12 +309,80 @@ const INITIAL: FormState = {
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export function NewListingScreen() {
-  const [form, setForm]  = useState<FormState>(INITIAL);
-  const [busy, setBusy]  = useState(false);
+  const [form, setForm]         = useState<FormState>(INITIAL);
+  const [busy, setBusy]         = useState(false);
   const [attempted, setAttempted] = useState(false);
-  const scrollRef        = useRef<ScrollView>(null);
-  const setListingsCount = useAuthStore((s) => s.setListingsActiveCount);
-  const nav              = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+  const [photoUris, setPhotoUris] = useState<string[]>([]);
+  const [photoKeys, setPhotoKeys] = useState<string[]>([]);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+  const [createdListingId, setCreatedListingId] = useState<string | null>(null);
+  const scrollRef               = useRef<ScrollView>(null);
+  const setListingsCount        = useAuthStore((s) => s.setListingsActiveCount);
+  const nav                     = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+
+  async function pickAndUpload(slotIndex: number) {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão necessária', 'Permita o acesso à galeria nas configurações.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const ext   = (asset.uri.split('.').pop() ?? 'jpg').toLowerCase();
+    const mime  = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+
+    if (!createdListingId) {
+      Alert.alert('Atenção', 'Preencha os dados do anúncio antes de adicionar fotos.');
+      return;
+    }
+
+    setUploadingIdx(slotIndex);
+    try {
+      const { uploadUrl, key } = await ListingsApi.presignPhoto(createdListingId, mime);
+
+      const blob = await fetch(asset.uri).then((r) => r.blob());
+      const uploadRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': mime },
+        body: blob,
+      });
+      if (!uploadRes.ok) throw new Error('Upload failed');
+
+      await ListingsApi.confirmPhoto(createdListingId, key);
+
+      setPhotoUris((prev) => {
+        const next = [...prev];
+        next[slotIndex] = asset.uri;
+        return next;
+      });
+      setPhotoKeys((prev) => {
+        const next = [...prev];
+        next[slotIndex] = key;
+        return next;
+      });
+    } catch {
+      Alert.alert('Erro', 'Não foi possível enviar a foto. Tente novamente.');
+    } finally {
+      setUploadingIdx(null);
+    }
+  }
+
+  async function removePhoto(slotIndex: number) {
+    if (!createdListingId || !photoKeys[slotIndex]) return;
+    try {
+      await ListingsApi.deletePhoto(createdListingId, photoKeys[slotIndex]);
+      setPhotoUris((prev) => prev.filter((_, i) => i !== slotIndex));
+      setPhotoKeys((prev) => prev.filter((_, i) => i !== slotIndex));
+    } catch {
+      Alert.alert('Erro', 'Não foi possível remover a foto.');
+    }
+  }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setAttempted(false);
@@ -393,13 +465,24 @@ export function NewListingScreen() {
       });
 
       setListingsCount(result.listingsActiveCount);
-      setForm(INITIAL);
-      setAttempted(false);
+      setCreatedListingId(result.listing.listingId);
 
       Alert.alert(
-        '✅ Anúncio publicado!',
-        'Sua camisa foi publicada com sucesso.',
-        [{ text: 'Ver meus anúncios', onPress: () => nav.navigate('Home') }],
+        '✅ Anúncio criado!',
+        photoUris.length === 0
+          ? 'Anúncio publicado. Adicione fotos para atrair mais compradores.'
+          : `Anúncio publicado com ${photoUris.length} foto${photoUris.length > 1 ? 's' : ''}.`,
+        [{
+          text: 'Ver meus anúncios',
+          onPress: () => {
+            setForm(INITIAL);
+            setPhotoUris([]);
+            setPhotoKeys([]);
+            setCreatedListingId(null);
+            setAttempted(false);
+            nav.navigate('Home');
+          },
+        }],
       );
     } catch {
       Alert.alert('Erro', 'Não foi possível publicar o anúncio. Verifique sua conexão.');
@@ -450,36 +533,60 @@ export function NewListingScreen() {
         )}
 
         {/* Fotos */}
-        <SectionTitle text="FOTOS" />
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          {/* Main photo slot */}
-          <View style={{
-            flex: 2, aspectRatio: 1, borderRadius: 14,
-            borderWidth: 1.5, borderColor: '#E5DCC4', borderStyle: 'dashed',
-            backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Text style={{ fontSize: 30, marginBottom: 6 }}>📷</Text>
-            <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '600' }}>Foto principal</Text>
-            <Text style={{ color: '#E5DCC4', fontSize: 10, marginTop: 4 }}>em breve</Text>
+        <SectionTitle text={`FOTOS (${photoUris.length}/${MAX_PHOTOS})`} />
+        {!createdListingId && (
+          <View style={{ backgroundColor: 'rgba(51,83,54,0.08)', borderRadius: 10, padding: 10, marginBottom: 8 }}>
+            <Text style={{ color: '#335336', fontSize: 12, textAlign: 'center' }}>
+              Publique o anúncio primeiro para adicionar fotos
+            </Text>
           </View>
-
-          {/* Secondary photo slots */}
-          <View style={{ flex: 1, gap: 10 }}>
-            {[1, 2].map((i) => (
-              <View key={i} style={{
-                flex: 1, borderRadius: 14,
-                borderWidth: 1.5, borderColor: '#E5DCC4', borderStyle: 'dashed',
-                backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center',
-                minHeight: 70,
-              }}>
-                <Text style={{ fontSize: 20 }}>+</Text>
-                <Text style={{ color: '#E5DCC4', fontSize: 9, marginTop: 2 }}>foto {i + 1}</Text>
-              </View>
-            ))}
-          </View>
+        )}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {Array.from({ length: Math.min(MAX_PHOTOS, photoUris.length + (photoUris.length < MAX_PHOTOS ? 1 : 0)) }).map((_, i) => {
+            const hasPhoto = !!photoUris[i];
+            const isUploading = uploadingIdx === i;
+            return (
+              <Pressable
+                key={i}
+                onPress={() => hasPhoto ? removePhoto(i) : pickAndUpload(i)}
+                disabled={isUploading || !createdListingId}
+                style={{
+                  width: i === 0 ? '48%' : '23%',
+                  aspectRatio: 1,
+                  borderRadius: 12,
+                  borderWidth: 1.5,
+                  borderColor: hasPhoto ? '#335336' : '#E5DCC4',
+                  borderStyle: hasPhoto ? 'solid' : 'dashed',
+                  backgroundColor: '#fff',
+                  overflow: 'hidden',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: !createdListingId ? 0.4 : 1,
+                }}
+              >
+                {isUploading ? (
+                  <ActivityIndicator color="#335336" />
+                ) : hasPhoto ? (
+                  <>
+                    <Image source={{ uri: photoUris[i] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 10, padding: 2 }}>
+                      <Text style={{ color: '#fff', fontSize: 10 }}>✕</Text>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Text style={{ fontSize: i === 0 ? 28 : 18 }}>📷</Text>
+                    <Text style={{ color: '#9C9486', fontSize: 9, marginTop: 2 }}>
+                      {i === 0 ? 'principal' : `foto ${i + 1}`}
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+            );
+          })}
         </View>
-        <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 6, textAlign: 'center' }}>
-          Upload de fotos disponível na próxima versão
+        <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 6 }}>
+          Toque para adicionar · Toque na foto para remover · Máx. {MAX_PHOTOS} fotos
         </Text>
 
         {/* Time ou Seleção */}

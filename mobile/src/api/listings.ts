@@ -59,4 +59,16 @@ export const ListingsApi = {
   listBySeller(sellerId: string): Promise<ListingPublic[]> {
     return api.get<ListingPublic[]>(`/listings/seller/${sellerId}`).then((r) => r.data);
   },
+
+  presignPhoto(listingId: string, contentType: string): Promise<{ uploadUrl: string; key: string }> {
+    return api.post(`/listings/${listingId}/photos/presign`, { contentType }).then((r) => r.data);
+  },
+
+  confirmPhoto(listingId: string, key: string): Promise<ListingPublic> {
+    return api.post(`/listings/${listingId}/photos/confirm`, { key }).then((r) => r.data);
+  },
+
+  deletePhoto(listingId: string, key: string): Promise<ListingPublic> {
+    return api.delete(`/listings/${listingId}/photos`, { data: { key } }).then((r) => r.data);
+  },
 };
