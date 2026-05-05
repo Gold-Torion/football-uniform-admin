@@ -534,14 +534,21 @@ export function NewListingScreen() {
 
         {/* Fotos */}
         <SectionTitle text={`FOTOS (${photoUris.length}/${MAX_PHOTOS})`} />
-        {!createdListingId && (
-          <View style={{ backgroundColor: 'rgba(51,83,54,0.08)', borderRadius: 10, padding: 10, marginBottom: 8 }}>
-            <Text style={{ color: '#335336', fontSize: 12, textAlign: 'center' }}>
+        {!createdListingId ? (
+          <View style={{
+            alignItems: 'center', justifyContent: 'center',
+            padding: 20, borderRadius: 12,
+            borderWidth: 1.5, borderColor: '#E5DCC4', borderStyle: 'dashed',
+            backgroundColor: '#fff',
+          }}>
+            <Text style={{ fontSize: 28, marginBottom: 6 }}>📷</Text>
+            <Text style={{ color: '#9C9486', fontSize: 13, fontWeight: '600' }}>Foto principal</Text>
+            <Text style={{ color: '#335336', fontSize: 11, marginTop: 6, textAlign: 'center' }}>
               Publique o anúncio primeiro para adicionar fotos
             </Text>
           </View>
-        )}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        ) : (<>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {Array.from({ length: Math.min(MAX_PHOTOS, photoUris.length + (photoUris.length < MAX_PHOTOS ? 1 : 0)) }).map((_, i) => {
             const hasPhoto = !!photoUris[i];
             const isUploading = uploadingIdx === i;
@@ -549,9 +556,9 @@ export function NewListingScreen() {
               <Pressable
                 key={i}
                 onPress={() => hasPhoto ? removePhoto(i) : pickAndUpload(i)}
-                disabled={isUploading || !createdListingId}
+                disabled={isUploading}
                 style={{
-                  width: i === 0 ? '48%' : '23%',
+                  width: i === 0 ? '60%' : '23%',
                   aspectRatio: 1,
                   borderRadius: 12,
                   borderWidth: 1.5,
@@ -561,7 +568,6 @@ export function NewListingScreen() {
                   overflow: 'hidden',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  opacity: !createdListingId ? 0.4 : 1,
                 }}
               >
                 {isUploading ? (
@@ -588,6 +594,7 @@ export function NewListingScreen() {
         <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 6 }}>
           Toque para adicionar · Toque na foto para remover · Máx. {MAX_PHOTOS} fotos
         </Text>
+        </> )}
 
         {/* Time ou Seleção */}
         <SectionTitle text="TIME OU SELEÇÃO" />
