@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Arena dos Mantos",
+    "slug": "arena-dos-mantos",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "arenadosmantos",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.arenadosmantos.app",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.arenadosmantos.app",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "CAMERA",
+        "INTERNET"
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-asset",
+      "@react-native-google-signin/google-signin"
+    ]
+  }
+}

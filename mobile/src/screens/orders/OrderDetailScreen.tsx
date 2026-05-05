@@ -1,0 +1,378 @@
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import type { RootStackParamList } from '../../navigation/types';
+import { OrdersApi, type OrderPublic, type OrderStatus } from '../../api/orders';
+import { useAuthStore } from '../../store/auth.store';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'OrderDetail'>;
+
+const STATUS_STEPS: OrderStatus[] = [
+  'PENDING_PAYMENT',
+  'PAID',
+  'SHIPPED',
+  'DELIVERED',
+  'COMPLETED',
+];
+
+const STEP_LABEL: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: 'Aguardando pagamento',
+  PAID:            'Pago',
+  SHIPPED:         'Enviado',
+  DELIVERED:       'Entregue',
+  COMPLETED:       'Concluído',
+  CANCELLED:       'Cancelado',
+};
+
+const CONDITION_LABEL: Record<string, string> = {
+  COM_ETIQUETA: 'Com etiqueta',
+  PERFEITA:     'Perfeita',
+  EXCELENTE:    'Excelente',
+  BOA:          'Boa',
+  REGULAR:      'Regular',
+  DESGASTADA:   'Desgastada',
+};
+
+function getInitials(name: string): string {
+  return name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+}
+
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={{
+      backgroundColor: '#fff',
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: '#E5DCC4',
+      padding: 16,
+      marginBottom: 12,
+    }}>
+      <Text style={{
+        color: '#9C9486', fontSize: 11, fontWeight: '700',
+        letterSpacing: 1, marginBottom: 12,
+      }}>
+        {title}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+function SummaryRow({ label, value, bold, gold }: {
+  label: string; value: string; bold?: boolean; gold?: boolean;
+}) {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+      <Text style={{ color: '#1C1A14', fontSize: 14, fontWeight: bold ? '700' : '400' }}>{label}</Text>
+      <Text style={{ color: gold ? '#D4AF37' : '#1C1A14', fontSize: bold ? 16 : 14, fontWeight: bold ? '700' : '400' }}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+export function OrderDetailScreen({ route, navigation }: Props) {
+  const { orderId } = route.params;
+  const currentUser = useAuthStore((s) => s.user);
+
+  const [order, setOrder]   = useState<OrderPublic | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState(false);
+
+  const fetchOrder = () => {
+    setLoading(true);
+    OrdersApi.findOne(orderId)
+      .then(setOrder)
+      .catch(() => { /* silently ignore */ })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchOrder();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId]);
+
+  const fmt = (cents: number) =>
+    (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  const handleConfirmReceipt = () => {
+    Alert.alert(
+      'Confirmar recebimento',
+      'Você confirma que recebeu o produto em boas condições?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          onPress: async () => {
+            setConfirming(true);
+            try {
+              await OrdersApi.confirmReceipt(orderId);
+              fetchOrder();
+            } catch {
+              Alert.alert('Erro', 'Não foi possível confirmar o recebimento.');
+            } finally {
+              setConfirming(false);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  const shortId = orderId.slice(-8).toUpperCase();
+
+  const canConfirm =
+    order !== null &&
+    currentUser?.userId === order.buyerId &&
+    (order.status === 'PAID' || order.status === 'SHIPPED');
+
+  // Timeline helpers
+  const currentStepIndex = order ? STATUS_STEPS.indexOf(order.status) : -1;
+
+  return (
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+
+      {/* Header */}
+      <View style={{
+        backgroundColor: '#335336',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        gap: 12,
+      }}>
+        <Pressable onPress={() => navigation.goBack()} hitSlop={12}>
+          <Text style={{ color: '#D4AF37', fontSize: 22 }}>←</Text>
+        </Pressable>
+        <Text style={{ color: '#F5E6B8', fontWeight: '800', fontSize: 17 }}>
+          Pedido #{shortId}
+        </Text>
+      </View>
+
+      {loading ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color="#335336" />
+        </View>
+      ) : !order ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: '#9C9486', fontSize: 15 }}>Pedido não encontrado</Text>
+        </View>
+      ) : (
+        <>
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: canConfirm ? 100 : 24 }}>
+
+            {/* Status timeline card */}
+            <SectionCard title="STATUS">
+              {order.status === 'CANCELLED' ? (
+                <View style={{
+                  backgroundColor: '#FEE2E2',
+                  borderRadius: 12,
+                  padding: 12,
+                  alignItems: 'center',
+                }}>
+                  <Text style={{ color: '#991B1B', fontWeight: '700', fontSize: 15 }}>
+                    Cancelado
+                  </Text>
+                </View>
+              ) : (
+                STATUS_STEPS.map((step, index) => {
+                  const isCompleted = index < currentStepIndex;
+                  const isCurrent   = index === currentStepIndex;
+                  const isFuture    = index > currentStepIndex;
+                  const isLast      = index === STATUS_STEPS.length - 1;
+
+                  return (
+                    <View key={step}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: isLast ? 0 : 0 }}>
+                        {/* Circle + connector column */}
+                        <View style={{ alignItems: 'center', width: 20 }}>
+                          <View style={{
+                            width: 20, height: 20, borderRadius: 10,
+                            backgroundColor: isCompleted
+                              ? '#D4AF37'
+                              : isCurrent
+                                ? '#335336'
+                                : 'transparent',
+                            borderWidth: isFuture ? 2 : 0,
+                            borderColor: '#9C9486',
+                          }} />
+                          {!isLast && (
+                            <View style={{
+                              width: 2,
+                              height: 20,
+                              backgroundColor: isCompleted ? '#D4AF37' : '#E5DCC4',
+                            }} />
+                          )}
+                        </View>
+
+                        {/* Label */}
+                        <Text style={{
+                          color: isFuture ? '#9C9486' : '#1C1A14',
+                          fontSize: 14,
+                          fontWeight: isCurrent ? '700' : '400',
+                          paddingVertical: 10,
+                        }}>
+                          {STEP_LABEL[step]}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </SectionCard>
+
+            {/* Product card */}
+            <SectionCard title="PRODUTO">
+              <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center', marginBottom: 12 }}>
+                <View style={{
+                  width: 64, height: 64, borderRadius: 12,
+                  backgroundColor: '#F4EFE3',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ fontSize: 32 }}>👕</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16, marginBottom: 2 }}>
+                    {order.teamName}
+                  </Text>
+                  <Text style={{ color: '#9C9486', fontSize: 13 }}>
+                    {order.supplier} · {order.season}
+                  </Text>
+                  <Text style={{ color: '#9C9486', fontSize: 13 }}>
+                    Tam. {order.size} · {CONDITION_LABEL[order.condition] ?? order.condition}
+                  </Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={{ color: '#9C9486', fontSize: 14 }}>Valor do item</Text>
+                <Text style={{ color: '#1C1A14', fontSize: 14, fontWeight: '600' }}>{fmt(order.priceCents)}</Text>
+              </View>
+            </SectionCard>
+
+            {/* Delivery card */}
+            <SectionCard title="ENTREGA">
+              {order.deliveryMethod === 'CORREIOS' ? (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <Text style={{ fontSize: 18 }}>📦</Text>
+                    <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>Correios</Text>
+                  </View>
+                  {order.buyerCep ? (
+                    <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 4 }}>
+                      CEP do comprador: {order.buyerCep}
+                    </Text>
+                  ) : null}
+                  <Text style={{ color: '#1C1A14', fontSize: 14 }}>
+                    Frete: {fmt(order.shippingCents)}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <Text style={{ fontSize: 18 }}>🤝</Text>
+                    <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>Entrega em Mãos</Text>
+                  </View>
+                  <Text style={{ color: '#9C9486', fontSize: 13 }}>
+                    Entrega pessoal combinada entre comprador e vendedor
+                  </Text>
+                </>
+              )}
+            </SectionCard>
+
+            {/* Summary card */}
+            <SectionCard title="RESUMO">
+              <SummaryRow label="Subtotal" value={fmt(order.priceCents)} />
+              <SummaryRow
+                label="Frete"
+                value={order.deliveryMethod === 'ENTREGA_EM_MAOS' ? 'Grátis' : fmt(order.shippingCents)}
+              />
+              <View style={{ height: 1, backgroundColor: '#F4EFE3', marginBottom: 10, marginTop: 2 }} />
+              <SummaryRow label="Total" value={fmt(order.totalCents)} bold gold />
+            </SectionCard>
+
+            {/* Parties card */}
+            <SectionCard title="PARTICIPANTES">
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <View style={{
+                  width: 40, height: 40, borderRadius: 20,
+                  backgroundColor: '#335336',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 14 }}>
+                    {getInitials(order.sellerName)}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={{ color: '#9C9486', fontSize: 11 }}>Vendedor</Text>
+                  <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
+                    {order.sellerName}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={{
+                  width: 40, height: 40, borderRadius: 20,
+                  backgroundColor: '#335336',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 14 }}>
+                    {getInitials(order.buyerName)}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={{ color: '#9C9486', fontSize: 11 }}>Comprador</Text>
+                  <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
+                    {order.buyerName}
+                  </Text>
+                </View>
+              </View>
+            </SectionCard>
+
+          </ScrollView>
+
+          {/* Fixed bottom — only for buyer when status is PAID or SHIPPED */}
+          {canConfirm && (
+            <View style={{
+              position: 'absolute',
+              bottom: 0, left: 0, right: 0,
+              backgroundColor: '#F4EFE3',
+              borderTopWidth: 1,
+              borderColor: '#E5DCC4',
+              padding: 16,
+              paddingBottom: 28,
+            }}>
+              <Pressable
+                onPress={handleConfirmReceipt}
+                disabled={confirming}
+                style={({ pressed }) => ({
+                  backgroundColor: confirming ? '#9C9486' : pressed ? '#B8942E' : '#D4AF37',
+                  borderRadius: 16,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                })}
+              >
+                {confirming
+                  ? <ActivityIndicator color="#211B15" />
+                  : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
+                      Confirmar Recebimento
+                    </Text>
+                }
+              </Pressable>
+            </View>
+          )}
+        </>
+      )}
+
+    </SafeAreaView>
+  );
+}
