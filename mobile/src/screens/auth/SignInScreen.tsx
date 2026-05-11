@@ -65,6 +65,7 @@ export function SignInScreen({ navigation }: Props) {
   const setTotpTempToken = useAuthStore((s) => s.setTotpTempToken);
   const accessToken      = useAuthStore((s) => s.accessToken);
   const user             = useAuthStore((s) => s.user);
+  const enterAsGuest     = useAuthStore((s) => s.enterAsGuest);
 
 
   // Entrance animations
@@ -191,6 +192,17 @@ export function SignInScreen({ navigation }: Props) {
             </Pressable>
 
             {busy && <ActivityIndicator color="#D4AF37" className="mt-3" />}
+
+            {/* Guest entry */}
+            <Pressable
+              onPress={enterAsGuest}
+              disabled={busy}
+              style={{ alignItems: 'center', marginTop: 18 }}
+            >
+              <Text style={{ color: '#EAEAEA', fontSize: 13, opacity: 0.7 }}>
+                Entrar sem login
+              </Text>
+            </Pressable>
 
             <Text className="text-center mt-5 text-arena-dourado-claro/60 text-[11px] leading-[16px]">
               Ao continuar você aceita nossa{' '}

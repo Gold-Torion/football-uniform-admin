@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { api } from './api.ts';
 import { Layout } from './components/Layout.tsx';
 import { Dashboard } from './pages/Dashboard.tsx';
 import { Users } from './pages/Users.tsx';
 import { Listings } from './pages/Listings.tsx';
 import { Reports } from './pages/Reports.tsx';
 import { Orders } from './pages/Orders.tsx';
+import { Coupons } from './pages/Coupons.tsx';
+import { Mpc } from './pages/Mpc.tsx';
+import { Quiz } from './pages/Quiz.tsx';
 
-type Page = 'dashboard' | 'users' | 'listings' | 'reports' | 'orders';
+type Page = 'dashboard' | 'users' | 'listings' | 'reports' | 'orders' | 'coupons' | 'mpc' | 'quiz';
 
 export default function App() {
   const [secret,   setSecret]   = useState('');
@@ -221,6 +223,9 @@ export default function App() {
       case 'listings':  return <Listings  secret={secret} />;
       case 'reports':   return <Reports   secret={secret} />;
       case 'orders':    return <Orders    secret={secret} />;
+      case 'coupons':   return <Coupons   secret={secret} />;
+      case 'mpc':       return <Mpc       secret={secret} />;
+      case 'quiz':      return <Quiz      secret={secret} />;
       default:          return <Dashboard secret={secret} />;
     }
   }

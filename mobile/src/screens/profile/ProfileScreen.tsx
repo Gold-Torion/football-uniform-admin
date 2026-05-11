@@ -3,6 +3,7 @@ import { Alert, Linking, Platform, Pressable, ScrollView, Text, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
+import { ShoppingBag, Shield, ShieldOff, Camera, AtSign } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import { QRScannerScreen } from '../coupon/QRScannerScreen';
@@ -25,11 +26,12 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-function Row({ label, value, onPress, danger }: {
+function Row({ label, value, onPress, danger, icon }: {
   label: string;
   value?: string;
   onPress?: () => void;
   danger?: boolean;
+  icon?: React.ReactNode;
 }) {
   return (
     <Pressable
@@ -44,9 +46,12 @@ function Row({ label, value, onPress, danger }: {
         backgroundColor: pressed ? '#F4EFE3' : '#fff',
       })}
     >
-      <Text style={{ fontSize: 15, color: danger ? '#EF4444' : '#1C1A14', fontWeight: danger ? '600' : '400' }}>
-        {label}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+        {icon}
+        <Text style={{ fontSize: 15, color: danger ? '#EF4444' : '#1C1A14', fontWeight: danger ? '600' : '400' }}>
+          {label}
+        </Text>
+      </View>
       {value && <Text style={{ fontSize: 14, color: '#9C9486' }}>{value}</Text>}
       {onPress && !danger && <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>}
     </Pressable>
@@ -236,7 +241,7 @@ export function ProfileScreen() {
           <Divider />
           <Row label="CPF" value={user?.cpf ? `***.***.${user.cpf.slice(6, 9)}-**` : '—'} />
           <Divider />
-          <Row label="📦  Meus pedidos" onPress={() => navigation.navigate('Orders')} />
+          <Row label="Meus pedidos" icon={<ShoppingBag size={17} color="#9C9486" />} onPress={() => navigation.navigate('Orders')} />
           <Divider />
           <Row label="Membro desde" value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '—'} />
         </Card>
@@ -248,13 +253,15 @@ export function ProfileScreen() {
         <Card>
           {user?.totpEnabled ? (
             <Row
-              label="🔐  2FA ativo"
+              label="2FA ativo"
+              icon={<Shield size={17} color="#22c55e" />}
               value="Desativar"
               onPress={onDisableTotp}
             />
           ) : (
             <Row
-              label="🔓  Ativar autenticação 2FA"
+              label="Ativar autenticação 2FA"
+              icon={<ShieldOff size={17} color="#9C9486" />}
               onPress={() => setTotpSetupVisible(true)}
             />
           )}
@@ -265,7 +272,7 @@ export function ProfileScreen() {
           CUPONS
         </Text>
         <Card>
-          <Row label="📷  Escanear cupom QR" onPress={() => setScannerVisible(true)} />
+          <Row label="Escanear cupom QR" icon={<Camera size={17} color="#9C9486" />} onPress={() => setScannerVisible(true)} />
         </Card>
 
         {/* Novidades */}
@@ -295,7 +302,7 @@ export function ProfileScreen() {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Text style={{ fontSize: 24 }}>📸</Text>
+            <AtSign size={26} color="#fff" />
           </View>
 
           <View style={{ flex: 1 }}>

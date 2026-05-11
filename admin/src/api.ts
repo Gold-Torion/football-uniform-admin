@@ -70,6 +70,28 @@ export interface OrderPublic {
   createdAt: string;
 }
 
+export interface CouponRecord {
+  code: string;
+  discountPct: number;
+  description: string;
+  maxRedemptions: number;
+  redemptionCount: number;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface QuizRecord {
+  quizId: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  status: 'ACTIVE' | 'CLOSED';
+  answerCounts: number[];
+  totalAnswers: number;
+  createdAt: string;
+  expiresAt?: string;
+}
+
 // ── API client ─────────────────────────────────────────────────────────────
 
 export const api = {
@@ -102,4 +124,31 @@ export const api = {
 
   getOrders:     (s: string) =>
     fetch(`${BASE}/admin/orders`, { headers: headers(s) }).then(r => r.json()) as Promise<OrderPublic[]>,
+
+  // ── Coupons ────────────────────────────────────────────────────────────────
+  listCoupons: (s: string) =>
+    fetch(`${BASE}/admin/coupons`, { headers: headers(s) }).then(r => r.json()) as Promise<CouponRecord[]>,
+
+  createCoupon: (s: string, dto: { code: string; discountPct: number; description: string; maxRedemptions: number }) =>
+    fetch(`${BASE}/admin/coupons`, { method: 'POST', headers: headers(s), body: JSON.stringify(dto) }).then(r => r.json()) as Promise<CouponRecord>,
+
+  toggleCoupon: (s: string, code: string) =>
+    fetch(`${BASE}/admin/coupons/${code}/toggle`, { method: 'PATCH', headers: headers(s) }),
+
+  // ── MPC ────────────────────────────────────────────────────────────────────
+  listMpc: (s: string) =>
+    fetch(`${BASE}/admin/mpc`, { headers: headers(s) }).then(r => r.json()) as Promise<ListingPublic[]>,
+
+  createMpc: (s: string, dto: Record<string, unknown>) =>
+    fetch(`${BASE}/admin/mpc`, { method: 'POST', headers: headers(s), body: JSON.stringify(dto) }).then(r => r.json()) as Promise<ListingPublic>,
+
+  // ── Quiz ───────────────────────────────────────────────────────────────────
+  listQuizzes: (s: string) =>
+    fetch(`${BASE}/admin/quiz`, { headers: headers(s) }).then(r => r.json()) as Promise<QuizRecord[]>,
+
+  createQuiz: (s: string, dto: { question: string; options: string[]; correctIndex: number }) =>
+    fetch(`${BASE}/admin/quiz`, { method: 'POST', headers: headers(s), body: JSON.stringify(dto) }).then(r => r.json()) as Promise<QuizRecord>,
+
+  closeQuiz: (s: string, quizId: string) =>
+    fetch(`${BASE}/admin/quiz/${quizId}/close`, { method: 'PATCH', headers: headers(s) }),
 };

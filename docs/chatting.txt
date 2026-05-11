@@ -1,0 +1,9 @@
+==============================
+CLIENT FEATURE REQUESTS (Eduardo)
+==============================
+
+--- 2026-05-11 ---
+"I want to implement a Quiz inside the app.
+Like: We make the question and people will give the answer inside the app"
+
+Status: IN PROGRESS — being implemented

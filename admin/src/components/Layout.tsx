@@ -7,19 +7,25 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', icon: '📊', label: 'Dashboard'  },
-  { id: 'users',     icon: '👥', label: 'Usuários'   },
-  { id: 'listings',  icon: '👕', label: 'Anúncios'   },
-  { id: 'reports',   icon: '🚩', label: 'Denúncias'  },
-  { id: 'orders',    icon: '📦', label: 'Pedidos'    },
+  { id: 'dashboard', icon: '📊', label: 'Dashboard'   },
+  { id: 'users',     icon: '👥', label: 'Usuários'    },
+  { id: 'listings',  icon: '👕', label: 'Anúncios'    },
+  { id: 'mpc',       icon: '⭐', label: 'MPC'         },
+  { id: 'reports',   icon: '🚩', label: 'Denúncias'   },
+  { id: 'orders',    icon: '📦', label: 'Pedidos'     },
+  { id: 'coupons',   icon: '🎟', label: 'Cupons'      },
+  { id: 'quiz',      icon: '❓', label: 'Quiz'        },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: 'Dashboard',
   users:     'Usuários',
   listings:  'Anúncios',
+  mpc:       'Minha Primeira Camisa',
   reports:   'Denúncias',
   orders:    'Pedidos',
+  coupons:   'Cupons',
+  quiz:      'Quiz',
 };
 
 interface LayoutProps {

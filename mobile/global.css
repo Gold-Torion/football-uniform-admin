@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html, body {
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ── Web-only: center the app in a phone-width container ─────────────────── */
+@media (min-width: 480px) {
+  html, body {
+    background-color: #0f0f0f;
+  }
+
+  #root {
+    max-width: 430px;
+    height: 100dvh;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+    overflow: visible;
+  }
+}
+
+@media (max-width: 479px) {
+  #root {
+    height: 100dvh;
+    overflow: visible;
+  }
+}

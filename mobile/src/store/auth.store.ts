@@ -31,11 +31,13 @@ interface AuthState {
   refreshToken: string | null;
   user: PublicUser | null;
   totpTempToken: string | null;      // in-memory only, not persisted
+  isGuest: boolean;                  // in-memory only, not persisted
   hydrate: () => Promise<void>;
   setSession: (s: Session) => Promise<void>;
   setTotpTempToken: (token: string) => void;
   setTotpEnabled: (enabled: boolean) => void;
   setListingsActiveCount: (count: number) => void;
+  enterAsGuest: () => void;
   clear: () => Promise<void>;
 }
 
@@ -49,6 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshToken: null,
   user: null,
   totpTempToken: null,
+  isGuest: false,
 
   async hydrate() {
     if (get().hydrated) return;
@@ -85,6 +88,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ totpTempToken: token });
   },
 
+  enterAsGuest() {
+    set({ isGuest: true });
+  },
+
   setTotpEnabled(enabled: boolean) {
     const user = get().user;
     if (!user) return;
@@ -107,6 +114,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       SecureStore.deleteItemAsync(REFRESH_KEY),
       SecureStore.deleteItemAsync(USER_KEY),
     ]);
-    set({ accessToken: null, refreshToken: null, user: null, totpTempToken: null });
+    set({ accessToken: null, refreshToken: null, user: null, totpTempToken: null, isGuest: false });
   },
 }));

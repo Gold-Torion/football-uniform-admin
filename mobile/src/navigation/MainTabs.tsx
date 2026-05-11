@@ -5,7 +5,9 @@ import { FeedScreen } from '../screens/feed/FeedScreen';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { NewListingScreen } from '../screens/listing/NewListingScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
+import { QuizScreen } from '../screens/quiz/QuizScreen';
 import { TabExploreIcon, TabHomeIcon, TabPlusIcon, TabProfileIcon } from '../components/BrandIcons';
+import { HelpCircle } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -13,17 +15,18 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 export function MainTabs() {
   return (
     <Tab.Navigator
+      safeAreaInsets={{ bottom: 0 }}
       screenOptions={{
         tabBarActiveTintColor: colors.arenaDourado,
         tabBarInactiveTintColor: colors.ink3,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.surfaceBorder,
-          height: 64,
-          paddingBottom: 10,
-          paddingTop: 6,
+          height: 72,
+          paddingBottom: 12,
+          paddingTop: 8,
         },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         headerStyle: { backgroundColor: colors.arenaVerde },
         headerTitleStyle: { color: colors.arenaDouradoClaro, fontWeight: '800', fontSize: 17 },
         headerTintColor: colors.arenaDouradoClaro,
@@ -43,6 +46,15 @@ export function MainTabs() {
         options={{
           title: 'Anunciar',
           tabBarIcon: ({ color, size }) => <TabPlusIcon color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Quiz"
+        component={QuizScreen}
+        options={{
+          title: 'Quiz',
+          headerTitle: 'Quiz',
+          tabBarIcon: ({ color, size }) => <HelpCircle color={color} size={size} />,
         }}
       />
       <Tab.Screen

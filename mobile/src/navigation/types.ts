@@ -42,6 +42,7 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Feed: undefined;
   NewListing: undefined;
+  Quiz: undefined;
   Home: undefined;
   Profile: undefined;
 };
@@ -54,6 +55,14 @@ export type RootStackParamList = {
   RateOrder: { orderId: string; rateeId: string; rateeName: string; raterRole: 'BUYER' | 'SELLER' };
   AdminReports: { secret: string };
   Checkout: { listing: ListingParam };
+  PixPayment: {
+    orderId: string;
+    pixQrCode: string;
+    pixQrCodeUrl: string;
+    pixExpiresAt: string;
+    totalCents: number;
+    teamName: string;
+  };
   Orders: undefined;
   OrderDetail: { orderId: string };
 };
