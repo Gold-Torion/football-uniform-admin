@@ -8,8 +8,9 @@ import { Orders } from './pages/Orders.tsx';
 import { Coupons } from './pages/Coupons.tsx';
 import { Mpc } from './pages/Mpc.tsx';
 import { Quiz } from './pages/Quiz.tsx';
+import { DeveloperEarnings } from './pages/DeveloperEarnings.tsx';
 
-type Page = 'dashboard' | 'users' | 'listings' | 'reports' | 'orders' | 'coupons' | 'mpc' | 'quiz';
+type Page = 'dashboard' | 'users' | 'listings' | 'reports' | 'orders' | 'coupons' | 'mpc' | 'quiz' | 'developer-earnings';
 
 export default function App() {
   const [secret,   setSecret]   = useState('');
@@ -225,8 +226,9 @@ export default function App() {
       case 'orders':    return <Orders    secret={secret} />;
       case 'coupons':   return <Coupons   secret={secret} />;
       case 'mpc':       return <Mpc       secret={secret} />;
-      case 'quiz':      return <Quiz      secret={secret} />;
-      default:          return <Dashboard secret={secret} />;
+      case 'quiz':               return <Quiz             secret={secret} />;
+      case 'developer-earnings': return <DeveloperEarnings secret={secret} />;
+      default:                   return <Dashboard         secret={secret} />;
     }
   }
 

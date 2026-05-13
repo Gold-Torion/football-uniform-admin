@@ -80,6 +80,26 @@ export interface CouponRecord {
   createdAt: string;
 }
 
+export interface DeveloperWithdrawal {
+  withdrawalId: string;
+  amountCents:  number;
+  notes?:       string;
+  createdAt:    string;
+}
+
+export interface DeveloperEarningsPublic {
+  totalSpreadCents:         number;
+  developerAllocatedCents:  number;
+  developerWithdrawnCents:  number;
+  developerAvailableCents:  number;
+  developerRemainingCents:  number;
+  arenaAllocatedCents:      number;
+  thresholdCents:           number;
+  thresholdReachedPct:      number;
+  status:                   'ACTIVE' | 'COMPLETED';
+  withdrawals:              DeveloperWithdrawal[];
+}
+
 export interface QuizRecord {
   quizId: string;
   question: string;
@@ -151,4 +171,14 @@ export const api = {
 
   closeQuiz: (s: string, quizId: string) =>
     fetch(`${BASE}/admin/quiz/${quizId}/close`, { method: 'PATCH', headers: headers(s) }),
+
+  // ── Developer Earnings ─────────────────────────────────────────────────────
+  getDeveloperEarnings: (s: string) =>
+    fetch(`${BASE}/developer-earnings`, { headers: headers(s) }).then(r => r.json()) as Promise<DeveloperEarningsPublic>,
+
+  recordWithdrawal: (s: string, amountCents: number, notes?: string) =>
+    fetch(`${BASE}/developer-earnings/withdrawal`, {
+      method: 'POST', headers: headers(s),
+      body: JSON.stringify({ amountCents, notes }),
+    }).then(r => r.json()),
 };
