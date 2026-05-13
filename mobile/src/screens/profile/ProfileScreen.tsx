@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { ShoppingBag, Shield, ShieldOff, Camera, AtSign } from 'lucide-react-native';
+import { ShoppingBag, Shield, ShieldOff, Camera, AtSign, MapPin } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import { QRScannerScreen } from '../coupon/QRScannerScreen';
 import { TotpSetupScreen } from '../auth/TotpSetupScreen';
 import { RatingsApi, type UserRatingSummary } from '../../api/ratings';
+import { UsersApi } from '../../api/users';
 import type { RootStackParamList } from '../../navigation/types';
 
 const APP_VERSION = '1.0.0';
@@ -85,6 +86,34 @@ export function ProfileScreen() {
   const [scannerVisible, setScannerVisible]     = useState(false);
   const [totpSetupVisible, setTotpSetupVisible] = useState(false);
   const setTotpEnabled = useAuthStore((s) => s.setTotpEnabled);
+  const setSession     = useAuthStore((s) => s.setSession);
+  const accessToken    = useAuthStore((s) => s.accessToken);
+  const refreshToken   = useAuthStore((s) => s.refreshToken);
+
+  const [cepInput,   setCepInput]   = useState(user?.sellerCep ?? '');
+  const [savingCep,  setSavingCep]  = useState(false);
+
+  const formatCep = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 8);
+    return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+  };
+
+  const onSaveCep = async () => {
+    const clean = cepInput.replace(/\D/g, '');
+    if (clean.length !== 8) { Alert.alert('CEP inválido', 'Digite um CEP com 8 dígitos.'); return; }
+    setSavingCep(true);
+    try {
+      const updated = await UsersApi.updateSellerCep(clean);
+      if (user && accessToken && refreshToken) {
+        await setSession({ accessToken, refreshToken, user: { ...user, ...updated } });
+      }
+      Alert.alert('CEP salvo!', 'Seu CEP de envio foi atualizado.');
+    } catch {
+      Alert.alert('Erro', 'Não foi possível salvar o CEP.');
+    } finally {
+      setSavingCep(false);
+    }
+  };
 
   const [ratingSummary, setRatingSummary] = useState<UserRatingSummary | null>(null);
 
@@ -245,6 +274,50 @@ export function ProfileScreen() {
           <Divider />
           <Row label="Membro desde" value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '—'} />
         </Card>
+
+        {/* CEP de envio */}
+        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+          ENDEREÇO DE ENVIO
+        </Text>
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <MapPin size={16} color="#9C9486" />
+            <Text style={{ fontSize: 13, color: '#9C9486', fontWeight: '600' }}>CEP de origem para cálculo de frete</Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TextInput
+              value={cepInput}
+              onChangeText={(t) => setCepInput(formatCep(t))}
+              placeholder="00000-000"
+              keyboardType="numeric"
+              style={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: '#E5DCC4',
+                borderRadius: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                fontSize: 15,
+                color: '#1C1A14',
+                backgroundColor: '#FAFAF8',
+              }}
+            />
+            <Pressable
+              onPress={onSaveCep}
+              disabled={savingCep}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+                borderRadius: 10,
+                paddingHorizontal: 16,
+                justifyContent: 'center',
+              })}
+            >
+              <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
+                {savingCep ? '...' : 'Salvar'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
 
         {/* Segurança */}
         <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>

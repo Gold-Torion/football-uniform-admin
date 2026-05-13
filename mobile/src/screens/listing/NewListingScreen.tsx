@@ -297,13 +297,14 @@ interface FormState {
   gender: 'MASCULINO' | 'FEMININO';
   priceText: string;
   description: string;
+  weightGrams: string;
   nonVerifiedAck: boolean;
 }
 
 const INITIAL: FormState = {
   kind: 'TIME', teamName: '', continent: '', country: '', season: '',
   supplier: '', model: '', garmentType: 'LOJA', size: '', condition: '',
-  gender: 'MASCULINO', priceText: '', description: '', nonVerifiedAck: false,
+  gender: 'MASCULINO', priceText: '', description: '', weightGrams: '300', nonVerifiedAck: false,
 };
 
 // ── Main screen ───────────────────────────────────────────────────────────────
@@ -461,6 +462,7 @@ export function NewListingScreen() {
         gender: form.gender,
         priceCents,
         description: form.description.trim() || undefined,
+        weightGrams: form.weightGrams ? parseInt(form.weightGrams, 10) : undefined,
         nonVerifiedSupplierAck: form.nonVerifiedAck,
       });
 
@@ -777,6 +779,28 @@ export function NewListingScreen() {
         />
         <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 4, textAlign: 'right' }}>
           {form.description.length}/500
+        </Text>
+
+        {/* Peso para frete */}
+        <SectionTitle text="PESO PARA CÁLCULO DE FRETE (gramas)" />
+        <TextInput
+          value={form.weightGrams}
+          onChangeText={(t) => set('weightGrams', t.replace(/\D/g, ''))}
+          placeholder="300"
+          keyboardType="numeric"
+          style={{
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+            fontSize: 15,
+            color: '#1C1A14',
+            borderWidth: 1,
+            borderColor: '#E5DCC4',
+            backgroundColor: '#fff',
+          }}
+        />
+        <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 4 }}>
+          Camisa típica: 300–400g. Usado para calcular o frete via Melhor Envio.
         </Text>
 
       </ScrollView>

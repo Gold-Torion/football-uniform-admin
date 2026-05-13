@@ -7,6 +7,7 @@ export interface PublicUser {
   email?: string;
   phoneE164?: string;
   cpf?: string;
+  sellerCep?: string;
   lgpdConsentAt?: string;
   ratingAvgAsSeller?: number;
   ratingCountAsSeller: number;

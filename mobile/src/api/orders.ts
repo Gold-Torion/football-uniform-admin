@@ -11,6 +11,12 @@ export interface OrderPublic {
   deliveryMethod: DeliveryMethod; shippingCents: number; totalCents: number;
   buyerCep?: string; sellerCep?: string;
   status: OrderStatus; createdAt: string; updatedAt: string;
+  // Melhor Envio fields
+  shippingLabelUrl?:     string;
+  shippingTrackingCode?: string;
+  shippingCarrier?:      string;
+  shippingService?:      string;
+  melhorEnvioOrderId?:   string;
 }
 
 export interface ShippingOption {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   Pressable,
   ScrollView,
   Text,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Package, Truck, Tag } from 'lucide-react-native';
 
 import type { RootStackParamList } from '../../navigation/types';
 import { OrdersApi, type OrderPublic, type OrderStatus } from '../../api/orders';
@@ -263,22 +265,56 @@ export function OrderDetailScreen({ route, navigation }: Props) {
               {order.deliveryMethod === 'CORREIOS' ? (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <Text style={{ fontSize: 18 }}>📦</Text>
-                    <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>Correios</Text>
+                    <Package size={18} color="#9C9486" />
+                    <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
+                      {order.shippingCarrier ?? 'Correios'} {order.shippingService ? `— ${order.shippingService}` : ''}
+                    </Text>
                   </View>
                   {order.buyerCep ? (
                     <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 4 }}>
                       CEP do comprador: {order.buyerCep}
                     </Text>
                   ) : null}
-                  <Text style={{ color: '#1C1A14', fontSize: 14 }}>
+                  <Text style={{ color: '#1C1A14', fontSize: 14, marginBottom: 8 }}>
                     Frete: {fmt(order.shippingCents)}
                   </Text>
+
+                  {/* Tracking code */}
+                  {order.shippingTrackingCode ? (
+                    <View style={{ backgroundColor: '#F4EFE3', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <Truck size={14} color="#335336" />
+                        <Text style={{ fontSize: 11, fontWeight: '700', color: '#335336', letterSpacing: 1 }}>
+                          CÓDIGO DE RASTREIO
+                        </Text>
+                      </View>
+                      <Text style={{ fontSize: 15, fontWeight: '800', color: '#1C1A14', letterSpacing: 1 }}>
+                        {order.shippingTrackingCode}
+                      </Text>
+                    </View>
+                  ) : null}
+
+                  {/* Label download */}
+                  {order.shippingLabelUrl ? (
+                    <Pressable
+                      onPress={() => void Linking.openURL(order.shippingLabelUrl!)}
+                      style={({ pressed }) => ({
+                        flexDirection: 'row', alignItems: 'center', gap: 8,
+                        backgroundColor: pressed ? '#2A4429' : '#335336',
+                        borderRadius: 10, padding: 12,
+                      })}
+                    >
+                      <Tag size={16} color="#D4AF37" />
+                      <Text style={{ color: '#D4AF37', fontWeight: '700', fontSize: 14 }}>
+                        Baixar etiqueta de envio
+                      </Text>
+                    </Pressable>
+                  ) : null}
                 </>
               ) : (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <Text style={{ fontSize: 18 }}>🤝</Text>
+                    <Package size={18} color="#9C9486" />
                     <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>Entrega em Mãos</Text>
                   </View>
                   <Text style={{ color: '#9C9486', fontSize: 13 }}>

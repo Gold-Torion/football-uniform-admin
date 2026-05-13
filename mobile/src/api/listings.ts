@@ -14,6 +14,7 @@ export interface CreateListingPayload {
   gender: 'MASCULINO' | 'FEMININO';
   priceCents: number;
   description?: string;
+  weightGrams?: number;
   nonVerifiedSupplierAck: boolean;
 }
 
