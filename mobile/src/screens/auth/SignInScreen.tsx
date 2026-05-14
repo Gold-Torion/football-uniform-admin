@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -13,6 +14,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -91,6 +93,33 @@ export function SignInScreen({ navigation }: Props) {
     opacity:   ctaOpacity.value,
     transform: [{ translateY: ctaY.value }],
   }));
+
+  const onApple = async () => {
+    setBusy(true);
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      const fullName = credential.fullName
+        ? [credential.fullName.givenName, credential.fullName.familyName].filter(Boolean).join(' ')
+        : undefined;
+      const result = await AuthApi.apple(credential.identityToken!, fullName);
+      if ('totpRequired' in result) {
+        setTotpTempToken(result.tempToken);
+      } else {
+        await setSession(result);
+      }
+    } catch (err: unknown) {
+      const e = err as { code?: string };
+      if (e.code === 'ERR_REQUEST_CANCELED') return;
+      Alert.alert('Erro', 'Não foi possível fazer login com Apple. Tente novamente.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const onGoogle = async () => {
     setBusy(true);
@@ -172,6 +201,17 @@ export function SignInScreen({ navigation }: Props) {
               <GoogleIcon size={20} />
               <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
             </Pressable>
+
+            {/* Apple Sign In — iOS only */}
+            {Platform.OS === 'ios' && (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+                cornerRadius={16}
+                style={{ width: '100%', height: 50, marginTop: 10 }}
+                onPress={onApple}
+              />
+            )}
 
             {/* E-mail */}
             <Pressable

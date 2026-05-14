@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -12,6 +13,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import type { RootStackParamList } from '../../navigation/types';
 import { OrdersApi, type DeliveryMethod, type ShippingOption } from '../../api/orders';
+import { PaymentsApi } from '../../api/payments';
+import { CouponsApi, type RedeemResult } from '../../api/coupons';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Checkout'>;
 
@@ -38,10 +41,17 @@ export function CheckoutScreen({ route, navigation }: Props) {
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [calculatingShipping, setCalculatingShipping] = useState(false);
+  const [creatingOrder, setCreatingOrder]   = useState(false);
+
+  const [couponInput,    setCouponInput]    = useState('');
+  const [couponResult,   setCouponResult]   = useState<RedeemResult | null>(null);
+  const [couponLoading,  setCouponLoading]  = useState(false);
+  const [couponError,    setCouponError]    = useState('');
 
   const priceCents    = listing.priceCents;
   const shippingCents = deliveryMethod === 'ENTREGA_EM_MAOS' ? 0 : (selectedShipping?.priceCents ?? null);
-  const totalCents    = shippingCents !== null ? priceCents + shippingCents : null;
+  const discountCents = couponResult ? Math.round(priceCents * (couponResult.discountPct / 100)) : 0;
+  const totalCents    = shippingCents !== null ? priceCents + shippingCents - discountCents : null;
 
   const fmt = (cents: number) =>
     (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -75,6 +85,61 @@ export function CheckoutScreen({ route, navigation }: Props) {
     setDeliveryMethod(method);
     setShippingOptions([]);
     setSelectedShipping(null);
+  };
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponError('');
+    setCouponResult(null);
+    try {
+      const result = await CouponsApi.redeem(code);
+      setCouponResult(result);
+      setCouponInput('');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setCouponError(typeof msg === 'string' ? msg : 'Cupom inválido ou expirado.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const canProceed = deliveryMethod === 'ENTREGA_EM_MAOS' || selectedShipping !== null;
+
+  const handlePayWithPix = async () => {
+    if (!canProceed) {
+      Alert.alert('Frete', 'Selecione uma opção de entrega primeiro.');
+      return;
+    }
+    setCreatingOrder(true);
+    try {
+      // 1. Create the order
+      const order = await OrdersApi.create({
+        listingId:  listing.listingId,
+        deliveryMethod,
+        buyerCep:   deliveryMethod === 'CORREIOS' ? buyerCep.replace(/\D/g, '') : undefined,
+        couponCode: couponResult?.code,
+      });
+
+      // 2. Initiate PIX payment
+      const pix = await PaymentsApi.initiatePixPayment(order.orderId);
+
+      // 3. Navigate to PIX payment screen
+      navigation.replace('PixPayment', {
+        orderId:      order.orderId,
+        pixQrCode:    pix.pixQrCode,
+        pixQrCodeUrl: pix.pixQrCodeUrl,
+        pixExpiresAt: pix.pixExpiresAt,
+        totalCents:   pix.totalCents,
+        teamName:     listing.teamName,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Tente novamente.';
+      Alert.alert('Erro ao criar pedido', msg);
+    } finally {
+      setCreatingOrder(false);
+    }
   };
 
   return (
@@ -304,6 +369,21 @@ export function CheckoutScreen({ route, navigation }: Props) {
             </Text>
           </View>
 
+          {/* Coupon discount line */}
+          {couponResult && (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Text style={{ color: '#22c55e', fontSize: 14 }}>🎟 Cupom ({couponResult.discountPct}%)</Text>
+                <Pressable onPress={() => { setCouponResult(null); }} hitSlop={8}>
+                  <Text style={{ color: '#9C9486', fontSize: 12 }}>✕</Text>
+                </Pressable>
+              </View>
+              <Text style={{ color: '#22c55e', fontSize: 14, fontWeight: '700' }}>
+                -{fmt(discountCents)}
+              </Text>
+            </View>
+          )}
+
           <View style={{ height: 1, backgroundColor: '#F4EFE3', marginBottom: 12 }} />
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -314,7 +394,68 @@ export function CheckoutScreen({ route, navigation }: Props) {
           </View>
         </View>
 
-        {/* Payment section */}
+        {/* Coupon input */}
+        <View style={{
+          backgroundColor: '#fff', borderRadius: 16,
+          borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12,
+        }}>
+          <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>
+            CUPOM DE DESCONTO
+          </Text>
+          {couponResult ? (
+            <View style={{
+              backgroundColor: '#dcfce7', borderRadius: 10, padding: 12,
+              flexDirection: 'row', alignItems: 'center', gap: 10,
+            }}>
+              <Text style={{ fontSize: 20 }}>🎟</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#166534', fontWeight: '800', fontSize: 14 }}>
+                  {couponResult.code} — {couponResult.discountPct}% off
+                </Text>
+                {couponResult.description ? (
+                  <Text style={{ color: '#166534', fontSize: 12 }}>{couponResult.description}</Text>
+                ) : null}
+              </View>
+              <Pressable onPress={() => setCouponResult(null)}>
+                <Text style={{ color: '#166534', fontSize: 18 }}>✕</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TextInput
+                  value={couponInput}
+                  onChangeText={(t) => { setCouponInput(t.toUpperCase()); setCouponError(''); }}
+                  placeholder="CÓDIGO DO CUPOM"
+                  placeholderTextColor="#9C9486"
+                  autoCapitalize="characters"
+                  style={{
+                    flex: 1, borderWidth: 1, borderColor: couponError ? '#ef4444' : '#E5DCC4',
+                    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10,
+                    fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8',
+                  }}
+                />
+                <Pressable
+                  onPress={handleApplyCoupon}
+                  disabled={couponLoading || !couponInput.trim()}
+                  style={({ pressed }) => ({
+                    backgroundColor: (!couponInput.trim() || couponLoading) ? '#E5DCC4' : (pressed ? '#B8962B' : '#D4AF37'),
+                    borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center',
+                  })}
+                >
+                  <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
+                    {couponLoading ? '...' : 'Aplicar'}
+                  </Text>
+                </Pressable>
+              </View>
+              {couponError ? (
+                <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 6 }}>{couponError}</Text>
+              ) : null}
+            </>
+          )}
+        </View>
+
+        {/* Payment method info */}
         <View style={{
           backgroundColor: '#fff',
           borderRadius: 16,
@@ -322,7 +463,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
           borderColor: '#E5DCC4',
           padding: 16,
           marginBottom: 12,
-          opacity: 0.5,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Text style={{ fontSize: 22 }}>💳</Text>
@@ -331,16 +471,8 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 Pagamento via Pagar.me
               </Text>
               <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 2 }}>
-                PIX · Cartão de crédito
+                PIX instantâneo · Ambiente seguro
               </Text>
-            </View>
-            <View style={{
-              backgroundColor: '#D4AF37',
-              borderRadius: 8,
-              paddingHorizontal: 8,
-              paddingVertical: 3,
-            }}>
-              <Text style={{ color: '#211B15', fontSize: 10, fontWeight: '700' }}>Em breve</Text>
             </View>
           </View>
         </View>
@@ -357,23 +489,33 @@ export function CheckoutScreen({ route, navigation }: Props) {
         padding: 16,
         paddingBottom: 28,
       }}>
-        <View style={{
-          backgroundColor: '#D4AF37',
-          borderRadius: 16,
-          paddingVertical: 16,
-          alignItems: 'center',
-          opacity: 0.4,
-        }}>
-          <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
-            Pagamento em breve
-          </Text>
-        </View>
-        <Text style={{
-          color: '#9C9486',
-          fontSize: 11,
-          textAlign: 'center',
-          marginTop: 8,
-        }}>
+        <Pressable
+          onPress={handlePayWithPix}
+          disabled={creatingOrder || !canProceed}
+          style={({ pressed }) => ({
+            backgroundColor: !canProceed
+              ? '#9C9486'
+              : creatingOrder
+              ? '#B8942E'
+              : pressed
+              ? '#B8942E'
+              : '#D4AF37',
+            borderRadius: 16,
+            paddingVertical: 16,
+            alignItems: 'center',
+          })}
+        >
+          {creatingOrder ? (
+            <ActivityIndicator color="#211B15" />
+          ) : (
+            <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
+              {!canProceed
+                ? 'Selecione o frete primeiro'
+                : `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com PIX`}
+            </Text>
+          )}
+        </Pressable>
+        <Text style={{ color: '#9C9486', fontSize: 11, textAlign: 'center', marginTop: 8 }}>
           Processamento via Pagar.me • Ambiente seguro
         </Text>
       </View>

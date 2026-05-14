@@ -26,7 +26,7 @@ export interface ShippingOption {
 }
 
 export const OrdersApi = {
-  create: (data: { listingId: string; deliveryMethod: DeliveryMethod; buyerCep?: string }) =>
+  create: (data: { listingId: string; deliveryMethod: DeliveryMethod; buyerCep?: string; couponCode?: string }) =>
     api.post<OrderPublic>('/orders', data).then((r: { data: OrderPublic }) => r.data),
   listMine: () =>
     api.get<OrderPublic[]>('/orders/mine').then((r: { data: OrderPublic[] }) => r.data),
