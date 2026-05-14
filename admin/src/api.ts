@@ -80,6 +80,19 @@ export interface CouponRecord {
   createdAt: string;
 }
 
+export interface InvoicePublic {
+  invoiceId:    string;
+  orderId:      string;
+  type:         'NFS-E' | 'NF-E';
+  ref:          string;
+  status:       'PENDING' | 'PROCESSING' | 'AUTHORIZED' | 'ERROR' | 'CANCELLED';
+  pdfUrl?:      string;
+  xmlUrl?:      string;
+  totalValue:   number;
+  errorMessage?: string;
+  createdAt:    string;
+}
+
 export interface DeveloperWithdrawal {
   withdrawalId: string;
   amountCents:  number;
@@ -181,4 +194,11 @@ export const api = {
       method: 'POST', headers: headers(s),
       body: JSON.stringify({ amountCents, notes }),
     }).then(r => r.json()),
+
+  // ── Fiscal ─────────────────────────────────────────────────────────────────
+  listInvoices: (s: string) =>
+    fetch(`${BASE}/fiscal/invoices`, { headers: headers(s) }).then(r => r.json()) as Promise<InvoicePublic[]>,
+
+  retryInvoice: (s: string, orderId: string, type: string) =>
+    fetch(`${BASE}/fiscal/invoices/${orderId}/${type}/retry`, { method: 'POST', headers: headers(s) }),
 };

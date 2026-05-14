@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'coupons',   icon: '🎟', label: 'Cupons'      },
   { id: 'quiz',               icon: '❓', label: 'Quiz'        },
   { id: 'developer-earnings', icon: '💰', label: 'Dev Earnings' },
+  { id: 'fiscal',             icon: '🧾', label: 'Fiscal'       },
 ];
 
 const PAGE_TITLES: Record<string, string> = {
@@ -28,6 +29,7 @@ const PAGE_TITLES: Record<string, string> = {
   coupons:   'Cupons',
   quiz:               'Quiz',
   'developer-earnings': 'Developer Earnings',
+  fiscal:               'Notas Fiscais',
 };
 
 interface LayoutProps {

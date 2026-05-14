@@ -9,8 +9,9 @@ import { Coupons } from './pages/Coupons.tsx';
 import { Mpc } from './pages/Mpc.tsx';
 import { Quiz } from './pages/Quiz.tsx';
 import { DeveloperEarnings } from './pages/DeveloperEarnings.tsx';
+import { Fiscal } from './pages/Fiscal.tsx';
 
-type Page = 'dashboard' | 'users' | 'listings' | 'reports' | 'orders' | 'coupons' | 'mpc' | 'quiz' | 'developer-earnings';
+type Page = 'dashboard' | 'users' | 'listings' | 'reports' | 'orders' | 'coupons' | 'mpc' | 'quiz' | 'developer-earnings' | 'fiscal';
 
 export default function App() {
   const [secret,   setSecret]   = useState('');
@@ -228,6 +229,7 @@ export default function App() {
       case 'mpc':       return <Mpc       secret={secret} />;
       case 'quiz':               return <Quiz             secret={secret} />;
       case 'developer-earnings': return <DeveloperEarnings secret={secret} />;
+      case 'fiscal':             return <Fiscal            secret={secret} />;
       default:                   return <Dashboard         secret={secret} />;
     }
   }
