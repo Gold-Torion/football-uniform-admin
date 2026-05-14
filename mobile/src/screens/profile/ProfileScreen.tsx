@@ -3,7 +3,7 @@ import { Alert, Linking, Platform, Pressable, ScrollView, Text, TextInput, View 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { ShoppingBag, Shield, ShieldOff, Camera, AtSign, MapPin } from 'lucide-react-native';
+import { ShoppingBag, Shield, ShieldOff, Camera, AtSign, MapPin, HelpCircle } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import { QRScannerScreen } from '../coupon/QRScannerScreen';
@@ -271,6 +271,8 @@ export function ProfileScreen() {
           <Row label="CPF" value={user?.cpf ? `***.***.${user.cpf.slice(6, 9)}-**` : '—'} />
           <Divider />
           <Row label="Meus pedidos" icon={<ShoppingBag size={17} color="#9C9486" />} onPress={() => navigation.navigate('Orders')} />
+          <Divider />
+          <Row label="Quiz" icon={<HelpCircle size={17} color="#9C9486" />} onPress={() => navigation.navigate('Quiz')} />
           <Divider />
           <Row label="Membro desde" value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '—'} />
         </Card>

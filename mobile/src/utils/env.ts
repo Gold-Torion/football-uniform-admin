@@ -1,30 +1,18 @@
-/**
- * Type-safe accessor for the EXPO_PUBLIC_* env vars baked into the bundle.
- *
- * We can't rely on `process.env` directly because the project's tsconfig
- * pins `types` to `["nativewind/types"]`, which excludes `@types/node` and
- * therefore strips the `process` global. At runtime Expo still populates
- * `process.env`, so we read it via `globalThis` cast.
- */
-type EnvShape = {
-  EXPO_PUBLIC_API_BASE_URL?: string;
-  EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID?: string;
-  EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS?: string;
-  EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB?: string;
-  EXPO_PUBLIC_APPLE_BUNDLE_ID?: string;
-};
-
-interface ProcessLike {
-  env?: EnvShape;
-}
-
-const proc = (globalThis as unknown as { process?: ProcessLike }).process;
-const env: EnvShape = proc?.env ?? {};
+// Metro substitutes process.env.EXPO_PUBLIC_* at build time only when referenced
+// directly. The globalThis workaround bypasses that substitution, so we declare
+// process here to satisfy TypeScript (tsconfig excludes @types/node).
+declare const process: { env: Record<string, string | undefined> };
 
 export const Env = {
-  apiBaseUrl: env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:3001',
-  googleClientIdAndroid: env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
-  googleClientIdIos: env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
-  googleClientIdWeb: env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
-  appleBundleId: env.EXPO_PUBLIC_APPLE_BUNDLE_ID,
+  apiBaseUrl:            process.env.EXPO_PUBLIC_API_BASE_URL            ?? 'http://localhost:3001',
+  r2PublicUrl:           process.env.EXPO_PUBLIC_R2_PUBLIC_URL           ?? '',
+  googleClientIdAndroid: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+  googleClientIdIos:     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
+  googleClientIdWeb:     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
+  appleBundleId:         process.env.EXPO_PUBLIC_APPLE_BUNDLE_ID,
 } as const;
+
+export function getPhotoUrl(key: string): string | null {
+  if (!Env.r2PublicUrl || !key) return null;
+  return `${Env.r2PublicUrl}/${key}`;
+}

@@ -42,7 +42,6 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   Feed: undefined;
   NewListing: undefined;
-  Quiz: undefined;
   Home: undefined;
   Profile: undefined;
 };
@@ -65,6 +64,7 @@ export type RootStackParamList = {
   };
   Orders: undefined;
   OrderDetail: { orderId: string };
+  Quiz: undefined;
 };
 
 declare global {

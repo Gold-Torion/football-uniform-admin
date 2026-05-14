@@ -5,9 +5,7 @@ import { FeedScreen } from '../screens/feed/FeedScreen';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { NewListingScreen } from '../screens/listing/NewListingScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
-import { QuizScreen } from '../screens/quiz/QuizScreen';
 import { TabExploreIcon, TabHomeIcon, TabPlusIcon, TabProfileIcon } from '../components/BrandIcons';
-import { HelpCircle } from 'lucide-react-native';
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -36,7 +34,8 @@ export function MainTabs() {
         name="Feed"
         component={FeedScreen}
         options={{
-          title: 'Explorar',
+          title: 'Home',
+          headerTitle: 'Arena dos Mantos',
           tabBarIcon: ({ color, size }) => <TabExploreIcon color={color} size={size} />,
         }}
       />
@@ -46,15 +45,6 @@ export function MainTabs() {
         options={{
           title: 'Anunciar',
           tabBarIcon: ({ color, size }) => <TabPlusIcon color={color} size={size} />,
-        }}
-      />
-      <Tab.Screen
-        name="Quiz"
-        component={QuizScreen}
-        options={{
-          title: 'Quiz',
-          headerTitle: 'Quiz',
-          tabBarIcon: ({ color, size }) => <HelpCircle color={color} size={size} />,
         }}
       />
       <Tab.Screen

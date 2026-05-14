@@ -20,6 +20,7 @@ import { CheckoutScreen } from '../screens/orders/CheckoutScreen';
 import { OrdersScreen } from '../screens/orders/OrdersScreen';
 import { OrderDetailScreen } from '../screens/orders/OrderDetailScreen';
 import { PixPaymentScreen } from '../screens/orders/PixPaymentScreen';
+import { QuizScreen } from '../screens/quiz/QuizScreen';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const s = (c: any) => c;
@@ -98,6 +99,9 @@ export function RootNavigator() {
             />
             <Stack.Screen name="PixPayment" component={s(PixPaymentScreen)}
               options={{ animation: 'slide_from_bottom' }}
+            />
+            <Stack.Screen name="Quiz" component={s(QuizScreen)}
+              options={{ animation: 'slide_from_right', headerShown: true, title: 'Quiz', headerStyle: { backgroundColor: colors.arenaVerde }, headerTitleStyle: { color: colors.arenaDouradoClaro, fontWeight: '800' }, headerTintColor: colors.arenaDouradoClaro }}
             />
           </>
         )}
