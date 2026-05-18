@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "281984451863",
+    "project_id": "arena-dos-mantos",
+    "storage_bucket": "arena-dos-mantos.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281984451863:android:arena",
+        "android_client_info": {
+          "package_name": "com.arenadosmantos.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "281984451863-r90b3qensith9hgg54apht08q7cbgv6j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arenadosmantos.app",
+            "certificate_hash": ""
+          }
+        },
+        {
+          "client_id": "281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
