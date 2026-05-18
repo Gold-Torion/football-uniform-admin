@@ -16,7 +16,6 @@
     },
     "android": {
       "package": "com.arenadosmantos.app",
-      "googleServicesFile": "./google-services.json",
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "CAMERA",
@@ -29,13 +28,7 @@
     "plugins": [
       "expo-secure-store",
       "expo-asset",
-      "expo-font",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.281984451863-p0khpjsuoaa0ltctomlvu5gca0es5rv4"
-        }
-      ]
+      "expo-font"
     ],
     "extra": {
       "eas": {
