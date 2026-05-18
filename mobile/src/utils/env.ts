@@ -5,7 +5,7 @@ declare const process: { env: Record<string, string | undefined> };
 
 export const Env = {
   apiBaseUrl:            process.env.EXPO_PUBLIC_API_BASE_URL            ?? 'http://localhost:3001',
-  r2PublicUrl:           process.env.EXPO_PUBLIC_R2_PUBLIC_URL           ?? '',
+  r2PublicUrl:           process.env.EXPO_PUBLIC_R2_PUBLIC_URL           ?? 'https://pub-6e17da7b716542dca1097f65c90480ac.r2.dev',
   googleClientIdAndroid: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
   googleClientIdIos:     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
   googleClientIdWeb:     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,

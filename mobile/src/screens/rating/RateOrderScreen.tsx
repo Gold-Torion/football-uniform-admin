@@ -86,13 +86,12 @@ export function RateOrderScreen({ route, navigation }: Props) {
     setSubmitting(true);
     try {
       await RatingsApi.create({ orderId, rateeId, raterRole, scores });
-      Alert.alert(
-        'Avaliação enviada!',
-        `Obrigado por avaliar ${rateeName}.`,
-        [{ text: 'OK', onPress: () => navigation.goBack() }],
-      );
+      // Navigate back immediately — Alert.alert unreliable on web
+      navigation.goBack();
     } catch {
-      Alert.alert('Erro', 'Não foi possível enviar a avaliação. Tente novamente.');
+      if (typeof window !== 'undefined') {
+        window.alert('Não foi possível enviar a avaliação. Tente novamente.');
+      }
     } finally {
       setSubmitting(false);
     }

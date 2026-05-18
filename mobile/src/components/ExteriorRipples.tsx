@@ -14,10 +14,10 @@ import Animated, {
 /**
  * Exterior wave rings outside the stadium boundary.
  *
- * 링이 퍼져나가는 방식이 아니라, 고정된 위치의 링들이
- * 안쪽→바깥쪽 순서로 opacity가 파동치는(물결치는) 방식.
- * 마치 물 위에 돌을 던졌을 때 생기는 파문처럼
- * 전체가 함께 물결치는 효과.
+ * Instead of rings expanding outward, fixed-position rings pulse
+ * their opacity from inside→outside in sequence.
+ * Creates a ripple effect like a stone dropped on water —
+ * all rings wave together in a continuous cycle.
  */
 
 const CYCLE_MS   = 1600;

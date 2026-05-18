@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CheckCircle, XCircle, HelpCircle, Users } from 'lucide-react-native';
 import { QuizApi, type QuizPublic, type QuizResult } from '../../api/quiz';
 import { useAuthStore } from '../../store/auth.store';
+import { webAlert } from '../../utils/webAlert';
 import { colors } from '../../theme/colors';
 
 function isResult(q: QuizPublic | QuizResult): q is QuizResult {
@@ -48,7 +49,7 @@ export function QuizScreen() {
       setSelected(null);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      Alert.alert('Erro', typeof msg === 'string' ? msg : 'Não foi possível enviar resposta.');
+      webAlert('Erro', typeof msg === 'string' ? msg : 'Não foi possível enviar resposta.');
     } finally {
       setSubmitting(false);
     }

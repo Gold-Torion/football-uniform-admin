@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -14,10 +15,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { Shirt, Building2, Pencil, Trash2 } from 'lucide-react-native';
+
 import type { RootStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/auth.store';
 import { ListingsApi } from '../../api/listings';
 import { CommentsApi, type CommentPublic } from '../../api/comments';
+import { getPhotoUrl } from '../../utils/env';
+import { webAlert, webConfirm } from '../../utils/webAlert';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ListingDetail'>;
 
@@ -196,7 +201,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
   const savePrice = async () => {
     const parsed = parseFloat(priceText.replace(',', '.'));
     if (isNaN(parsed) || parsed < 1) {
-      Alert.alert('Preço inválido', 'Digite um valor mínimo de R$ 1,00.');
+      webAlert('Preço inválido', 'Digite um valor mínimo de R$ 1,00.');
       return;
     }
     setSaving(true);
@@ -205,33 +210,28 @@ export function ListingDetailScreen({ route, navigation }: Props) {
       setPriceCents(updated.priceCents);
       setEditingPrice(false);
     } catch {
-      Alert.alert('Erro', 'Não foi possível atualizar o preço.');
+      webAlert('Erro', 'Não foi possível atualizar o preço.');
     } finally {
       setSaving(false);
     }
   };
 
   const confirmRemove = () => {
-    Alert.alert(
+    webConfirm(
       'Remover anúncio',
       `Tem certeza que quer remover "${listing.teamName}"? Esta ação não pode ser desfeita.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Remover',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await ListingsApi.remove(listing.listingId);
-              const store = useAuthStore.getState();
-              store.setListingsActiveCount(Math.max(0, (store.user?.listingsActiveCount ?? 1) - 1));
-              navigation.goBack();
-            } catch {
-              Alert.alert('Erro', 'Não foi possível remover o anúncio.');
-            }
-          },
-        },
-      ],
+      async () => {
+        try {
+          await ListingsApi.remove(listing.listingId);
+          const store = useAuthStore.getState();
+          store.setListingsActiveCount(Math.max(0, (store.user?.listingsActiveCount ?? 1) - 1));
+          navigation.goBack();
+        } catch {
+          webAlert('Erro', 'Não foi possível remover o anúncio.');
+        }
+      },
+      undefined,
+      'Remover',
     );
   };
 
@@ -261,7 +261,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
       // Revert optimistic
       setComments((prev) => prev.filter((c) => c.commentId !== optimistic.commentId));
       setCommentText(body);
-      Alert.alert('Erro', 'Não foi possível enviar o comentário.');
+      webAlert('Erro', 'Não foi possível enviar o comentário.');
     } finally {
       setSendingComment(false);
     }
@@ -276,9 +276,9 @@ export function ListingDetailScreen({ route, navigation }: Props) {
           if (!reason?.trim()) return;
           try {
             await CommentsApi.report(listing.listingId, comment.commentId, reason.trim());
-            Alert.alert('Denúncia enviada', 'Obrigado! Iremos analisar em breve.');
+            webAlert('Denúncia enviada', 'Obrigado! Iremos analisar em breve.');
           } catch {
-            Alert.alert('Erro', 'Não foi possível enviar a denúncia.');
+            webAlert('Erro', 'Não foi possível enviar a denúncia.');
           }
         },
         'plain-text',
@@ -296,9 +296,9 @@ export function ListingDetailScreen({ route, navigation }: Props) {
             onPress: async () => {
               try {
                 await CommentsApi.report(listing.listingId, comment.commentId, 'Conteúdo inadequado');
-                Alert.alert('Denúncia enviada', 'Obrigado! Iremos analisar em breve.');
+                webAlert('Denúncia enviada', 'Obrigado! Iremos analisar em breve.');
               } catch {
-                Alert.alert('Erro', 'Não foi possível enviar a denúncia.');
+                webAlert('Erro', 'Não foi possível enviar a denúncia.');
               }
             },
           },
@@ -342,28 +342,48 @@ export function ListingDetailScreen({ route, navigation }: Props) {
       >
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
 
-          {/* Foto placeholder */}
+          {/* Fotos */}
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
             <View style={{
               flex: 2, aspectRatio: 1, borderRadius: 16,
               backgroundColor: '#fff', borderWidth: 1, borderColor: '#E5DCC4',
-              alignItems: 'center', justifyContent: 'center',
+              alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
             }}>
-              <Text style={{ fontSize: 56 }}>👕</Text>
-              <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 8 }}>
-                {listing.kind === 'SELECAO' ? '🌎 Seleção' : '🏟️ Time'}
-              </Text>
+              {listing.photoKeys?.[0] && getPhotoUrl(listing.photoKeys[0]) ? (
+                <Image
+                  source={{ uri: getPhotoUrl(listing.photoKeys[0])! }}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <>
+                  <Shirt size={56} color="rgba(0,0,0,0.15)" />
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 }}>
+                    <Building2 size={12} color="#9C9486" />
+                    <Text style={{ color: '#9C9486', fontSize: 12 }}>
+                      {listing.kind === 'SELECAO' ? 'Seleção' : 'Time'}
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
             <View style={{ flex: 1, gap: 8 }}>
-              {[1, 2].map((i) => (
-                <View key={i} style={{
-                  flex: 1, borderRadius: 12, minHeight: 80,
-                  backgroundColor: '#fff', borderWidth: 1, borderColor: '#E5DCC4',
-                  alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Text style={{ color: '#E5DCC4', fontSize: 22 }}>+</Text>
-                </View>
-              ))}
+              {[1, 2].map((i) => {
+                const photoUrl = listing.photoKeys?.[i] ? getPhotoUrl(listing.photoKeys[i]) : null;
+                return (
+                  <View key={i} style={{
+                    flex: 1, borderRadius: 12, minHeight: 80,
+                    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E5DCC4',
+                    alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+                  }}>
+                    {photoUrl ? (
+                      <Image source={{ uri: photoUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    ) : (
+                      <Text style={{ color: '#E5DCC4', fontSize: 22 }}>+</Text>
+                    )}
+                  </View>
+                );
+              })}
             </View>
           </View>
 
@@ -526,9 +546,11 @@ export function ListingDetailScreen({ route, navigation }: Props) {
               style={({ pressed }) => ({
                 backgroundColor: pressed ? '#B8942E' : '#D4AF37',
                 borderRadius: 16, paddingVertical: 16, paddingHorizontal: 28, alignItems: 'center',
+                flexDirection: 'row', gap: 6,
               })}
             >
-              <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>✏️ Editar preço</Text>
+              <Pencil size={15} color="#211B15" />
+              <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>Editar preço</Text>
             </Pressable>
             <Pressable
               onPress={confirmRemove}
@@ -536,9 +558,11 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 backgroundColor: pressed ? '#F5D0D0' : '#FEE2E2',
                 borderRadius: 16, paddingVertical: 16, paddingHorizontal: 28, alignItems: 'center',
                 borderWidth: 1, borderColor: '#FECACA',
+                flexDirection: 'row', gap: 6,
               })}
             >
-              <Text style={{ color: '#B91C1C', fontWeight: '800', fontSize: 15 }}>🗑️ Remover</Text>
+              <Trash2 size={15} color="#B91C1C" />
+              <Text style={{ color: '#B91C1C', fontWeight: '800', fontSize: 15 }}>Remover</Text>
             </Pressable>
           </View>
         ) : (

@@ -10,11 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Shirt, Package, Handshake, Ticket, Tag, X } from 'lucide-react-native';
 
 import type { RootStackParamList } from '../../navigation/types';
 import { OrdersApi, type DeliveryMethod, type ShippingOption } from '../../api/orders';
 import { PaymentsApi } from '../../api/payments';
 import { CouponsApi, type RedeemResult } from '../../api/coupons';
+import { webAlert } from '../../utils/webAlert';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Checkout'>;
 
@@ -51,7 +53,10 @@ export function CheckoutScreen({ route, navigation }: Props) {
   const priceCents    = listing.priceCents;
   const shippingCents = deliveryMethod === 'ENTREGA_EM_MAOS' ? 0 : (selectedShipping?.priceCents ?? null);
   const discountCents = couponResult ? Math.round(priceCents * (couponResult.discountPct / 100)) : 0;
-  const totalCents    = shippingCents !== null ? priceCents + shippingCents - discountCents : null;
+  // Show discounted subtotal even before shipping is selected
+  const totalCents    = shippingCents !== null
+    ? priceCents + shippingCents - discountCents
+    : discountCents > 0 ? priceCents - discountCents : null;
 
   const fmt = (cents: number) =>
     (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -109,7 +114,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
 
   const handlePayWithPix = async () => {
     if (!canProceed) {
-      Alert.alert('Frete', 'Selecione uma opção de entrega primeiro.');
+      webAlert('Frete', 'Selecione uma opção de entrega primeiro.');
       return;
     }
     setCreatingOrder(true);
@@ -136,7 +141,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Tente novamente.';
-      Alert.alert('Erro ao criar pedido', msg);
+      webAlert('Erro ao criar pedido', msg);
     } finally {
       setCreatingOrder(false);
     }
@@ -181,7 +186,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
             backgroundColor: '#F4EFE3',
             alignItems: 'center', justifyContent: 'center',
           }}>
-            <Text style={{ fontSize: 32 }}>👕</Text>
+            <Shirt size={32} color="#335336" />
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16, marginBottom: 2 }}>
@@ -226,7 +231,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
               alignItems: 'center',
             }}
           >
-            <Text style={{ fontSize: 22, marginBottom: 4 }}>📦</Text>
+            <Package size={22} color="#9C9486" style={{ marginBottom: 4 }} />
             <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>Correios</Text>
             {deliveryMethod === 'CORREIOS' && (
               <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 2 }}>Calcular frete</Text>
@@ -246,7 +251,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
               alignItems: 'center',
             }}
           >
-            <Text style={{ fontSize: 22, marginBottom: 4 }}>🤝</Text>
+            <Handshake size={22} color="#9C9486" style={{ marginBottom: 4 }} />
             <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>Em Mãos</Text>
             {deliveryMethod === 'ENTREGA_EM_MAOS' && (
               <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 2 }}>Entrega pessoal • Sem frete</Text>
@@ -373,9 +378,10 @@ export function CheckoutScreen({ route, navigation }: Props) {
           {couponResult && (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <Text style={{ color: '#22c55e', fontSize: 14 }}>🎟 Cupom ({couponResult.discountPct}%)</Text>
+                <Ticket size={14} color="#22c55e" />
+                <Text style={{ color: '#22c55e', fontSize: 14 }}>Cupom ({couponResult.discountPct}%)</Text>
                 <Pressable onPress={() => { setCouponResult(null); }} hitSlop={8}>
-                  <Text style={{ color: '#9C9486', fontSize: 12 }}>✕</Text>
+                  <X size={12} color="#9C9486" />
                 </Pressable>
               </View>
               <Text style={{ color: '#22c55e', fontSize: 14, fontWeight: '700' }}>
@@ -407,7 +413,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
               backgroundColor: '#dcfce7', borderRadius: 10, padding: 12,
               flexDirection: 'row', alignItems: 'center', gap: 10,
             }}>
-              <Text style={{ fontSize: 20 }}>🎟</Text>
+              <Ticket size={20} color="#166534" />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: '#166534', fontWeight: '800', fontSize: 14 }}>
                   {couponResult.code} — {couponResult.discountPct}% off
@@ -417,7 +423,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 ) : null}
               </View>
               <Pressable onPress={() => setCouponResult(null)}>
-                <Text style={{ color: '#166534', fontSize: 18 }}>✕</Text>
+                <X size={18} color="#166534" />
               </Pressable>
             </View>
           ) : (
@@ -465,7 +471,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
           marginBottom: 12,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Text style={{ fontSize: 22 }}>💳</Text>
+            <Tag size={22} color="#335336" />
             <View style={{ flex: 1 }}>
               <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
                 Pagamento via Pagar.me

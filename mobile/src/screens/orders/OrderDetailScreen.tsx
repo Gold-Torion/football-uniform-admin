@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Linking,
   Pressable,
   ScrollView,
@@ -10,7 +9,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Package, Truck, Tag } from 'lucide-react-native';
+import { Package, Truck, Tag, Shirt } from 'lucide-react-native';
+import { webAlert, webConfirm } from '../../utils/webAlert';
 
 import type { RootStackParamList } from '../../navigation/types';
 import { OrdersApi, type OrderPublic, type OrderStatus } from '../../api/orders';
@@ -107,26 +107,22 @@ export function OrderDetailScreen({ route, navigation }: Props) {
     (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const handleConfirmReceipt = () => {
-    Alert.alert(
+    webConfirm(
       'Confirmar recebimento',
       'Você confirma que recebeu o produto em boas condições?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Confirmar',
-          onPress: async () => {
-            setConfirming(true);
-            try {
-              await OrdersApi.confirmReceipt(orderId);
-              fetchOrder();
-            } catch {
-              Alert.alert('Erro', 'Não foi possível confirmar o recebimento.');
-            } finally {
-              setConfirming(false);
-            }
-          },
-        },
-      ],
+      async () => {
+        setConfirming(true);
+        try {
+          await OrdersApi.confirmReceipt(orderId);
+          fetchOrder();
+        } catch {
+          webAlert('Erro', 'Não foi possível confirmar o recebimento.');
+        } finally {
+          setConfirming(false);
+        }
+      },
+      undefined,
+      'Confirmar',
     );
   };
 
@@ -136,6 +132,15 @@ export function OrderDetailScreen({ route, navigation }: Props) {
     order !== null &&
     currentUser?.userId === order.buyerId &&
     (order.status === 'PAID' || order.status === 'SHIPPED');
+
+  const canRate =
+    order !== null &&
+    (order.status === 'DELIVERED' || order.status === 'COMPLETED') &&
+    (currentUser?.userId === order.buyerId || currentUser?.userId === order.sellerId);
+
+  const raterRole = order && currentUser?.userId === order.buyerId ? 'BUYER' : 'SELLER';
+  const rateeId   = order && raterRole === 'BUYER' ? order.sellerId : order?.buyerId ?? '';
+  const rateeName = order && raterRole === 'BUYER' ? order.sellerName : order?.buyerName ?? '';
 
   // Timeline helpers
   const currentStepIndex = order ? STATUS_STEPS.indexOf(order.status) : -1;
@@ -240,7 +245,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                   backgroundColor: '#F4EFE3',
                   alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Text style={{ fontSize: 32 }}>👕</Text>
+                  <Shirt size={32} color="#335336" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16, marginBottom: 2 }}>
@@ -337,7 +342,10 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
             {/* Parties card */}
             <SectionCard title="PARTICIPANTES">
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <Pressable
+                onPress={() => navigation.navigate('SellerProfile', { sellerId: order.sellerId, sellerName: order.sellerName })}
+                style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12, opacity: pressed ? 0.7 : 1 })}
+              >
                 <View style={{
                   width: 40, height: 40, borderRadius: 20,
                   backgroundColor: '#335336',
@@ -347,13 +355,14 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                     {getInitials(order.sellerName)}
                   </Text>
                 </View>
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={{ color: '#9C9486', fontSize: 11 }}>Vendedor</Text>
                   <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
                     {order.sellerName}
                   </Text>
                 </View>
-              </View>
+                <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>
+              </Pressable>
 
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <View style={{
@@ -376,33 +385,43 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
           </ScrollView>
 
-          {/* Fixed bottom — only for buyer when status is PAID or SHIPPED */}
+          {/* Confirm receipt button */}
           {canConfirm && (
-            <View style={{
-              position: 'absolute',
-              bottom: 0, left: 0, right: 0,
-              backgroundColor: '#F4EFE3',
-              borderTopWidth: 1,
-              borderColor: '#E5DCC4',
-              padding: 16,
-              paddingBottom: 28,
-            }}>
+            <View style={{ backgroundColor: '#F4EFE3', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
               <Pressable
                 onPress={handleConfirmReceipt}
                 disabled={confirming}
                 style={({ pressed }) => ({
                   backgroundColor: confirming ? '#9C9486' : pressed ? '#B8942E' : '#D4AF37',
-                  borderRadius: 16,
-                  paddingVertical: 16,
-                  alignItems: 'center',
+                  borderRadius: 16, paddingVertical: 16, alignItems: 'center',
                 })}
               >
                 {confirming
                   ? <ActivityIndicator color="#211B15" />
-                  : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
-                      Confirmar Recebimento
-                    </Text>
+                  : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>Confirmar Recebimento</Text>
                 }
+              </Pressable>
+            </View>
+          )}
+
+          {/* Rate button — after delivery */}
+          {canRate && (
+            <View style={{ backgroundColor: '#F4EFE3', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
+              <Pressable
+                onPress={() => navigation.navigate('RateOrder', {
+                  orderId,
+                  rateeId,
+                  rateeName,
+                  raterRole: raterRole as 'BUYER' | 'SELLER',
+                })}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? '#2A4429' : '#335336',
+                  borderRadius: 16, paddingVertical: 16, alignItems: 'center',
+                })}
+              >
+                <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 16 }}>
+                  ⭐ Avaliar {raterRole === 'BUYER' ? 'Vendedor' : 'Comprador'}
+                </Text>
               </Pressable>
             </View>
           )}

@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -11,10 +12,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { getPhotoUrl } from '../../utils/env';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+
+import { Pencil, Trash2, Shirt } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import type { MainTabParamList } from '../../navigation/types';
@@ -100,42 +104,51 @@ function ListingCard({
         borderWidth: 1,
         borderColor: '#E5DCC4',
         marginBottom: 10,
-        overflow: 'hidden',
         flexDirection: 'row',
       }}
     >
-      {/* Photo placeholder */}
+      {/* Photo */}
       <View
         style={{
-          width: 120,
-          minHeight: 120,
+          width: 100,
           backgroundColor: '#F4EFE3',
           alignItems: 'center',
           justifyContent: 'center',
           borderRightWidth: 1,
           borderColor: '#E5DCC4',
+          overflow: 'hidden',
+          borderTopLeftRadius: 15,
+          borderBottomLeftRadius: 15,
         }}
       >
-        <Text style={{ fontSize: 40 }}>👕</Text>
+        {item.photoKeys?.[0] && getPhotoUrl(item.photoKeys[0]) ? (
+          <Image
+            source={{ uri: getPhotoUrl(item.photoKeys[0])! }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Shirt size={36} color="#335336" />
+        )}
       </View>
 
       {/* Info */}
-      <View style={{ flex: 1, padding: 16 }}>
-        <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 15 }} numberOfLines={1}>
+      <View style={{ flex: 1, padding: 12 }}>
+        <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
           {item.teamName}
         </Text>
-        <Text style={{ color: '#6B6357', fontSize: 13, marginTop: 2 }}>
+        <Text style={{ color: '#6B6357', fontSize: 12, marginTop: 2 }}>
           {item.supplier} · {item.season}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+        <View style={{ flexDirection: 'row', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
           <Badge text={`Tam. ${item.size}`} />
           <Badge text={GARMENT_LABEL[item.garmentType] ?? item.garmentType} />
           <Badge text={CONDITION_LABEL[item.condition] ?? item.condition} />
         </View>
 
-        {/* Price row with action buttons */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 6 }}>
-          <Text style={{ color: '#335336', fontWeight: '800', fontSize: 16, flex: 1 }}>
+        {/* Price + buttons on same row */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, flexWrap: 'wrap', gap: 6 }}>
+          <Text style={{ color: '#335336', fontWeight: '800', fontSize: 15, marginRight: 4 }}>
             {price}
           </Text>
           <Pressable
@@ -148,11 +161,13 @@ function ListingCard({
               paddingVertical: 4,
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 4,
+              gap: 3,
+              borderWidth: 1,
+              borderColor: '#E5DCC4',
             })}
           >
-            <Text style={{ fontSize: 12 }}>✏️</Text>
-            <Text style={{ color: '#335336', fontSize: 12, fontWeight: '700' }}>Preço</Text>
+            <Pencil size={11} color="#335336" />
+            <Text style={{ color: '#335336', fontSize: 11, fontWeight: '700' }}>Preço</Text>
           </Pressable>
           <Pressable
             onPress={() => onRemove(item)}
@@ -164,11 +179,13 @@ function ListingCard({
               paddingVertical: 4,
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 4,
+              gap: 3,
+              borderWidth: 1,
+              borderColor: '#FECACA',
             })}
           >
-            <Text style={{ fontSize: 12 }}>🗑️</Text>
-            <Text style={{ color: '#B91C1C', fontSize: 12, fontWeight: '700' }}>Remover</Text>
+            <Trash2 size={11} color="#B91C1C" />
+            <Text style={{ color: '#B91C1C', fontSize: 11, fontWeight: '700' }}>Remover</Text>
           </Pressable>
         </View>
       </View>
@@ -204,28 +221,19 @@ export function HomeScreen() {
   const [saving, setSaving]             = useState(false);
   const inputRef                        = useRef<TextInput>(null);
 
-  const confirmRemove = (item: ListingPublic) => {
-    Alert.alert(
-      'Remover anúncio',
-      `Tem certeza que quer remover "${item.teamName}"? Esta ação não pode ser desfeita.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Remover',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await ListingsApi.remove(item.listingId);
-              setListings((prev) => prev.filter((l) => l.listingId !== item.listingId));
-              const store = useAuthStore.getState();
-              store.setListingsActiveCount(Math.max(0, (store.user?.listingsActiveCount ?? 1) - 1));
-            } catch {
-              Alert.alert('Erro', 'Não foi possível remover o anúncio. Tente novamente.');
-            }
-          },
-        },
-      ],
-    );
+  const confirmRemove = async (item: ListingPublic) => {
+    const ok = typeof window !== 'undefined'
+      ? window.confirm(`Remover "${item.teamName}"? Esta ação não pode ser desfeita.`)
+      : true;
+    if (!ok) return;
+    try {
+      await ListingsApi.remove(item.listingId);
+      setListings((prev) => prev.filter((l) => l.listingId !== item.listingId));
+      const store = useAuthStore.getState();
+      store.setListingsActiveCount(Math.max(0, (store.user?.listingsActiveCount ?? 1) - 1));
+    } catch {
+      if (typeof window !== 'undefined') window.alert('Não foi possível remover o anúncio.');
+    }
   };
 
   const openPriceSheet = (item: ListingPublic) => {
@@ -356,7 +364,7 @@ export function HomeScreen() {
                   marginBottom: 16,
                 }}
               >
-                <Text style={{ fontSize: 28 }}>👕</Text>
+                <Shirt size={28} color="#335336" />
               </View>
               <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 8 }}>
                 Nenhuma camisa ainda

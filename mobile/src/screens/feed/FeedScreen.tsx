@@ -2,9 +2,10 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  PanResponder,
+  Image,
   Pressable,
   RefreshControl,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -12,16 +13,42 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
+import { Heart, MapPin, Calendar, SlidersHorizontal, ChevronDown, ChevronUp, Star, Shirt, Building2, Search, X } from 'lucide-react-native';
 
 import { ListingsApi, type ListingPublic } from '../../api/listings';
+import { SearchApi } from '../../api/search';
 import type { RootStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/auth.store';
+import { getPhotoUrl } from '../../utils/env';
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// ── Filter types ──────────────────────────────────────────────────────────────
 
-const PRICE_MIN = 99;
-const PRICE_MAX = 5000;
-const THUMB_R   = 13;
+type PriceFilter = null | 249 | 499 | 999;
+type KindFilter  = 'TIME' | 'SELECAO' | 'MPC' | null;
+
+const PRICE_BUTTONS: { label: string; value: PriceFilter }[] = [
+  { label: 'Todos',        value: null },
+  { label: 'Até R$249',    value: 249  },
+  { label: 'Até R$499',    value: 499  },
+  { label: 'Acima R$999',  value: 999  },
+];
+
+const KIND_FILTERS = [
+  { label: 'Todos',    value: null },
+  { label: 'Clubes',   value: 'TIME' },
+  { label: 'Seleções', value: 'SELECAO' },
+  { label: '⭐ MPC',   value: 'MPC' },
+] as const;
+
+const CONDITION_FILTERS = [
+  { label: 'Com etiqueta', value: 'COM_ETIQUETA' },
+  { label: 'Perfeita',     value: 'PERFEITA'     },
+  { label: 'Excelente',    value: 'EXCELENTE'    },
+  { label: 'Boa',          value: 'BOA'          },
+  { label: 'Regular',      value: 'REGULAR'      },
+];
+
+const SIZE_FILTERS = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 
 const CONDITION_LABEL: Record<string, string> = {
   COM_ETIQUETA: 'Com etiqueta',
@@ -32,269 +59,279 @@ const CONDITION_LABEL: Record<string, string> = {
   DESGASTADA:   'Desgastada',
 };
 
-const KIND_FILTERS = [
-  { label: 'Todos',    value: null },
-  { label: 'Clubes',   value: 'TIME' },
-  { label: 'Seleções', value: 'SELECAO' },
-  { label: '⭐ MPC',   value: 'MPC' },
-] as const;
+const CONDITION_COLOR: Record<string, string> = {
+  COM_ETIQUETA: '#D4AF37',
+  PERFEITA:     '#D4AF37',
+  EXCELENTE:    '#D4AF37',
+  BOA:          '#9C9486',
+  REGULAR:      '#9C9486',
+  DESGASTADA:   '#9C9486',
+};
 
-type KindFilter = 'TIME' | 'SELECAO' | 'MPC' | null;
+// ── Static events (will be replaced with API later) ───────────────────────────
 
-// ── PriceRangeSlider ──────────────────────────────────────────────────────────
+const EVENTS = [
+  {
+    id: '1',
+    title: 'Encontro de Colecionismo do Pacaembu',
+    date: '13 de junho de 2026',
+    location: 'Museu do Futebol · Pacaembu, São Paulo',
+    image: null,
+  },
+];
 
-function PriceRangeSlider({
-  values,
-  onChange,
+// ── ListingCard (2-column grid) ───────────────────────────────────────────────
+
+function ListingCard({
+  item,
+  onPress,
+  isFav,
+  onToggleFav,
 }: {
-  values: [number, number];
-  onChange: (v: [number, number]) => void;
+  item: ListingPublic;
+  onPress: () => void;
+  isFav: boolean;
+  onToggleFav: () => void;
 }) {
-  const [trackW, setTrackW] = useState(0);
-
-  // Refs so PanResponder closures always see fresh data
-  const valRef   = useRef(values);
-  valRef.current = values;
-  const trackRef = useRef(0);
-
-  const snap = (raw: number) =>
-    Math.max(PRICE_MIN, Math.min(PRICE_MAX, Math.round(raw / 100) * 100));
-
-  const INSET = THUMB_R / 2;
-
-  const usable = () => Math.max(1, trackRef.current - INSET * 2);
-
-  const toPx = (val: number) =>
-    INSET + ((val - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * usable();
-
-  const toVal = (px: number) =>
-    snap(PRICE_MIN + (Math.max(0, Math.min(usable(), px - INSET)) / usable()) * (PRICE_MAX - PRICE_MIN));
-
-  const lStart = useRef(0);
-  const rStart = useRef(0);
-
-  const leftPan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder:         () => true,
-      onMoveShouldSetPanResponder:          () => true,
-      onPanResponderTerminationRequest:     () => false,
-      onPanResponderGrant: () => {
-        lStart.current = toPx(valRef.current[0]);
-      },
-      onPanResponderMove: (_, { dx }) => {
-        if (!trackRef.current) return;
-        const maxPx = toPx(valRef.current[1]) - THUMB_R * 2.5;
-        onChange([toVal(Math.min(maxPx, lStart.current + dx)), valRef.current[1]]);
-      },
-      onPanResponderRelease: (_, { dx }) => {
-        if (!trackRef.current) return;
-        const maxPx = toPx(valRef.current[1]) - THUMB_R * 2.5;
-        onChange([toVal(Math.min(maxPx, lStart.current + dx)), valRef.current[1]]);
-      },
-    })
-  ).current;
-
-  const rightPan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder:         () => true,
-      onMoveShouldSetPanResponder:          () => true,
-      onPanResponderTerminationRequest:     () => false,
-      onPanResponderGrant: () => {
-        rStart.current = toPx(valRef.current[1]);
-      },
-      onPanResponderMove: (_, { dx }) => {
-        if (!trackRef.current) return;
-        const minPx = toPx(valRef.current[0]) + THUMB_R * 2.5;
-        onChange([valRef.current[0], toVal(Math.max(minPx, rStart.current + dx))]);
-      },
-      onPanResponderRelease: (_, { dx }) => {
-        if (!trackRef.current) return;
-        const minPx = toPx(valRef.current[0]) + THUMB_R * 2.5;
-        onChange([valRef.current[0], toVal(Math.max(minPx, rStart.current + dx))]);
-      },
-    })
-  ).current;
-
-  const isDefault = values[0] === PRICE_MIN && values[1] === PRICE_MAX;
-  const lPx = toPx(values[0]);
-  const rPx = toPx(values[1]);
-
-  const labelLeft  = `R$ ${values[0].toLocaleString('pt-BR')}`;
-  const labelRight = `R$ ${values[1].toLocaleString('pt-BR')}${values[1] >= PRICE_MAX ? '+' : ''}`;
-
-  return (
-    <View style={{ marginTop: 14 }}>
-      {/* Label row */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 0.5, flex: 1 }}>
-          PREÇO
-        </Text>
-        <Text style={{ color: isDefault ? 'rgba(255,255,255,0.45)' : '#D4AF37', fontSize: 12, fontWeight: '800' }}>
-          {isDefault ? 'Todos os preços' : `${labelLeft} – ${labelRight}`}
-        </Text>
-      </View>
-
-      {/* Track area — height = thumb diameter so thumbs fit without clipping */}
-      <View
-        style={{ height: THUMB_R * 2 }}
-        onLayout={(e) => {
-          const w = e.nativeEvent.layout.width;
-          setTrackW(w);
-          trackRef.current = w;
-        }}
-      >
-        {/* Background track — inset by INSET so it aligns with thumb travel range */}
-        <View style={{
-          position: 'absolute', left: THUMB_R / 2, right: THUMB_R / 2,
-          height: 4, top: THUMB_R - 2,
-          backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 2,
-        }} />
-
-        {trackW > 0 && (
-          <>
-            {/* Active fill */}
-            <View style={{
-              position: 'absolute',
-              left: lPx,
-              width: Math.max(0, rPx - lPx),
-              height: 4,
-              top: THUMB_R - 2,
-              backgroundColor: isDefault ? 'rgba(255,255,255,0.35)' : '#D4AF37',
-              borderRadius: 2,
-            }} />
-
-            {/* Left thumb */}
-            <View
-              {...leftPan.panHandlers}
-              style={{
-                position: 'absolute',
-                left: lPx - THUMB_R,
-                top: 0,
-                width: THUMB_R * 2,
-                height: THUMB_R * 2,
-                borderRadius: THUMB_R,
-                backgroundColor: '#FFF',
-                borderWidth: 3,
-                borderColor: '#D4AF37',
-                elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 3,
-              }}
-            />
-
-            {/* Right thumb */}
-            <View
-              {...rightPan.panHandlers}
-              style={{
-                position: 'absolute',
-                left: rPx - THUMB_R,
-                top: 0,
-                width: THUMB_R * 2,
-                height: THUMB_R * 2,
-                borderRadius: THUMB_R,
-                backgroundColor: '#FFF',
-                borderWidth: 3,
-                borderColor: '#D4AF37',
-                elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 3,
-              }}
-            />
-          </>
-        )}
-      </View>
-
-      {/* Min / Max axis labels */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 }}>
-        <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10 }}>R$ 99</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10 }}>R$ 5.000+</Text>
-      </View>
-    </View>
-  );
-}
-
-// ── Badge ─────────────────────────────────────────────────────────────────────
-
-function Badge({ text }: { text: string }) {
-  return (
-    <View style={{ backgroundColor: '#F4EFE3', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-      <Text style={{ color: '#6B6357', fontSize: 11, fontWeight: '600' }}>{text}</Text>
-    </View>
-  );
-}
-
-// ── ListingCard ───────────────────────────────────────────────────────────────
-
-function ListingCard({ item, onPress }: { item: ListingPublic; onPress: () => void }) {
   const price = (item.priceCents / 100).toLocaleString('pt-BR', {
     style: 'currency', currency: 'BRL',
   });
+  const photoUrl = item.photoKeys?.[0] ? getPhotoUrl(item.photoKeys[0]) : null;
+  const conditionLabel = CONDITION_LABEL[item.condition] ?? item.condition;
+  const badgeColor     = CONDITION_COLOR[item.condition] ?? '#9C9486';
+  const avg = (item as ListingPublic & { ratingAvgAsSeller?: number }).ratingAvgAsSeller;
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        backgroundColor: pressed ? '#F0EAD8' : '#FFF',
-        borderRadius: 16,
-        borderWidth: item.isMpc ? 2 : 1,
-        borderColor: item.isMpc ? '#D4AF37' : '#E5DCC4',
-        marginHorizontal: 16,
-        marginBottom: 12,
+        flex: 1,
+        backgroundColor: '#1a3a1c',
+        borderRadius: 14,
         overflow: 'hidden',
-        opacity: pressed ? 0.82 : 1,
+        opacity: pressed ? 0.88 : 1,
         transform: [{ scale: pressed ? 0.97 : 1 }],
       })}
     >
-      <View style={{ flexDirection: 'row' }}>
-        {/* Photo placeholder */}
-        <View
-          style={{
-            width: 96,
-            backgroundColor: '#F4EFE3',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRightWidth: 1,
-            borderColor: '#E5DCC4',
-          }}
-        >
-          <Text style={{ fontSize: 30 }}>👕</Text>
-          <Text style={{ fontSize: 10, color: '#9C9486', marginTop: 4 }}>
-            {item.kind === 'SELECAO' ? '🌎' : '🏟️'}
+      {/* Photo */}
+      <View style={{ aspectRatio: 1, backgroundColor: '#122613', position: 'relative' }}>
+        {photoUrl ? (
+          <Image
+            source={{ uri: photoUrl }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Shirt size={40} color="rgba(255,255,255,0.4)" />
+          </View>
+        )}
+
+        {/* Condition badge */}
+        <View style={{
+          position: 'absolute', top: 8, left: 8,
+          backgroundColor: badgeColor,
+          borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
+        }}>
+          <Text style={{ color: '#1C1A14', fontSize: 10, fontWeight: '800' }}>
+            {conditionLabel}
           </Text>
         </View>
 
-        {/* Info */}
-        <View style={{ flex: 1, padding: 12 }}>
-          <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 15 }} numberOfLines={1}>
-            {item.teamName}
-          </Text>
-          <Text style={{ color: '#6B6357', fontSize: 13, marginTop: 2 }}>
-            {item.supplier} · {item.season}
-          </Text>
-          {item.sellerName ? (
-            <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 1 }}>
-              Vendedor: {item.sellerName}
-            </Text>
-          ) : null}
-          <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            <Badge text={`Tam. ${item.size}`} />
-            <Badge text={CONDITION_LABEL[item.condition] ?? item.condition} />
-            {item.isMpc && (
-              <View style={{ backgroundColor: '#D4AF37', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                <Text style={{ color: '#211B15', fontSize: 11, fontWeight: '800' }}>⭐ MPC</Text>
-              </View>
-            )}
-          </View>
-          <Text style={{ color: '#335336', fontWeight: '900', fontSize: 17, marginTop: 8 }}>
+        {/* Favorite button */}
+        <Pressable
+          onPress={(e) => { e.stopPropagation?.(); onToggleFav(); }}
+          hitSlop={8}
+          style={{
+            position: 'absolute', top: 8, right: 8,
+            width: 30, height: 30, borderRadius: 15,
+            backgroundColor: 'rgba(0,0,0,0.45)',
+            alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <Heart
+            size={15}
+            color={isFav ? '#FF6B6B' : '#fff'}
+            fill={isFav ? '#FF6B6B' : 'transparent'}
+          />
+        </Pressable>
+      </View>
+
+      {/* Info */}
+      <View style={{ padding: 10 }}>
+        <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 13 }} numberOfLines={1}>
+          {item.teamName}
+        </Text>
+        <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, marginTop: 2 }}>
+          {item.season}
+        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
+          <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 15 }}>
             {price}
           </Text>
+          {avg != null && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Star size={11} color="#D4AF37" fill="#D4AF37" />
+              <Text style={{ color: '#D4AF37', fontSize: 11, fontWeight: '700' }}>
+                {avg.toFixed(1)}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </Pressable>
+  );
+}
+
+// ── Hero section ──────────────────────────────────────────────────────────────
+
+function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () => void }) {
+  return (
+    <View style={{
+      backgroundColor: '#1a3a1c',
+      margin: 16,
+      borderRadius: 18,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: 'rgba(212,175,55,0.3)',
+    }}>
+      <View style={{
+        alignSelf: 'flex-start',
+        backgroundColor: 'rgba(212,175,55,0.15)',
+        borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5,
+        marginBottom: 14,
+        borderWidth: 1, borderColor: 'rgba(212,175,55,0.4)',
+        flexDirection: 'row', alignItems: 'center', gap: 6,
+      }}>
+        <Star size={11} color="#D4AF37" fill="#D4AF37" />
+        <Text style={{ color: '#D4AF37', fontSize: 11, fontWeight: '700' }}>
+          Novo na Arena
+        </Text>
+      </View>
+
+      <Text style={{ color: '#EAEAEA', fontWeight: '900', fontSize: 22, lineHeight: 28, marginBottom: 10 }}>
+        O maior marketplace de camisas de futebol do Brasil
+      </Text>
+
+      <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 19, marginBottom: 20 }}>
+        Encontre camisas raras, originais e históricas. Compre e venda com segurança na maior comunidade de colecionadores.
+      </Text>
+
+      <Pressable
+        onPress={onExplore}
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? '#e8e8e8' : '#fff',
+          borderRadius: 10, paddingVertical: 13,
+          alignItems: 'center', marginBottom: 10,
+          flexDirection: 'row', justifyContent: 'center', gap: 8,
+        })}
+      >
+        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+          Explorar Catálogo
+        </Text>
+        <Text style={{ color: '#1C1A14', fontSize: 15 }}>→</Text>
+      </Pressable>
+
+      <Pressable
+        onPress={onSell}
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+          borderRadius: 10, paddingVertical: 13,
+          alignItems: 'center',
+        })}
+      >
+        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+          Anunciar Camisa
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+// ── Events section ────────────────────────────────────────────────────────────
+
+function EventsSection() {
+  return (
+    <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+      <Text style={{ color: '#1C1A14', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
+        Eventos
+      </Text>
+      <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 14 }}>
+        Encontros e feiras de colecionadores
+      </Text>
+      {EVENTS.map((ev) => (
+        <View key={ev.id} style={{
+          borderRadius: 14, overflow: 'hidden',
+          borderWidth: 1, borderColor: '#E5DCC4',
+          backgroundColor: '#fff', marginBottom: 12,
+        }}>
+          {/* Event image placeholder */}
+          <View style={{
+            height: 140, backgroundColor: '#1a3a1c',
+            alignItems: 'flex-end', justifyContent: 'flex-end', padding: 12,
+          }}>
+            <Building2 size={32} color="rgba(255,255,255,0.6)" />
+            <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 14, position: 'absolute', bottom: 12, left: 12 }}>
+              {ev.title}
+            </Text>
+          </View>
+          <View style={{ padding: 14, gap: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Calendar size={14} color="#9C9486" />
+              <Text style={{ color: '#6B6357', fontSize: 13 }}>{ev.date}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <MapPin size={14} color="#9C9486" />
+              <Text style={{ color: '#6B6357', fontSize: 13 }}>{ev.location}</Text>
+            </View>
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ── Sell CTA section ──────────────────────────────────────────────────────────
+
+function SellCTA({ onRegister, onLearnMore }: { onRegister: () => void; onLearnMore: () => void }) {
+  return (
+    <View style={{
+      margin: 16, marginTop: 8,
+      backgroundColor: '#1a3a1c',
+      borderRadius: 18, padding: 20,
+      borderWidth: 1, borderColor: 'rgba(212,175,55,0.3)',
+    }}>
+      <Text style={{ color: '#EAEAEA', fontWeight: '900', fontSize: 18, marginBottom: 8 }}>
+        Tem camisas para vender?
+      </Text>
+      <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 19, marginBottom: 20 }}>
+        Cadastre-se gratuitamente e comece a anunciar suas camisas hoje mesmo. Alcance milhares de colecionadores.
+      </Text>
+      <Pressable
+        onPress={onRegister}
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? '#e8e8e8' : '#fff',
+          borderRadius: 10, paddingVertical: 13,
+          alignItems: 'center', marginBottom: 10,
+        })}
+      >
+        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+          Criar conta grátis
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={onLearnMore}
+        style={({ pressed }) => ({
+          backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+          borderRadius: 10, paddingVertical: 13,
+          alignItems: 'center',
+        })}
+      >
+        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+          Conhecer mais
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -302,15 +339,28 @@ function ListingCard({ item, onPress }: { item: ListingPublic; onPress: () => vo
 
 export function FeedScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const user = useAuthStore((s) => s.user);
-  const [listings, setListings]     = useState<ListingPublic[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter]         = useState<KindFilter>(null);
-  const [query, setQuery]           = useState('');
-  const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX]);
+  const user    = useAuthStore((s) => s.user);
+  const isGuest = useAuthStore((s) => s.isGuest);
+  const enterAsGuest = useAuthStore((s) => s.enterAsGuest);
 
-  const hasLoaded = useRef(false);
+  const [listings,      setListings]      = useState<ListingPublic[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [refreshing,    setRefreshing]    = useState(false);
+  const [searchResults, setSearchResults] = useState<ListingPublic[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [isSearchMode,  setIsSearchMode]  = useState(false);
+  const [favorites,     setFavorites]     = useState<Set<string>>(new Set());
+
+  const [filter,      setFilter]      = useState<KindFilter>(null);
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>(null);
+  const [query,       setQuery]       = useState('');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [condFilter,  setCondFilter]  = useState<string | null>(null);
+  const [sizeFilter,  setSizeFilter]  = useState<string | null>(null);
+  const [catalogMode, setCatalogMode] = useState(false);
+
+  const hasLoaded   = useRef(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
@@ -319,9 +369,7 @@ export function FeedScreen() {
       const data = await ListingsApi.feed();
       setListings(data);
       hasLoaded.current = true;
-    } catch {
-      // silently fail — user can pull to refresh
-    } finally {
+    } catch { /* silently fail */ } finally {
       setLoading(false);
       setRefreshing(false);
     }
@@ -329,43 +377,82 @@ export function FeedScreen() {
 
   useFocusEffect(useCallback(() => { void load(); }, [load]));
 
+  const runSearch = useCallback(async (q: string) => {
+    if (q.trim().length < 2) { setIsSearchMode(false); setSearchResults([]); return; }
+    setIsSearchMode(true);
+    setSearchLoading(true);
+    try {
+      const algoliaFilters: string[] = [];
+      if (filter === 'MPC') algoliaFilters.push('isMpc:true');
+      else if (filter) algoliaFilters.push(`kind:${filter}`);
+      const result = await SearchApi.search(q.trim(), algoliaFilters.join(' AND ') || undefined, 0, 40);
+      setSearchResults(result.hits as ListingPublic[]);
+    } catch { setIsSearchMode(false); } finally { setSearchLoading(false); }
+  }, [filter]);
+
+  const handleQueryChange = (text: string) => {
+    setQuery(text);
+    if (!catalogMode) setCatalogMode(true);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    if (text.trim().length < 2) { setIsSearchMode(false); setSearchResults([]); return; }
+    searchTimer.current = setTimeout(() => void runSearch(text), 350);
+  };
+
   const filtered = useMemo(() => {
-    const q           = query.trim().toLowerCase();
-    const defaultMin  = priceRange[0] === PRICE_MIN;
-    const defaultMax  = priceRange[1] === PRICE_MAX;
-
-    return listings.filter((l) => {
-      const matchKind = filter === 'MPC' ? l.isMpc : filter ? l.kind === filter : true;
-
-      const matchQuery = q === '' ? true : (
-        l.teamName.toLowerCase().includes(q) ||
-        l.supplier.toLowerCase().includes(q) ||
-        l.season.toLowerCase().includes(q) ||
-        l.country.toLowerCase().includes(q)
-      );
-
-      // When right thumb is at PRICE_MAX (5000), no upper cap — show all prices above too
-      const matchPrice = (
-        (defaultMin || l.priceCents >= priceRange[0] * 100) &&
-        (defaultMax || l.priceCents <= priceRange[1] * 100)
-      );
-
-      return matchKind && matchQuery && matchPrice;
+    const source = isSearchMode ? searchResults : listings;
+    return source.filter((l) => {
+      const matchKind = !isSearchMode
+        ? (filter === 'MPC' ? l.isMpc : filter ? l.kind === filter : true)
+        : true;
+      const matchPrice = (() => {
+        if (!priceFilter) return true;
+        if (priceFilter === 249) return l.priceCents <= 24900;
+        if (priceFilter === 499) return l.priceCents <= 49900;
+        if (priceFilter === 999) return l.priceCents >= 99900;
+        return true;
+      })();
+      const matchCond = !condFilter || l.condition === condFilter;
+      const matchSize = !sizeFilter || l.size === sizeFilter;
+      return matchKind && matchPrice && matchCond && matchSize;
     });
-  }, [listings, filter, query, priceRange]);
+  }, [listings, searchResults, isSearchMode, filter, priceFilter, condFilter, sizeFilter]);
+
+  const activeFilterCount = [priceFilter, condFilter, sizeFilter].filter(Boolean).length;
+
+  const toggleFav = (id: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const showHome = !catalogMode && !query;
+
+  // ── Pair items for 2-column grid ──────────────────────────────────────────
+
+  type Row = [ListingPublic, ListingPublic | null];
+  const rows: Row[] = useMemo(() => {
+    const r: Row[] = [];
+    for (let i = 0; i < filtered.length; i += 2) {
+      r.push([filtered[i], filtered[i + 1] ?? null]);
+    }
+    return r;
+  }, [filtered]);
 
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
 
-      {/* ── Header: search + filters + price slider ── */}
-      <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 16, paddingTop: 6 }}>
-
-        {/* User badge */}
-        {user && (
-          <View style={{ alignItems: 'flex-end', marginBottom: 8 }}>
+      {/* ── Top bar ── */}
+      <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
+        {/* Logo + avatar */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 20 }}>
+            Arena dos Mantos
+          </Text>
+          {user && (
             <View style={{
-              width: 34, height: 34, borderRadius: 17,
-              backgroundColor: '#D4AF37',
+              width: 34, height: 34, borderRadius: 17, backgroundColor: '#D4AF37',
               alignItems: 'center', justifyContent: 'center',
               borderWidth: 2, borderColor: 'rgba(255,255,255,0.3)',
             }}>
@@ -373,102 +460,239 @@ export function FeedScreen() {
                 {user.displayName.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()}
               </Text>
             </View>
-          </View>
-        )}
+          )}
+        </View>
 
         {/* Search bar */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: 'rgba(255,255,255,0.12)',
-            borderRadius: 12,
-            paddingHorizontal: 12,
-            marginBottom: 10,
-          }}
-        >
-          <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 16, marginRight: 8 }}>🔍</Text>
+        <View style={{
+          flexDirection: 'row', alignItems: 'center',
+          backgroundColor: 'rgba(255,255,255,0.12)',
+          borderRadius: 12, paddingHorizontal: 12, marginBottom: catalogMode ? 10 : 0,
+        }}>
+          <Search size={16} color="rgba(255,255,255,0.5)" style={{ marginRight: 8 }} />
           <TextInput
             value={query}
-            onChangeText={setQuery}
+            onChangeText={handleQueryChange}
+            onFocus={() => setCatalogMode(true)}
             placeholder="Buscar por time, fornecedor, temporada..."
             placeholderTextColor="rgba(255,255,255,0.4)"
             style={{ flex: 1, color: '#FFF', fontSize: 14, paddingVertical: 10 }}
             returnKeyType="search"
-            clearButtonMode="while-editing"
+            onSubmitEditing={() => void runSearch(query)}
           />
-          {query.length > 0 && (
-            <Pressable onPress={() => setQuery('')} hitSlop={8}>
-              <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 18 }}>✕</Text>
+          {searchLoading && <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />}
+          {(query.length > 0 || catalogMode) && (
+            <Pressable onPress={() => { setQuery(''); setIsSearchMode(false); setSearchResults([]); setCatalogMode(false); }} hitSlop={8}>
+              <X size={18} color="rgba(255,255,255,0.5)" style={{ marginLeft: 6 }} />
             </Pressable>
           )}
         </View>
 
-        {/* Kind filter chips */}
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {KIND_FILTERS.map((f) => {
-            const active = filter === f.value;
-            return (
+        {/* Filters — only shown in catalog mode */}
+        {catalogMode && (
+          <>
+            <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+              {KIND_FILTERS.map((f) => {
+                const active = filter === f.value;
+                return (
+                  <Pressable
+                    key={String(f.value)}
+                    onPress={() => setFilter(f.value)}
+                    style={{
+                      backgroundColor: active ? '#D4AF37' : 'rgba(255,255,255,0.12)',
+                      borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6,
+                    }}
+                  >
+                    <Text style={{ color: active ? '#211B15' : '#FFF', fontWeight: '700', fontSize: 13 }}>
+                      {f.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
               <Pressable
-                key={String(f.value)}
-                onPress={() => setFilter(f.value)}
+                onPress={() => setFiltersOpen((v) => !v)}
                 style={{
-                  backgroundColor: active ? '#D4AF37' : 'rgba(255,255,255,0.12)',
-                  borderRadius: 20,
-                  paddingHorizontal: 14,
-                  paddingVertical: 6,
+                  backgroundColor: activeFilterCount > 0 ? '#D4AF37' : 'rgba(255,255,255,0.12)',
+                  borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6,
+                  flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 'auto',
                 }}
               >
-                <Text style={{ color: active ? '#211B15' : '#FFF', fontWeight: '700', fontSize: 13 }}>
-                  {f.label}
-                </Text>
+                <SlidersHorizontal size={14} color={activeFilterCount > 0 ? '#211B15' : '#FFF'} />
+                {activeFilterCount > 0 && (
+                  <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 12 }}>{activeFilterCount}</Text>
+                )}
+                {filtersOpen
+                  ? <ChevronUp   size={13} color={activeFilterCount > 0 ? '#211B15' : '#FFF'} />
+                  : <ChevronDown size={13} color={activeFilterCount > 0 ? '#211B15' : '#FFF'} />
+                }
               </Pressable>
-            );
-          })}
-        </View>
+            </View>
 
-        {/* Price range slider */}
-        <PriceRangeSlider values={priceRange} onChange={setPriceRange} />
+            {filtersOpen && (
+              <View style={{ marginTop: 12, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.12)', paddingTop: 12 }}>
+                <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>PREÇO</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                  {PRICE_BUTTONS.map((p) => {
+                    const active = priceFilter === p.value;
+                    return (
+                      <Pressable key={String(p.value)} onPress={() => setPriceFilter(p.value)}
+                        style={{ backgroundColor: active ? '#D4AF37' : 'rgba(255,255,255,0.10)', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: active ? '#D4AF37' : 'rgba(255,255,255,0.2)' }}>
+                        <Text style={{ color: active ? '#211B15' : '#FFF', fontWeight: '700', fontSize: 12 }}>{p.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>ESTADO</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                  {CONDITION_FILTERS.map((c) => {
+                    const active = condFilter === c.value;
+                    return (
+                      <Pressable key={c.value} onPress={() => setCondFilter(active ? null : c.value)}
+                        style={{ backgroundColor: active ? '#D4AF37' : 'rgba(255,255,255,0.10)', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 6, borderWidth: 1, borderColor: active ? '#D4AF37' : 'rgba(255,255,255,0.2)' }}>
+                        <Text style={{ color: active ? '#211B15' : '#FFF', fontWeight: '700', fontSize: 12 }}>{c.label}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>TAMANHO</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+                  {SIZE_FILTERS.map((s) => {
+                    const active = sizeFilter === s;
+                    return (
+                      <Pressable key={s} onPress={() => setSizeFilter(active ? null : s)}
+                        style={{ backgroundColor: active ? '#D4AF37' : 'rgba(255,255,255,0.10)', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6, borderWidth: 1, borderColor: active ? '#D4AF37' : 'rgba(255,255,255,0.2)' }}>
+                        <Text style={{ color: active ? '#211B15' : '#FFF', fontWeight: '700', fontSize: 12 }}>{s}</Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                {activeFilterCount > 0 && (
+                  <Pressable onPress={() => { setPriceFilter(null); setCondFilter(null); setSizeFilter(null); }} style={{ alignSelf: 'flex-start', marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <X size={12} color="#FF6B6B" />
+                    <Text style={{ color: '#FF6B6B', fontSize: 12, fontWeight: '700' }}>Limpar filtros</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+          </>
+        )}
       </View>
 
+      {/* ── Body ── */}
       {loading ? (
         <ActivityIndicator color="#335336" size="large" style={{ marginTop: 60 }} />
-      ) : filtered.length === 0 ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
-          <Text style={{ fontSize: 36, marginBottom: 12 }}>👕</Text>
-          <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 8 }}>
-            Nenhuma camisa encontrada
-          </Text>
-          <Text style={{ color: '#9C9486', textAlign: 'center', fontSize: 14, lineHeight: 20 }}>
-            Tente ajustar os filtros ou o intervalo de preço.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.listingId}
-          renderItem={({ item }) => (
-            <ListingCard
-              item={item}
-              onPress={() => navigation.navigate('ListingDetail', { listing: item })}
+      ) : showHome ? (
+        // ── HOME VIEW ─────────────────────────────────────────────────────────
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} tintColor="#335336" colors={['#335336']} />}
+        >
+          {/* Hero */}
+          <HeroSection
+            onExplore={() => setCatalogMode(true)}
+            onSell={() => navigation.navigate('Main', { screen: 'NewListing' } as never)}
+          />
+
+          {/* Events */}
+          <EventsSection />
+
+          {/* Latest listings */}
+          <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <Text style={{ color: '#1C1A14', fontWeight: '900', fontSize: 17 }}>
+                As últimas camisas publicadas
+              </Text>
+              <Pressable onPress={() => setCatalogMode(true)}>
+                <Text style={{ color: '#335336', fontWeight: '700', fontSize: 13 }}>Ver todos →</Text>
+              </Pressable>
+            </View>
+
+            {listings.slice(0, 8).reduce<[ListingPublic, ListingPublic | null][]>((acc, _, i, arr) => {
+              if (i % 2 === 0) acc.push([arr[i], arr[i + 1] ?? null]);
+              return acc;
+            }, []).map((pair, idx) => (
+              <View key={idx} style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <ListingCard
+                    item={pair[0]}
+                    onPress={() => navigation.navigate('ListingDetail', { listing: pair[0] })}
+                    isFav={favorites.has(pair[0].listingId)}
+                    onToggleFav={() => toggleFav(pair[0].listingId)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  {pair[1] ? (
+                    <ListingCard
+                      item={pair[1]}
+                      onPress={() => navigation.navigate('ListingDetail', { listing: pair[1]! })}
+                      isFav={favorites.has(pair[1].listingId)}
+                      onToggleFav={() => toggleFav(pair[1]!.listingId)}
+                    />
+                  ) : <View style={{ flex: 1 }} />}
+                </View>
+              </View>
+            ))}
+          </View>
+
+          {/* Sell CTA */}
+          {(!user || isGuest) && (
+            <SellCTA
+              onRegister={() => navigation.navigate('Auth', { screen: 'SignUp' } as never)}
+              onLearnMore={() => setCatalogMode(true)}
             />
           )}
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => void load(true)}
-              tintColor="#335336"
-              colors={['#335336']}
-            />
-          }
-          ListHeaderComponent={
-            <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '700', marginLeft: 16, marginBottom: 8 }}>
-              {filtered.length} camisa{filtered.length !== 1 ? 's' : ''} disponíve{filtered.length !== 1 ? 'is' : 'l'}
+          <View style={{ height: 24 }} />
+        </ScrollView>
+      ) : (
+        // ── CATALOG VIEW ──────────────────────────────────────────────────────
+        filtered.length === 0 ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+            <Shirt size={36} color="#9C9486" style={{ marginBottom: 12 }} />
+            <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 8 }}>
+              Nenhuma camisa encontrada
             </Text>
-          }
-        />
+            <Text style={{ color: '#9C9486', textAlign: 'center', fontSize: 14 }}>
+              Tente ajustar os filtros.
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={rows}
+            keyExtractor={(_, i) => String(i)}
+            renderItem={({ item: pair }) => (
+              <View style={{ flexDirection: 'row', gap: 10, marginHorizontal: 16, marginBottom: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <ListingCard
+                    item={pair[0]}
+                    onPress={() => navigation.navigate('ListingDetail', { listing: pair[0] })}
+                    isFav={favorites.has(pair[0].listingId)}
+                    onToggleFav={() => toggleFav(pair[0].listingId)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  {pair[1] ? (
+                    <ListingCard
+                      item={pair[1]}
+                      onPress={() => navigation.navigate('ListingDetail', { listing: pair[1]! })}
+                      isFav={favorites.has(pair[1].listingId)}
+                      onToggleFav={() => toggleFav(pair[1]!.listingId)}
+                    />
+                  ) : <View style={{ flex: 1 }} />}
+                </View>
+              </View>
+            )}
+            contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} tintColor="#335336" colors={['#335336']} />
+            }
+            ListHeaderComponent={
+              <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '700', marginLeft: 16, marginBottom: 12 }}>
+                {filtered.length} camisa{filtered.length !== 1 ? 's' : ''} disponíve{filtered.length !== 1 ? 'is' : 'l'}
+              </Text>
+            }
+          />
+        )
       )}
     </SafeAreaView>
   );

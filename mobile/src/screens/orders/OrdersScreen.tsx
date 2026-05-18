@@ -11,6 +11,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { Package, Handshake, Shirt } from 'lucide-react-native';
+
 import type { RootStackParamList } from '../../navigation/types';
 import { OrdersApi, type OrderPublic, type OrderStatus } from '../../api/orders';
 import { useAuthStore } from '../../store/auth.store';
@@ -77,7 +79,7 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
           alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <Text style={{ fontSize: 24 }}>👕</Text>
+          <Shirt size={24} color="#335336" />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }} numberOfLines={1}>
@@ -100,9 +102,15 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
         paddingVertical: 10,
         backgroundColor: '#F4EFE3',
       }}>
-        <Text style={{ color: '#9C9486', fontSize: 12 }}>
-          {order.deliveryMethod === 'CORREIOS' ? '📦 Correios' : '🤝 Em Mãos'}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          {order.deliveryMethod === 'CORREIOS'
+            ? <Package size={12} color="#9C9486" />
+            : <Handshake size={12} color="#9C9486" />
+          }
+          <Text style={{ color: '#9C9486', fontSize: 12 }}>
+            {order.deliveryMethod === 'CORREIOS' ? 'Correios' : 'Em Mãos'}
+          </Text>
+        </View>
         <Text style={{ color: '#D4AF37', fontWeight: '700', fontSize: 14 }}>
           {(order.totalCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
         </Text>
@@ -194,7 +202,7 @@ export function OrdersScreen({ navigation }: Props) {
         </View>
       ) : displayed.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-          <Text style={{ fontSize: 32, marginBottom: 12 }}>📦</Text>
+          <Package size={32} color="#9C9486" style={{ marginBottom: 12 }} />
           <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16, marginBottom: 6, textAlign: 'center' }}>
             Nenhum pedido ainda
           </Text>

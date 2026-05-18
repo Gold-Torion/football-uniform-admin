@@ -15,6 +15,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { Eye, EyeOff } from 'lucide-react-native';
+
 import type { AuthStackParamList } from '../../navigation/types';
 import { AuthApi } from '../../api/auth';
 import { useAuthStore } from '../../store/auth.store';
@@ -112,7 +114,7 @@ export function EmailSignInScreen({ navigation }: Props) {
                 style={{ position: 'absolute', right: 14, top: 0, bottom: 0, justifyContent: 'center' }}
                 hitSlop={8}
               >
-                <Text style={{ fontSize: 18 }}>{showPwd ? '🙈' : '👁️'}</Text>
+                {showPwd ? <EyeOff size={18} color="rgba(255,255,255,0.6)" /> : <Eye size={18} color="rgba(255,255,255,0.6)" />}
               </Pressable>
             </View>
 

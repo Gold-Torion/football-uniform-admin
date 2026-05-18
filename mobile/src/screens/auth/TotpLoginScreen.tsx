@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Lock } from 'lucide-react-native';
+
 import { AuthApi } from '../../api/auth';
 import { useAuthStore } from '../../store/auth.store';
 
@@ -53,7 +55,7 @@ export function TotpLoginScreen() {
             marginBottom: 24,
           }}
         >
-          <Text style={{ fontSize: 36 }}>🔐</Text>
+          <Lock size={36} color="#D4AF37" />
         </View>
 
         <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 22, marginBottom: 8, textAlign: 'center' }}>

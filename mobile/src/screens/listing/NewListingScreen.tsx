@@ -12,9 +12,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { webAlert } from '../../utils/webAlert';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import * as ImagePicker from 'expo-image-picker';
+
+import { Camera, X } from 'lucide-react-native';
 
 import { ListingsApi } from '../../api/listings';
 import { useAuthStore } from '../../store/auth.store';
@@ -317,6 +320,7 @@ export function NewListingScreen() {
   const [photoKeys, setPhotoKeys] = useState<string[]>([]);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess]           = useState(false);
   const scrollRef               = useRef<ScrollView>(null);
   const setListingsCount        = useAuthStore((s) => s.setListingsActiveCount);
   const nav                     = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
@@ -324,7 +328,7 @@ export function NewListingScreen() {
   async function pickAndUpload(slotIndex: number) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permissão necessária', 'Permita o acesso à galeria nas configurações.');
+      webAlert('Permissão necessária', 'Permita o acesso à galeria nas configurações.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -339,7 +343,7 @@ export function NewListingScreen() {
     const mime  = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
 
     if (!createdListingId) {
-      Alert.alert('Atenção', 'Preencha os dados do anúncio antes de adicionar fotos.');
+      webAlert('Atenção', 'Preencha os dados do anúncio antes de adicionar fotos.');
       return;
     }
 
@@ -368,7 +372,7 @@ export function NewListingScreen() {
         return next;
       });
     } catch {
-      Alert.alert('Erro', 'Não foi possível enviar a foto. Tente novamente.');
+      webAlert('Erro', 'Não foi possível enviar a foto. Tente novamente.');
     } finally {
       setUploadingIdx(null);
     }
@@ -381,7 +385,7 @@ export function NewListingScreen() {
       setPhotoUris((prev) => prev.filter((_, i) => i !== slotIndex));
       setPhotoKeys((prev) => prev.filter((_, i) => i !== slotIndex));
     } catch {
-      Alert.alert('Erro', 'Não foi possível remover a foto.');
+      webAlert('Erro', 'Não foi possível remover a foto.');
     }
   }
 
@@ -468,26 +472,10 @@ export function NewListingScreen() {
 
       setListingsCount(result.listingsActiveCount);
       setCreatedListingId(result.listing.listingId);
-
-      Alert.alert(
-        '✅ Anúncio criado!',
-        photoUris.length === 0
-          ? 'Anúncio publicado. Adicione fotos para atrair mais compradores.'
-          : `Anúncio publicado com ${photoUris.length} foto${photoUris.length > 1 ? 's' : ''}.`,
-        [{
-          text: 'Ver meus anúncios',
-          onPress: () => {
-            setForm(INITIAL);
-            setPhotoUris([]);
-            setPhotoKeys([]);
-            setCreatedListingId(null);
-            setAttempted(false);
-            nav.navigate('Home');
-          },
-        }],
-      );
+      setShowSuccess(true);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
     } catch {
-      Alert.alert('Erro', 'Não foi possível publicar o anúncio. Verifique sua conexão.');
+      webAlert('Erro', 'Não foi possível publicar o anúncio. Verifique sua conexão.');
     } finally {
       setBusy(false);
     }
@@ -519,6 +507,41 @@ export function NewListingScreen() {
         onTouchStart={() => setAttempted(false)}
       >
 
+        {/* Success banner — shown after listing is created */}
+        {showSuccess && (
+          <View style={{
+            backgroundColor: '#dcfce7', borderRadius: 14,
+            padding: 16, marginBottom: 16,
+            borderWidth: 1, borderColor: '#22c55e',
+          }}>
+            <Text style={{ color: '#166534', fontWeight: '800', fontSize: 16, marginBottom: 4 }}>
+              ✅ Anúncio publicado!
+            </Text>
+            <Text style={{ color: '#166534', fontSize: 13, marginBottom: 12 }}>
+              Agora adicione fotos para atrair mais compradores. Quando terminar, clique em "Ver meus anúncios".
+            </Text>
+            <Pressable
+              onPress={() => {
+                setForm(INITIAL);
+                setPhotoUris([]);
+                setPhotoKeys([]);
+                setCreatedListingId(null);
+                setAttempted(false);
+                setShowSuccess(false);
+                nav.navigate('Home');
+              }}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? '#166534' : '#22c55e',
+                borderRadius: 10, paddingVertical: 12, alignItems: 'center',
+              })}
+            >
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
+                Ver meus anúncios →
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Error summary banner */}
         {attempted && hasErrors && (
           <View style={{
@@ -543,7 +566,7 @@ export function NewListingScreen() {
             borderWidth: 1.5, borderColor: '#E5DCC4', borderStyle: 'dashed',
             backgroundColor: '#fff',
           }}>
-            <Text style={{ fontSize: 28, marginBottom: 6 }}>📷</Text>
+            <Camera size={28} color="#9C9486" style={{ marginBottom: 6 }} />
             <Text style={{ color: '#9C9486', fontSize: 13, fontWeight: '600' }}>Foto principal</Text>
             <Text style={{ color: '#335336', fontSize: 11, marginTop: 6, textAlign: 'center' }}>
               Publique o anúncio primeiro para adicionar fotos
@@ -578,12 +601,12 @@ export function NewListingScreen() {
                   <>
                     <Image source={{ uri: photoUris[i] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 10, padding: 2 }}>
-                      <Text style={{ color: '#fff', fontSize: 10 }}>✕</Text>
+                      <X size={10} color="#fff" />
                     </View>
                   </>
                 ) : (
                   <>
-                    <Text style={{ fontSize: i === 0 ? 28 : 18 }}>📷</Text>
+                    <Camera size={i === 0 ? 28 : 18} color="#9C9486" />
                     <Text style={{ color: '#9C9486', fontSize: 9, marginTop: 2 }}>
                       {i === 0 ? 'principal' : `foto ${i + 1}`}
                     </Text>
@@ -606,12 +629,15 @@ export function NewListingScreen() {
           onChange={(v) => set('kind', v as 'TIME' | 'SELECAO')}
         />
 
-        {/* Nome do time */}
-        <SectionTitle text="NOME DO TIME" error={e.teamName} />
+        {/* Nome do time / País */}
+        <SectionTitle
+          text={form.kind === 'SELECAO' ? 'PAÍS' : 'NOME DO TIME'}
+          error={e.teamName}
+        />
         <TextInput
           value={form.teamName}
           onChangeText={(t) => set('teamName', t)}
-          placeholder="ex: Flamengo, Brasil..."
+          placeholder={form.kind === 'SELECAO' ? 'ex: Brasil, Argentina, França...' : 'ex: Flamengo, Real Madrid...'}
           placeholderTextColor={e.teamName ? ERR_COLOR : '#9C9486'}
           style={{
             borderRadius: 12, padding: 14, fontSize: 15, color: '#1C1A14',
@@ -620,7 +646,14 @@ export function NewListingScreen() {
             backgroundColor: e.teamName ? ERR_BG : '#fff',
           }}
         />
-        {e.teamName && <FieldError message="Digite o nome do time (mín. 2 caracteres)" />}
+        {e.teamName && (
+          <FieldError
+            message={form.kind === 'SELECAO'
+              ? 'Digite o nome do país (mín. 2 caracteres)'
+              : 'Digite o nome do time (mín. 2 caracteres)'
+            }
+          />
+        )}
 
         {/* Continente */}
         <SectionTitle text="CONTINENTE" error={e.continent} />
@@ -819,10 +852,10 @@ export function NewListingScreen() {
         )}
         <Pressable
           onPress={onSubmit}
-          disabled={busy}
+          disabled={busy || showSuccess || !!createdListingId}
           style={{
             borderRadius: 16, paddingVertical: 16, alignItems: 'center',
-            backgroundColor: !hasErrors ? '#335336' : '#9C9486',
+            backgroundColor: (!hasErrors && !showSuccess && !createdListingId) ? '#335336' : '#9C9486',
           }}
         >
           {busy

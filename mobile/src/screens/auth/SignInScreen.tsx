@@ -31,6 +31,7 @@ import { Env } from '../../utils/env';
 import { BrandLogo } from '../../components/BrandLogo';
 import { FeatureChips } from '../../components/FeatureChips';
 import { GoogleIcon } from '../../components/BrandIcons';
+import { Mail } from 'lucide-react-native';
 
 GoogleSignin.configure({
   webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
@@ -226,7 +227,7 @@ export function SignInScreen({ navigation }: Props) {
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginRight: 30 }}>
-                <Text style={{ fontSize: 20 }}>✉️</Text>
+                <Mail size={20} color="#1C1A14" />
                 <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>Entrar com e-mail</Text>
               </View>
             </Pressable>

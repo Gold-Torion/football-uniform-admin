@@ -28,7 +28,14 @@
     "plugins": [
       "expo-secure-store",
       "expo-asset",
-      "@react-native-google-signin/google-signin"
-    ]
+      "@react-native-google-signin/google-signin",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2a3afaab-ac27-4e04-884f-2664185c0445"
+      }
+    },
+    "owner": "yuri-silva"
   }
 }

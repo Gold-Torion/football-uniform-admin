@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { webAlert } from '../../utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -100,16 +101,16 @@ export function ProfileScreen() {
 
   const onSaveCep = async () => {
     const clean = cepInput.replace(/\D/g, '');
-    if (clean.length !== 8) { Alert.alert('CEP inválido', 'Digite um CEP com 8 dígitos.'); return; }
+    if (clean.length !== 8) { webAlert('CEP inválido', 'Digite um CEP com 8 dígitos.'); return; }
     setSavingCep(true);
     try {
       const updated = await UsersApi.updateSellerCep(clean);
       if (user && accessToken && refreshToken) {
         await setSession({ accessToken, refreshToken, user: { ...user, ...updated } });
       }
-      Alert.alert('CEP salvo!', 'Seu CEP de envio foi atualizado.');
+      webAlert('CEP salvo!', 'Seu CEP de envio foi atualizado.');
     } catch {
-      Alert.alert('Erro', 'Não foi possível salvar o CEP.');
+      webAlert('Erro', 'Não foi possível salvar o CEP.');
     } finally {
       setSavingCep(false);
     }
@@ -149,14 +150,10 @@ export function ProfileScreen() {
   };
 
   const onSignOut = () => {
-    Alert.alert(
-      'Sair da conta',
-      'Tem certeza que deseja sair?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Sair', style: 'destructive', onPress: () => void clear() },
-      ],
-    );
+    const ok = typeof window !== 'undefined'
+      ? window.confirm('Tem certeza que deseja sair da conta?')
+      : true;
+    if (ok) void clear();
   };
 
   const onPrivacy = () => {

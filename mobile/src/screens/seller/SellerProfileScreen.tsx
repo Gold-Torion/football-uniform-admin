@@ -9,6 +9,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { Star, Shirt } from 'lucide-react-native';
+
 import type { RootStackParamList } from '../../navigation/types';
 import { RatingsApi, type UserRatingSummary } from '../../api/ratings';
 import { ListingsApi, type ListingPublic } from '../../api/listings';
@@ -30,9 +32,12 @@ function StarDisplay({ average }: { average: number }) {
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1, 2, 3, 4, 5].map((star) => (
-        <Text key={star} style={{ fontSize: 16, color: star <= Math.round(average) ? '#D4AF37' : '#E5DCC4' }}>
-          {star <= Math.round(average) ? '★' : '☆'}
-        </Text>
+        <Star
+          key={star}
+          size={16}
+          color="#D4AF37"
+          fill={star <= Math.round(average) ? '#D4AF37' : 'transparent'}
+        />
       ))}
     </View>
   );
@@ -61,7 +66,7 @@ function MiniListingCard({ listing }: { listing: ListingPublic }) {
         alignItems: 'center', justifyContent: 'center',
         marginBottom: 8,
       }}>
-        <Text style={{ fontSize: 32 }}>👕</Text>
+        <Shirt size={32} color="#335336" />
       </View>
       <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 13, marginBottom: 2 }} numberOfLines={1}>
         {listing.teamName}
@@ -172,7 +177,7 @@ export function SellerProfileScreen({ route, navigation }: Props) {
             alignItems: 'center',
             gap: 12,
           }}>
-            <Text style={{ fontSize: 28 }}>⭐</Text>
+            <Star size={28} color="#D4AF37" fill="#D4AF37" />
             <View>
               {sellerCount > 0 ? (
                 <>
