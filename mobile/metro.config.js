@@ -29,9 +29,6 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
-// Apply NativeWind CSS pipeline — use global.native.css for Android/iOS
-// (minimal, no web-only media queries) to avoid CSS parse errors on mobile.
-const isWeb = process.env.EXPO_PUBLIC_PLATFORM === 'web';
-module.exports = withNativeWind(config, {
-  input: isWeb ? './global.css' : './global.native.css',
-});
+// Use global.css for all platforms — web-specific CSS uses 100% instead of
+// 100dvh to avoid react-native-css-interop parse errors on Android.
+module.exports = withNativeWind(config, { input: './global.css' });
