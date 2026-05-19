@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "281984451863",
-    "project_id": "arena-dos-mantos-app",
-    "storage_bucket": "arena-dos-mantos-app.appspot.com"
+    "project_number": "265836821890",
+    "project_id": "arena-dos-mantos-495611",
+    "storage_bucket": "arena-dos-mantos-495611.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:281984451863:android:dacc209125bfd154",
+        "mobilesdk_app_id": "1:265836821890:android:879aa27dda205ef9aee39b",
         "android_client_info": {
           "package_name": "com.arenadosmantos.app"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "281984451863-r90b3qensith9hgg54apht08q7cbgv6j.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.arenadosmantos.app",
-            "certificate_hash": "DACC209125BFD154F497AA8265108E3886FE658E"
-          }
-        },
-        {
-          "client_id": "281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBFO9UjxuFRKiYyd8J2Nr5M_48Jr53Qoko"
+          "current_key": "AIzaSyAh5Umhjd5-GiMncWUIOzMI8zQsBLhbsxI"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
