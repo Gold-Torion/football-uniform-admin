@@ -20,6 +20,10 @@
             "package_name": "com.arenadosmantos.app",
             "certificate_hash": "dacc209125bfd154f497aa8265108e3886fe658e"
           }
+        },
+        {
+          "client_id": "281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
@@ -29,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

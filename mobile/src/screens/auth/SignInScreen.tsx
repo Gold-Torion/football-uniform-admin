@@ -225,7 +225,7 @@ export function SignInScreen({ navigation }: Props) {
           {/* ── Bottom: CTAs ──────────────────────────────────────── */}
           <Animated.View style={ctaStyle} className="px-6 pb-6">
             {/* Google Sign-In — web and iOS only (Android causes crash without Firebase native setup) */}
-            {Platform.OS !== 'android' && (
+            
               <Pressable
                 onPress={onGoogle}
                 disabled={busy}
@@ -235,7 +235,6 @@ export function SignInScreen({ navigation }: Props) {
                 <GoogleIcon size={20} />
                 <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
               </Pressable>
-            )}
 
             {/* Apple Sign In — iOS only */}
             {Platform.OS === 'ios' && (
