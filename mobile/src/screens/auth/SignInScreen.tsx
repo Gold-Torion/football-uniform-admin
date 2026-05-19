@@ -38,7 +38,8 @@ import { GoogleIcon } from '../../components/BrandIcons';
 import { Mail } from 'lucide-react-native';
 
 GoogleSignin.configure({
-  webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+  webClientId:     '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+  androidClientId: '265836821890-kvvbh3o5nbv4uurcum4lurn0gp79c4t4.apps.googleusercontent.com',
   offlineAccess: true,
 });
 

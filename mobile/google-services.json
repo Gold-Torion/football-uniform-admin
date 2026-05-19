@@ -12,7 +12,16 @@
           "package_name": "com.arenadosmantos.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "265836821890-kvvbh3o5nbv4uurcum4lurn0gp79c4t4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arenadosmantos.app",
+            "certificate_hash": "dacc209125bfd154f497aa8265108e3886fe658e"
+          }
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAh5Umhjd5-GiMncWUIOzMI8zQsBLhbsxI"
