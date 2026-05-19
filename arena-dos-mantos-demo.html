@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arena dos Mantos — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--p:#0D1B2A;--g:#22C55E;--gd:#16A34A;--r:#EF4444;--bg:#FFFFFF;--sf:#F1F5F9;--bd:#E2E8F0;--t1:#0F172A;--t2:#475569;--t3:#94A3B8;--sh:0 4px 20px rgba(0,0,0,0.08);--rad:14px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Inter',sans-serif;background:#06080f;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 16px 48px;}
+.demo-label{color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;}
+
+#phone{width:390px;height:844px;position:relative;background:#000;border-radius:50px;box-shadow:0 0 0 2px #333,0 0 0 5px #111,0 50px 120px rgba(0,0,0,0.8);overflow:hidden;}
+#island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:200;pointer-events:none;}
+
+.screen{display:none;position:absolute;inset:0;background:var(--bg);flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+.sroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.sroll::-webkit-scrollbar{display:none;}
+
+.bnav{height:72px;background:#fff;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-around;flex-shrink:0;padding-bottom:10px;}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 0;}
+.bni span{font-size:10px;font-weight:600;color:var(--t3);transition:color .2s;}
+.bni.on span{color:var(--g);}
+.bni-sell{width:50px;height:50px;background:linear-gradient(135deg,#22C55E,#16A34A);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(34,197,94,0.45);margin-bottom:2px;}
+
+.toast{position:absolute;top:56px;left:16px;right:16px;background:var(--p);color:#fff;padding:13px 16px;border-radius:14px;font-size:13px;font-weight:600;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,0.3);transform:translateY(-100px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,0.5);z-index:40;display:none;}
+.overlay.open{display:block;}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:14px;border:none;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:transform .1s,opacity .15s;}
+.btn:active{transform:scale(.97);}
+.btn-g{background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;}
+.btn-p{background:var(--p);color:#fff;}
+.btn-out{background:#fff;color:var(--t1);border:2px solid var(--bd);}
+.btn-sm{padding:10px 16px;font-size:13px;border-radius:10px;}
+
+/* Jersey card */
+.jcard{background:#fff;border-radius:var(--rad);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:transform .15s;}
+.jcard:active{transform:scale(.96);}
+.jthumb{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.jbadge-r{position:absolute;top:8px;right:8px;background:rgba(239,68,68,0.9);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+.jinfo{padding:12px;}
+.jname{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.jmeta{font-size:11px;color:var(--t3);margin-bottom:6px;}
+.jrow{display:flex;align-items:center;justify-content:space-between;}
+.jprice{font-size:15px;font-weight:800;color:var(--t1);}
+.cond{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;}
+.cn{background:#dcfce7;color:#15803d;}
+.cg{background:#dbeafe;color:#1d4ed8;}
+.cf{background:#fef3c7;color:#b45309;}
+
+.inp{width:100%;padding:13px 16px;border:2px solid var(--bd);border-radius:12px;font-family:inherit;font-size:15px;color:var(--t1);background:var(--sf);outline:none;transition:border-color .2s;}
+.inp:focus{border-color:var(--g);background:#fff;}
+.inp-wrap{position:relative;}
+.inp-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);}
+.inp.ico{padding-left:44px;}
+
+.shdr{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 10px;}
+.stitle{font-size:17px;font-weight:800;color:var(--t1);}
+.smore{font-size:13px;font-weight:700;color:var(--g);cursor:pointer;}
+.hscroll{display:flex;gap:14px;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none;}
+.hscroll::-webkit-scrollbar{display:none;}
+.hscroll .jcard{width:148px;flex-shrink:0;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 20px 16px;}
+.divider{height:8px;background:var(--sf);flex-shrink:0;}
+
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0;}
+.stars{color:#F59E0B;font-size:12px;}
+
+/* ONBOARDING */
+#s-ob{background:linear-gradient(160deg,#060818 0%,#0d2240 55%,#060818 100%);}
+.ob-body{flex:1;padding:64px 28px 0;display:flex;flex-direction:column;}
+.ob-icon{width:76px;height:76px;background:linear-gradient(135deg,#22C55E,#16A34A);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;box-shadow:0 8px 28px rgba(34,197,94,0.4);}
+.ob-h1{font-size:34px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:10px;}
+.ob-sub{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:28px;}
+.ob-feats{display:flex;flex-wrap:wrap;gap:8px;}
+.ob-feat{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.65);}
+.ob-footer{padding:28px 24px 40px;}
+.btn-soc{display:flex;align-items:center;justify-content:center;gap:12px;padding:14px 18px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px;font-family:inherit;}
+.ob-div{text-align:center;color:rgba(255,255,255,0.25);font-size:12px;margin:14px 0;}
+.ob-link{text-align:center;color:rgba(255,255,255,0.45);font-size:13px;margin-top:18px;cursor:pointer;}
+.ob-link b{color:#22C55E;}
+
+/* HOME */
+.home-hdr{background:var(--p);padding:52px 20px 16px;flex-shrink:0;}
+.home-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.home-logo{font-size:18px;font-weight:900;color:#fff;}
+.home-logo span{color:#22C55E;}
+.home-greeting{font-size:11px;color:rgba(255,255,255,0.5);font-weight:500;margin-bottom:2px;}
+.hicons{display:flex;gap:10px;}
+.hico{width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;}
+.hico .reddot{position:absolute;top:7px;right:7px;width:7px;height:7px;background:#EF4444;border-radius:50%;border:1.5px solid var(--p);}
+.hsearch{background:rgba(255,255,255,0.09);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.45);font-size:13px;cursor:pointer;}
+.cats{display:flex;gap:8px;padding:14px 20px;overflow-x:auto;scrollbar-width:none;background:var(--p);flex-shrink:0;}
+.cats::-webkit-scrollbar{display:none;}
+.cat{flex-shrink:0;padding:7px 15px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);border:none;font-family:inherit;}
+.cat.on{background:#fff;color:var(--p);}
+.hero{margin:16px 20px;height:168px;border-radius:20px;background:linear-gradient(135deg,#0d2240,#1a3a6e);display:flex;align-items:center;padding:22px;position:relative;overflow:hidden;cursor:pointer;}
+.hero-tag{font-size:10px;font-weight:800;color:#22C55E;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;}
+.hero-h{font-size:22px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:12px;}
+.hero-cta{background:#22C55E;color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;display:inline-block;}
+.hero-badge{position:absolute;top:14px;right:14px;background:rgba(239,68,68,0.9);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:6px;}
+.hero-svg{position:absolute;right:-10px;top:50%;transform:translateY(-50%) rotate(8deg);opacity:0.22;width:130px;}
+
+/* SEARCH */
+.srch-hdr{background:#fff;padding:52px 20px 0;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.srch-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.back-btn{width:40px;height:40px;border-radius:10px;background:var(--sf);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.chips{display:flex;gap:8px;padding:12px 20px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--bd);}
+.chips::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--bd);color:var(--t2);cursor:pointer;white-space:nowrap;font-family:inherit;background:#fff;}
+.chip.on{background:var(--p);color:#fff;border-color:var(--p);}
+.sortbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid var(--sf);}
+.sort-count{font-size:12px;color:var(--t2);}
+.sort-btn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--t1);cursor:pointer;font-family:inherit;border:none;background:none;}
+
+.fsheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,0.18);z-index:50;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:75%;overflow-y:auto;}
+.fsheet.open{transform:translateY(0);}
+.fhandle{width:40px;height:4px;background:var(--bd);border-radius:2px;margin:12px auto 0;}
+.fsec{padding:16px 20px;}
+.fsec-title{font-size:13px;font-weight:800;color:var(--t1);margin-bottom:12px;}
+.ftags{display:flex;flex-wrap:wrap;gap:8px;}
+.ftag{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--bd);color:var(--t2);cursor:pointer;font-family:inherit;background:#fff;}
+.ftag.on{background:var(--p);color:#fff;border-color:var(--p);}
+
+/* DETAIL */
+.dgallery{height:300px;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.d-back{position:absolute;top:54px;left:14px;width:40px;height:40px;background:rgba(255,255,255,0.92);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.d-save{position:absolute;top:54px;right:14px;width:40px;height:40px;background:rgba(255,255,255,0.92);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.gdots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
+.gdot{width:6px;height:6px;border-radius:3px;background:rgba(0,0,0,0.18);transition:all .2s;}
+.gdot.on{width:20px;background:var(--p);}
+.cart-ico-wrap{position:absolute;top:54px;right:62px;width:40px;height:40px;background:rgba(255,255,255,0.92);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.cart-badge{position:absolute;top:-4px;right:-4px;background:#EF4444;color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.cart-item{display:flex;gap:12px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--bd);}
+.cart-thumb{width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.cart-info{flex:1;}
+.cart-name{font-size:14px;font-weight:700;color:var(--t1);margin-bottom:2px;}
+.cart-sub{font-size:12px;color:var(--t2);margin-bottom:4px;}
+.cart-price{font-size:15px;font-weight:800;color:var(--t1);}
+.cart-del{width:32px;height:32px;border-radius:8px;background:#fff0f0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cart-qty{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.qty-btn{width:28px;height:28px;border-radius:8px;background:var(--sf);border:1px solid var(--bd);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t1);}
+.qty-num{font-size:14px;font-weight:700;color:var(--t1);min-width:20px;text-align:center;}
+.cart-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--t3);}
+.cart-total{padding:16px 20px;border-top:2px solid var(--bd);background:#fff;}
+.dcarousel-wrap{position:absolute;inset:0;overflow:hidden;}
+.dcarousel-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.4,0,.2,1);}
+.dslide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.dbody{padding:20px;}
+.dtop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.dtitle{font-size:20px;font-weight:800;color:var(--t1);flex:1;margin-right:10px;line-height:1.2;}
+.dprice{font-size:24px;font-weight:900;color:var(--t1);}
+.dmeta{font-size:13px;color:var(--t2);margin-bottom:18px;}
+.seller{background:var(--sf);border-radius:12px;padding:13px;display:flex;align-items:center;gap:12px;margin-bottom:18px;cursor:pointer;}
+.seller-n{font-size:14px;font-weight:700;color:var(--t1);}
+.seller-s{font-size:12px;color:var(--t2);}
+.slabel{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;}
+.sizes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.sz{width:44px;height:44px;border-radius:10px;border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;color:var(--t1);}
+.sz.on{border-color:var(--p);background:var(--p);color:#fff;}
+.sz.na{border-color:transparent;color:var(--t3);background:var(--sf);text-decoration:line-through;cursor:not-allowed;}
+.dbtns{display:flex;gap:10px;margin-bottom:22px;}
+.dbtns .btn{flex:1;}
+.dtabs{display:flex;border-bottom:2px solid var(--bd);margin-bottom:16px;}
+.dtab{flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:700;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.dtab.on{color:var(--p);border-bottom-color:var(--p);}
+
+/* CHATS */
+.chdr{background:#fff;padding:52px 20px 14px;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.chdr-title{font-size:22px;font-weight:900;color:var(--t1);}
+.citem{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--sf);cursor:pointer;}
+.citem:active{background:var(--sf);}
+.cinfo{flex:1;min-width:0;}
+.ctop{display:flex;justify-content:space-between;align-items:baseline;}
+.cname{font-size:14px;font-weight:700;color:var(--t1);}
+.ctime{font-size:11px;color:var(--t3);}
+.cmsg{font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.cunread{width:20px;height:20px;background:var(--g);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* CHAT ROOM */
+#s-cr{background:var(--sf);}
+.cr-hdr{background:#fff;padding:52px 16px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.cr-name{font-size:15px;font-weight:800;color:var(--t1);}
+.cr-status{font-size:11px;color:var(--g);font-weight:600;}
+.msgs{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.mb{max-width:78%;padding:11px 14px;border-radius:18px;font-size:14px;line-height:1.5;}
+.min{background:#fff;color:var(--t1);border-radius:4px 18px 18px 18px;align-self:flex-start;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.mout{background:var(--p);color:#fff;border-radius:18px 4px 18px 18px;align-self:flex-end;}
+.mtime{font-size:10px;margin-top:4px;}
+.min .mtime{color:var(--t3);}
+.mout .mtime{color:rgba(255,255,255,0.45);text-align:right;}
+.cprod{background:#fff;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:center;margin:0 16px 10px;box-shadow:var(--sh);cursor:pointer;}
+.cprod-img{width:54px;height:54px;border-radius:8px;background:var(--sf);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.cprod-n{font-size:13px;font-weight:700;color:var(--t1);}
+.cprod-p{font-size:15px;font-weight:800;color:var(--t1);}
+.cinput{background:#fff;border-top:1px solid var(--bd);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.cinput input{flex:1;background:var(--sf);border:none;border-radius:20px;padding:10px 16px;font-family:inherit;font-size:14px;outline:none;color:var(--t1);}
+.csend{width:40px;height:40px;background:linear-gradient(135deg,#22C55E,#16A34A);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;border:none;}
+
+/* SELL */
+.sell-hdr{background:#fff;padding:52px 20px 16px;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.sell-title{font-size:22px;font-weight:900;color:var(--t1);margin-bottom:14px;}
+.steps{display:flex;gap:4px;}
+.step{flex:1;height:4px;background:var(--bd);border-radius:2px;transition:background .3s;}
+.step.done{background:var(--g);}
+.step.cur{background:var(--p);}
+.sell-body{padding:22px 20px;}
+.flabel{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:8px;display:block;}
+.fgroup{margin-bottom:18px;}
+.fhint{font-size:11px;color:var(--t3);margin-top:5px;}
+.sku-result{background:var(--sf);border-radius:12px;padding:14px;display:flex;align-items:center;gap:14px;margin-top:12px;}
+.photogrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.photoslot{aspect-ratio:1;border-radius:10px;border:2px dashed var(--bd);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:22px;gap:3px;}
+.photoslot span{font-size:10px;color:var(--t3);font-weight:600;}
+.photoslot.filled{border:none;background:var(--sf);}
+.select{width:100%;padding:12px 16px;border:2px solid var(--bd);border-radius:12px;font-family:inherit;font-size:14px;color:var(--t1);background:var(--sf);outline:none;-webkit-appearance:none;cursor:pointer;}
+.select:focus{border-color:var(--g);}
+
+/* PROFILE */
+.prof-hdr{background:linear-gradient(180deg,var(--p) 0%,var(--p) 55%,var(--bg) 55%);padding:52px 20px 0;flex-shrink:0;}
+.prof-top{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;}
+.prof-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;color:#fff;border:3px solid #fff;flex-shrink:0;}
+.prof-n{font-size:20px;font-weight:900;color:#fff;}
+.prof-h{font-size:12px;color:rgba(255,255,255,0.55);}
+.pstats{display:flex;background:#fff;border-radius:16px;box-shadow:var(--sh);overflow:hidden;margin-bottom:14px;}
+.pst{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--bd);}
+.pst:last-child{border-right:none;}
+.pstn{font-size:20px;font-weight:900;color:var(--t1);}
+.pstl{font-size:10px;color:var(--t3);font-weight:600;margin-top:2px;}
+.ptabs{display:flex;border-bottom:2px solid var(--bd);}
+.ptab{flex:1;text-align:center;padding:11px 0;font-size:13px;font-weight:700;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.ptab.on{color:var(--p);border-bottom-color:var(--p);}
+.rev-item{padding:14px 20px;border-bottom:1px solid var(--sf);}
+.rev-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.rev-txt{font-size:13px;color:var(--t2);line-height:1.5;}
+
+@media(max-width:440px){body{padding:0;}#phone{width:100%;height:100vh;border-radius:0;box-shadow:none;}}
+</style>
+</head>
+<body>
+<div class="demo-label">Arena dos Mantos — Demo Interativo</div>
+<div id="phone">
+  <div id="island"></div>
+  <div class="toast" id="toast"></div>
+  <div class="overlay" id="foverlay" onclick="closeSheet()"></div>
+
+  <!-- ONBOARDING -->
+  <div class="screen active" id="s-ob">
+    <div class="ob-body">
+      <!-- FIFA World Cup 2026 official emblem -->
+      <div style="align-self:center;margin-bottom:20px;background:#FFF;border-radius:16px;padding:14px 22px;display:inline-block;box-shadow:0 4px 24px rgba(0,0,0,0.35);">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/2026_FIFA_World_Cup_emblem.svg"
+             alt="FIFA World Cup 2026"
+             style="height:96px;width:auto;display:block;">
+      </div>
+      <div class="ob-icon">👕</div>
+      <div class="ob-h1">Arena dos<br>Mantos</div>
+      <div class="ob-sub">O maior marketplace de camisas de futebol do Brasil. Compre, venda e colecione.</div>
+      <div class="ob-feats">
+        <div class="ob-feat">🔍 Busca por SKU</div>
+        <div class="ob-feat">💬 Chat seguro</div>
+        <div class="ob-feat">🛡️ Pagamento protegido</div>
+        <div class="ob-feat">⭐ Avaliações</div>
+        <div class="ob-feat">📦 50k+ camisas</div>
+        <div class="ob-feat">🏟️ Comunidade</div>
+      </div>
+    </div>
+    <div class="ob-footer">
+      <button class="btn-soc" onclick="navTo('s-home')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continuar com Google
+      </button>
+      <button class="btn-soc" onclick="navTo('s-home')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.3.07 2.18.87 3.05.87.87 0 2.5-1.07 4.23-.91 1.35.1 2.58.64 3.49 1.71-3.16 1.89-2.64 5.98.38 7.18-.73 1.24-1.74 2.4-3.15 3.03zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Continuar com Apple
+      </button>
+      <div class="ob-div">— ou —</div>
+      <button class="btn btn-g" onclick="navTo('s-home')">📧 Entrar com e-mail</button>
+      <div class="ob-link" onclick="navTo('s-home')">Não tem conta? <b>Cadastrar grátis</b></div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div class="screen" id="s-home">
+    <div class="home-hdr">
+      <div class="home-top">
+        <div>
+          <div class="home-greeting">Olá, Marcos 👋</div>
+          <div class="home-logo">Arena <span>dos Mantos</span></div>
+        </div>
+        <div class="hicons">
+          <div class="hico" onclick="toast('🔔 3 novas notificações')">
+            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <div class="reddot"></div>
+          </div>
+          <div class="hico" onclick="toast('🛒 Carrinho: 1 item')">
+            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="hsearch" onclick="navTo('s-search')">
+        <svg width="15" height="15" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Buscar times, ligas, SKU...
+      </div>
+    </div>
+    <div class="cats">
+      <button class="cat on">Todos</button>
+      <button class="cat" onclick="navTo('s-search')">Brasileirão</button>
+      <button class="cat" onclick="navTo('s-search')">Premier League</button>
+      <button class="cat" onclick="navTo('s-search')">La Liga</button>
+      <button class="cat" onclick="navTo('s-search')">Seleções</button>
+      <button class="cat" onclick="navTo('s-search')">Retrôs</button>
+    </div>
+    <div class="sroll">
+      <div class="hero" onclick="navTo('s-detail')">
+        <div style="z-index:1;">
+          <div class="hero-tag">✨ Destaque da semana</div>
+          <div class="hero-h">Brasil 1970<br>Edição Histórica</div>
+          <div class="hero-cta">Ver por R$ 890</div>
+        </div>
+        <div id="hero-jersey" style="position:absolute;right:-8px;top:50%;transform:translateY(-50%) rotate(8deg);width:130px;height:149px;opacity:0.28;"></div>
+        <div class="hero-badge">🔥 Raridade</div>
+      </div>
+
+      <div class="shdr"><div class="stitle">🔥 Em Alta</div><div class="smore" onclick="navTo('s-search')">Ver todos</div></div>
+      <div class="hscroll" id="hot-scroll"></div>
+      <div class="divider"></div>
+      <div class="shdr"><div class="stitle">🆕 Recém Chegados</div><div class="smore" onclick="navTo('s-search')">Ver todos</div></div>
+      <div class="grid2" id="new-grid"></div>
+      <div style="height:12px;"></div>
+    </div>
+    <nav class="bnav">
+      <div class="bni on" onclick="navTo('s-home')">
+        <svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Início</span>
+      </div>
+      <div class="bni" onclick="navTo('s-search')">
+        <svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Buscar</span>
+      </div>
+      <div class="bni" onclick="navTo('s-sell')">
+        <div class="bni-sell"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <span>Vender</span>
+      </div>
+      <div class="bni" onclick="navTo('s-chats')">
+        <svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Chat</span>
+      </div>
+      <div class="bni" onclick="navTo('s-prof')">
+        <svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Perfil</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="screen" id="s-search">
+    <div class="srch-hdr">
+      <div class="srch-top">
+        <div class="back-btn" onclick="navTo('s-home')">
+          <svg width="18" height="18" fill="none" stroke="var(--t1)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+        <div class="inp-wrap" style="flex:1;">
+          <span class="inp-ico"><svg width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+          <input class="inp ico" placeholder="Times, ligas, SKU..." value="" style="padding-right:12px;">
+        </div>
+        <div onclick="openSheet()" style="flex-shrink:0;width:40px;height:40px;background:var(--sf);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+          <svg width="18" height="18" fill="none" stroke="var(--t1)" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="10" y2="18"/></svg>
+        </div>
+      </div>
+      <div class="chips">
+        <button class="chip on">🇧🇷 Brasileirão</button>
+        <button class="chip" onclick="this.classList.toggle('on')">Adidas</button>
+        <button class="chip" onclick="this.classList.toggle('on')">Tamanho M</button>
+        <button class="chip" onclick="this.classList.toggle('on')">Novo</button>
+        <button class="chip" onclick="this.classList.toggle('on')">até R$500</button>
+      </div>
+    </div>
+    <div class="sortbar">
+      <div class="sort-count">247 resultados encontrados</div>
+      <button class="sort-btn">Relevância <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+    </div>
+    <div class="sroll">
+      <div class="grid2" id="search-grid" style="padding-top:14px;"></div>
+      <div style="height:12px;"></div>
+    </div>
+    <nav class="bnav">
+      <div class="bni" onclick="navTo('s-home')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Início</span></div>
+      <div class="bni on"><svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Buscar</span></div>
+      <div class="bni" onclick="navTo('s-sell')"><div class="bni-sell"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>Vender</span></div>
+      <div class="bni" onclick="navTo('s-chats')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></div>
+      <div class="bni" onclick="navTo('s-prof')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></div>
+    </nav>
+    <div class="fsheet" id="fsheet">
+      <div class="fhandle"></div>
+      <div class="fsec"><div class="fsec-title">Liga / Competição</div><div class="ftags"><button class="ftag on" onclick="this.classList.toggle('on')">Brasileirão</button><button class="ftag" onclick="this.classList.toggle('on')">Premier League</button><button class="ftag" onclick="this.classList.toggle('on')">La Liga</button><button class="ftag" onclick="this.classList.toggle('on')">Serie A</button><button class="ftag" onclick="this.classList.toggle('on')">Copa do Mundo</button><button class="ftag" onclick="this.classList.toggle('on')">Libertadores</button></div></div>
+      <div class="fsec"><div class="fsec-title">Fornecedor</div><div class="ftags"><button class="ftag" onclick="this.classList.toggle('on')">Adidas</button><button class="ftag" onclick="this.classList.toggle('on')">Nike</button><button class="ftag" onclick="this.classList.toggle('on')">Puma</button><button class="ftag" onclick="this.classList.toggle('on')">Umbro</button><button class="ftag" onclick="this.classList.toggle('on')">Kappa</button></div></div>
+      <div class="fsec"><div class="fsec-title">Tamanho</div><div class="ftags"><button class="ftag" onclick="this.classList.toggle('on')">PP</button><button class="ftag" onclick="this.classList.toggle('on')">P</button><button class="ftag on" onclick="this.classList.toggle('on')">M</button><button class="ftag" onclick="this.classList.toggle('on')">G</button><button class="ftag" onclick="this.classList.toggle('on')">GG</button><button class="ftag" onclick="this.classList.toggle('on')">XGG</button></div></div>
+      <div class="fsec"><div class="fsec-title">Condição</div><div class="ftags"><button class="ftag" onclick="this.classList.toggle('on')">Novo com etiqueta</button><button class="ftag" onclick="this.classList.toggle('on')">Excelente</button><button class="ftag" onclick="this.classList.toggle('on')">Bom</button><button class="ftag" onclick="this.classList.toggle('on')">Regular</button></div></div>
+      <div class="fsec"><div class="fsec-title">Faixa de Preço</div><div style="display:flex;gap:10px;align-items:center;"><input class="inp" placeholder="R$ Mín" style="font-size:13px;padding:10px 12px;"><span style="color:var(--t3);font-weight:700;">—</span><input class="inp" placeholder="R$ Máx" style="font-size:13px;padding:10px 12px;"></div></div>
+      <div style="padding:16px 20px 32px;"><button class="btn btn-p" onclick="closeSheet();toast('✅ Filtros aplicados — 247 resultados')">Aplicar Filtros</button></div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="screen" id="s-detail">
+    <div class="sroll">
+      <div class="dgallery" id="dgallery" style="background:linear-gradient(145deg,#fefce8,#fef9c3);">
+        <div class="dcarousel-wrap" id="dcarousel-wrap">
+          <div class="dcarousel-track" id="dcarousel-track"></div>
+        </div>
+        <div class="d-back" onclick="navTo('s-home')"><svg width="18" height="18" fill="none" stroke="var(--t1)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+        <div class="cart-ico-wrap" onclick="navTo('s-cart')" style="position:absolute;top:54px;right:62px;">
+          <svg width="18" height="18" fill="none" stroke="var(--t1)" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <div class="cart-badge" id="cart-badge" style="display:none">0</div>
+        </div>
+        <div class="d-save" id="save-btn" onclick="toggleSave()"><svg id="save-ico" width="18" height="18" fill="none" stroke="var(--t1)" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div class="gdots" id="gdots"></div>
+      </div>
+      <div class="dbody">
+        <div class="dtop">
+          <div class="dtitle">Brasil 1970 — Camisa Retrô</div>
+          <div class="dprice">R$ 890</div>
+        </div>
+        <div class="dmeta">⭐ 4.9 · Adidas · Temporada 1970 · SKU: CBF-1970-H-ADI</div>
+        <div style="display:flex;gap:8px;margin-bottom:18px;"><span class="cond cn">Novo com etiqueta</span><span style="background:#f0fdf4;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;">Frete grátis</span></div>
+        <div class="seller">
+          <div class="av">MS</div>
+          <div style="flex:1;">
+            <div class="seller-n">Marcos Silveira</div>
+            <div class="seller-s"><span class="stars">★★★★★</span> 4.9 · 127 vendas · São Paulo, SP</div>
+          </div>
+          <svg width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="slabel">Selecionar Tamanho</div>
+        <div class="sizes">
+          <div class="sz na">PP</div>
+          <div class="sz" onclick="selSize(this)">P</div>
+          <div class="sz on" onclick="selSize(this)">M</div>
+          <div class="sz" onclick="selSize(this)">G</div>
+          <div class="sz na">GG</div>
+        </div>
+        <div class="dbtns">
+          <button class="btn btn-p btn-sm" onclick="navTo('s-cr')">💬 Mensagem</button>
+          <button class="btn btn-g" onclick="addToCart()">🛒 Comprar</button>
+        </div>
+        <div class="dtabs">
+          <div class="dtab on" onclick="setDTab(this,0)">Descrição</div>
+          <div class="dtab" onclick="setDTab(this,1)">SKU / Dados</div>
+          <div class="dtab" onclick="setDTab(this,2)">Avaliações</div>
+        </div>
+        <div id="dtab-0"><p style="font-size:14px;color:var(--t2);line-height:1.7;">Camisa histórica da Seleção Brasileira, edição da Copa do Mundo de 1970 no México — o ano do tri. Réplica oficial Adidas, confeccionada com tecido de alta qualidade. Nunca usada, etiqueta original.</p></div>
+        <div id="dtab-1" style="display:none;"><div style="background:var(--sf);border-radius:12px;padding:14px;"><table style="width:100%;border-collapse:collapse;font-size:13px;"><tr><td style="color:var(--t3);padding:6px 0;font-weight:600;">SKU</td><td style="color:var(--t1);font-weight:700;text-align:right;">CBF-1970-H-ADI</td></tr><tr><td style="color:var(--t3);padding:6px 0;font-weight:600;">Time</td><td style="color:var(--t1);font-weight:700;text-align:right;">Seleção Brasileira</td></tr><tr><td style="color:var(--t3);padding:6px 0;font-weight:600;">Temporada</td><td style="color:var(--t1);font-weight:700;text-align:right;">1970</td></tr><tr><td style="color:var(--t3);padding:6px 0;font-weight:600;">Tipo</td><td style="color:var(--t1);font-weight:700;text-align:right;">Home</td></tr><tr><td style="color:var(--t3);padding:6px 0;font-weight:600;">Marca</td><td style="color:var(--t1);font-weight:700;text-align:right;">Adidas</td></tr></table></div></div>
+        <div id="dtab-2" style="display:none;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-top:4px;"><div style="font-size:40px;font-weight:900;color:var(--t1);">4.9</div><div><div class="stars" style="font-size:18px;">★★★★★</div><div style="font-size:12px;color:var(--t3);">38 avaliações</div></div></div>
+          <div class="rev-item" style="padding:0 0 14px;border-bottom:1px solid var(--sf);"><div class="rev-top"><div class="av" style="width:34px;height:34px;font-size:13px;">RJ</div><div><div style="font-size:13px;font-weight:700;">Ricardo J.</div><div class="stars">★★★★★</div></div><div style="font-size:11px;color:var(--t3);margin-left:auto;">há 2 dias</div></div><div class="rev-txt">Camisa incrível, exatamente como descrito. Chegou muito bem embalada!</div></div>
+          <div class="rev-item" style="padding:14px 0 0;"><div class="rev-top"><div class="av" style="width:34px;height:34px;font-size:13px;background:linear-gradient(135deg,#f093fb,#f5576c);">AM</div><div><div style="font-size:13px;font-weight:700;">Ana M.</div><div class="stars">★★★★★</div></div><div style="font-size:11px;color:var(--t3);margin-left:auto;">há 5 dias</div></div><div class="rev-txt">Presente perfeito para meu pai. Vendedor muito atencioso!</div></div>
+        </div>
+        <div style="height:24px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART -->
+  <div class="screen" id="s-cart" style="background:#fff;">
+    <div class="chdr" style="display:flex;align-items:center;gap:12px;">
+      <div style="cursor:pointer;padding:4px;" onclick="navTo('s-detail')"><svg width="20" height="20" fill="none" stroke="var(--t1)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="chdr-title">Meu Carrinho</div>
+    </div>
+    <div class="sroll" id="cart-list"></div>
+    <div class="cart-total" id="cart-total" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-size:15px;font-weight:600;color:var(--t2);">Total</span>
+        <span style="font-size:22px;font-weight:900;color:var(--t1);" id="cart-total-val"></span>
+      </div>
+      <button class="btn btn-g" onclick="toast('✅ Pedido confirmado! Redirecionando para pagamento...')">Finalizar Pedido</button>
+    </div>
+  </div>
+
+  <!-- CHATS -->
+  <div class="screen" id="s-chats">
+    <div class="chdr"><div class="chdr-title">Mensagens</div></div>
+    <div class="sroll"><div id="chat-list"></div></div>
+    <nav class="bnav">
+      <div class="bni" onclick="navTo('s-home')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Início</span></div>
+      <div class="bni" onclick="navTo('s-search')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Buscar</span></div>
+      <div class="bni" onclick="navTo('s-sell')"><div class="bni-sell"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>Vender</span></div>
+      <div class="bni on"><svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></div>
+      <div class="bni" onclick="navTo('s-prof')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></div>
+    </nav>
+  </div>
+
+  <!-- CHAT ROOM -->
+  <div class="screen" id="s-cr">
+    <div class="cr-hdr">
+      <div class="back-btn" onclick="navTo('s-chats')"><svg width="18" height="18" fill="none" stroke="var(--t1)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="av">MS</div>
+      <div style="flex:1;"><div class="cr-name">Marcos Silveira</div><div class="cr-status">● Online agora</div></div>
+      <div onclick="toast('📞 Ligação não disponível no demo')" style="cursor:pointer;"><svg width="20" height="20" fill="none" stroke="var(--t2)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.95-.95a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+    </div>
+    <div class="cprod" onclick="navTo('s-detail')">
+      <div class="cprod-img" id="chat-prod-img"></div>
+      <div style="flex:1;"><div class="cprod-n">Brasil 1970 — Retrô</div><div class="cprod-p">R$ 890</div></div>
+      <svg width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="sroll">
+      <div class="msgs" id="msgs-area">
+        <div class="mb min">Olá! Ainda está disponível a camisa do Brasil 1970?<div class="mtime">10:24</div></div>
+        <div class="mb mout">Oi! Sim, disponível 😊 Acabei de confirmar o estoque.<div class="mtime">10:26</div></div>
+        <div class="mb min">Perfeito! Você aceita R$ 820?<div class="mtime">10:27</div></div>
+        <div class="mb mout">Posso fazer por R$ 850 com frete incluído. Topa?<div class="mtime">10:29</div></div>
+        <div class="mb min">Fechado! Como faço o pagamento?<div class="mtime">10:31</div></div>
+        <div class="mb mout">Pelo app mesmo — Pix ou cartão. Protegido pela plataforma 🛡️<div class="mtime">10:32</div></div>
+      </div>
+    </div>
+    <div class="cinput">
+      <input id="chat-inp" placeholder="Digite uma mensagem..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="csend" onclick="sendMsg()"><svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+  </div>
+
+  <!-- SELL -->
+  <div class="screen" id="s-sell">
+    <div class="sell-hdr">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="sell-title" style="margin-bottom:0;">Anunciar Camisa</div>
+        <div onclick="navTo('s-home')" style="cursor:pointer;color:var(--t3);"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+      </div>
+      <div class="steps"><div class="step cur" id="st1"></div><div class="step" id="st2"></div><div class="step" id="st3"></div><div class="step" id="st4"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;"><span style="font-size:11px;font-weight:700;color:var(--p);">SKU</span><span style="font-size:11px;color:var(--t3);">Fotos</span><span style="font-size:11px;color:var(--t3);">Detalhes</span><span style="font-size:11px;color:var(--t3);">Revisar</span></div>
+    </div>
+    <div class="sroll">
+      <!-- Step 1 -->
+      <div class="sell-body" id="sell-s1">
+        <div style="text-align:center;padding:8px 0 24px;"><div style="font-size:32px;margin-bottom:8px;">🔍</div><div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:6px;">Busca por SKU</div><div style="font-size:13px;color:var(--t2);">Digite o código SKU para preenchermos os dados automaticamente</div></div>
+        <div class="fgroup"><label class="flabel">Fornecedor</label><select class="select"><option>Selecionar...</option><option>Adidas</option><option>Nike</option><option>Puma</option><option>Umbro</option></select></div>
+        <div class="fgroup"><label class="flabel">Código SKU</label><div style="display:flex;gap:10px;"><input class="inp" id="sku-inp" placeholder="Ex: FLA-2023-H-ADI" style="flex:1;"><button class="btn btn-p btn-sm" style="width:auto;padding:13px 18px;" onclick="skuSearch()">Buscar</button></div><div class="fhint">SKU identifica: Time + Temporada + Tipo + Marca</div></div>
+        <div class="sku-result" id="sku-result" style="display:none;"><div id="sku-jersey" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;"></div><div><div style="font-size:15px;font-weight:800;color:var(--t1);">Flamengo 2023 — Home</div><div style="font-size:12px;color:var(--t2);">Adidas · Brasileirão · 2023/24</div><div style="margin-top:6px;"><span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;">✓ Encontrado no banco</span></div></div></div>
+        <div style="margin-top:24px;"><button class="btn btn-g" onclick="sellNext(2)">Próximo — Fotos →</button></div>
+      </div>
+      <!-- Step 2 -->
+      <div class="sell-body" id="sell-s2" style="display:none;">
+        <div style="text-align:center;padding:8px 0 24px;"><div style="font-size:32px;margin-bottom:8px;">📸</div><div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:6px;">Fotos da Camisa</div><div style="font-size:13px;color:var(--t2);">Mínimo 4 fotos: frente, costas, etiqueta e detalhe</div></div>
+        <div class="photogrid" style="margin-bottom:20px;">
+          <div class="photoslot filled" onclick="toast('📸 Frente adicionada!')" id="ps-front" style="background:var(--sf);"></div>
+          <div class="photoslot" onclick="toast('📷 Costas')">+<span>Costas</span></div>
+          <div class="photoslot" onclick="toast('📷 Etiqueta')">+<span>Etiqueta</span></div>
+          <div class="photoslot" onclick="toast('📷 Detalhe')">+<span>Detalhe</span></div>
+          <div class="photoslot" onclick="toast('📷 Extra')">+<span>Extra</span></div>
+          <div class="photoslot" onclick="toast('📷 Extra')">+<span>Extra</span></div>
+          <div class="photoslot" onclick="toast('📷 Extra')">+<span>Extra</span></div>
+          <div class="photoslot" onclick="toast('📷 Extra')">+<span>Extra</span></div>
+        </div>
+        <div style="display:flex;gap:10px;"><button class="btn btn-out btn-sm" onclick="sellNext(1)">← Voltar</button><button class="btn btn-g btn-sm" onclick="sellNext(3)">Próximo →</button></div>
+      </div>
+      <!-- Step 3 -->
+      <div class="sell-body" id="sell-s3" style="display:none;">
+        <div style="text-align:center;padding:8px 0 20px;"><div style="font-size:32px;margin-bottom:8px;">✏️</div><div style="font-size:16px;font-weight:800;color:var(--t1);">Detalhes do Anúncio</div></div>
+        <div class="fgroup"><label class="flabel">Preço (R$)</label><input class="inp" type="number" value="320"></div>
+        <div class="fgroup"><label class="flabel">Tamanho</label><select class="select"><option>M</option><option>PP</option><option>P</option><option>G</option><option>GG</option></select></div>
+        <div class="fgroup"><label class="flabel">Condição</label><select class="select"><option>Novo com etiqueta</option><option>Excelente</option><option>Bom</option><option>Regular</option></select></div>
+        <div class="fgroup"><label class="flabel">Descrição</label><textarea class="inp" rows="3" placeholder="Detalhes adicionais..." style="resize:none;line-height:1.5;"></textarea></div>
+        <div style="display:flex;gap:10px;"><button class="btn btn-out btn-sm" onclick="sellNext(2)">← Voltar</button><button class="btn btn-g btn-sm" onclick="sellNext(4)">Revisar →</button></div>
+      </div>
+      <!-- Step 4 -->
+      <div class="sell-body" id="sell-s4" style="display:none;">
+        <div style="text-align:center;padding:8px 0 20px;"><div style="font-size:32px;margin-bottom:8px;">✅</div><div style="font-size:16px;font-weight:800;color:var(--t1);">Revisar Anúncio</div></div>
+        <div style="background:var(--sf);border-radius:16px;padding:16px;margin-bottom:20px;">
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+            <div id="sell-review-jersey" style="width:70px;height:70px;display:flex;align-items:center;justify-content:center;"></div>
+            <div><div style="font-size:16px;font-weight:800;color:var(--t1);">Flamengo 2023 — Home</div><div style="font-size:12px;color:var(--t2);margin-top:2px;">Adidas · Tamanho M · Novo</div><div style="font-size:20px;font-weight:900;color:var(--t1);margin-top:6px;">R$ 320,00</div></div>
+          </div>
+          <div style="background:white;border-radius:10px;padding:12px;">
+            <div style="font-size:12px;color:var(--t2);margin-bottom:6px;font-weight:600;">TAXAS</div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="color:var(--t2);">Preço de venda</span><span style="font-weight:700;">R$ 320,00</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span style="color:var(--t2);">Taxa (5%)</span><span style="color:var(--r);">- R$ 16,00</span></div>
+            <div style="height:1px;background:var(--bd);margin:8px 0;"></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:800;"><span>Você recebe</span><span style="color:var(--g);">R$ 304,00</span></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;"><button class="btn btn-out btn-sm" onclick="sellNext(3)">← Editar</button><button class="btn btn-g" onclick="publishListing()">🚀 Publicar Anúncio</button></div>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="screen" id="s-prof">
+    <div class="prof-hdr">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><div onclick="toast('⚙️ Configurações em breve')" style="cursor:pointer;width:38px;height:38px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div></div>
+      <div class="prof-top">
+        <div class="prof-av">M</div>
+        <div><div class="prof-n">Marcos Silveira</div><div class="prof-h">@marcossilv · São Paulo, SP</div><div style="margin-top:6px;"><span class="stars">★★★★★</span> <span style="font-size:12px;color:rgba(255,255,255,0.7);font-weight:600;">4.9 · 127 avaliações</span></div></div>
+      </div>
+      <div class="pstats"><div class="pst"><div class="pstn">43</div><div class="pstl">Anúncios</div></div><div class="pst"><div class="pstn">127</div><div class="pstl">Vendas</div></div><div class="pst"><div class="pstn">38</div><div class="pstl">Compras</div></div><div class="pst"><div class="pstn">4.9</div><div class="pstl">Nota</div></div></div>
+      <div class="ptabs"><div class="ptab on" onclick="setPTab(this,0)">Anúncios</div><div class="ptab" onclick="setPTab(this,1)">Vendas</div><div class="ptab" onclick="setPTab(this,2)">Avaliações</div></div>
+    </div>
+    <div class="sroll">
+      <div id="ptab-0" class="grid2" style="padding-top:14px;"></div>
+      <div id="ptab-1" style="display:none;padding:20px;">
+        <div style="background:var(--sf);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;"><div id="prof-sale-1" style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--t1);">Flamengo 2022 Home</div><div style="font-size:12px;color:var(--t2);">Vendido em 18/04/2026</div></div><div style="text-align:right;"><div style="font-size:15px;font-weight:800;color:var(--t1);">R$ 290</div><span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;">Concluído</span></div></div>
+        <div style="background:var(--sf);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;"><div id="prof-sale-2" style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div><div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--t1);">Argentina 2022 Copa</div><div style="font-size:12px;color:var(--t2);">Vendido em 15/04/2026</div></div><div style="text-align:right;"><div style="font-size:15px;font-weight:800;color:var(--t1);">R$ 580</div><span style="background:#dcfce7;color:#15803d;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;">Concluído</span></div></div>
+      </div>
+      <div id="ptab-2" style="display:none;">
+        <div class="rev-item"><div class="rev-top"><div class="av" style="width:36px;height:36px;font-size:13px;">PL</div><div><div style="font-size:13px;font-weight:700;">Pedro Lima</div><div class="stars">★★★★★</div></div><div style="font-size:11px;color:var(--t3);margin-left:auto;">há 3 dias</div></div><div class="rev-txt">Vendedor excelente, chegou antes do prazo!</div></div>
+        <div class="rev-item"><div class="rev-top"><div class="av" style="width:36px;height:36px;font-size:13px;background:linear-gradient(135deg,#f093fb,#f5576c);">CF</div><div><div style="font-size:13px;font-weight:700;">Carla F.</div><div class="stars">★★★★★</div></div><div style="font-size:11px;color:var(--t3);margin-left:auto;">há 1 semana</div></div><div class="rev-txt">Perfeita! Camisa autêntica, descrição precisa.</div></div>
+        <div class="rev-item"><div class="rev-top"><div class="av" style="width:36px;height:36px;font-size:13px;background:linear-gradient(135deg,#4facfe,#00f2fe);">TN</div><div><div style="font-size:13px;font-weight:700;">Thiago N.</div><div class="stars">★★★★☆</div></div><div style="font-size:11px;color:var(--t3);margin-left:auto;">há 2 semanas</div></div><div class="rev-txt">Ótima camisa, entrega no prazo.</div></div>
+      </div>
+      <div style="height:12px;"></div>
+    </div>
+    <nav class="bnav">
+      <div class="bni" onclick="navTo('s-home')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Início</span></div>
+      <div class="bni" onclick="navTo('s-search')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>Buscar</span></div>
+      <div class="bni" onclick="navTo('s-sell')"><div class="bni-sell"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>Vender</span></div>
+      <div class="bni" onclick="navTo('s-chats')"><svg width="22" height="22" fill="none" stroke="var(--t3)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></div>
+      <div class="bni on"><svg width="22" height="22" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></div>
+    </nav>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+/* ── CDN image optimizer (Blogger CDN size param) ── */
+function getOptimizedImage(url, size = 600) {
+  return url.replace('/s1600/', `/s${size}/`);
+}
+function jphoto(url, size, extraStyle='') {
+  return `<img src="${getOptimizedImage(url,size)}" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 20px rgba(0,0,0,.22));${extraStyle}" alt="jersey" loading="lazy" onerror="this.style.opacity='.1'">`;
+}
+
+let _cIdx = 0, _cImgs = [];
+let _cart = [], _currentJIdx = 1;
+
+function addToCart() {
+  const j = JD[_currentJIdx];
+  if (_cart.some(i => i.sku === j.sku)) {
+    toast('⚠️ Este item já está no carrinho!');
+    return;
+  }
+  const sz = document.querySelector('.sz.on');
+  const size = sz ? sz.textContent : 'M';
+  const basePrice = parseFloat(j.p.replace('R$ ','').replace('.','').replace(',','.'));
+  _cart.push({...j, size, uid: Date.now(), qty: 1, basePrice});
+  updateCartBadge();
+  toast('🛒 Adicionado ao carrinho!');
+}
+function removeFromCart(uid) {
+  _cart = _cart.filter(i => i.uid !== uid);
+  updateCartBadge();
+  renderCart();
+}
+function changeQty(uid, delta) {
+  const item = _cart.find(i => i.uid === uid);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  renderCart();
+}
+function updateCartBadge() {
+  const b = document.getElementById('cart-badge');
+  if (!b) return;
+  if (_cart.length === 0) { b.style.display = 'none'; return; }
+  b.style.display = 'flex';
+  b.textContent = _cart.length;
+}
+function renderCart() {
+  const list = document.getElementById('cart-list');
+  const tot  = document.getElementById('cart-total');
+  const totV = document.getElementById('cart-total-val');
+  if (_cart.length === 0) {
+    list.innerHTML = `<div class="cart-empty"><svg width="56" height="56" fill="none" stroke="var(--bd)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span style="font-size:15px;font-weight:600;">Carrinho vazio</span><span style="font-size:13px;">Adicione camisas para continuar</span></div>`;
+    tot.style.display = 'none'; return;
+  }
+  list.innerHTML = _cart.map(i => `
+    <div class="cart-item">
+      <div class="cart-thumb" style="background:${i.bg}">${jphoto(i.imgs[0], 200)}</div>
+      <div class="cart-info">
+        <div class="cart-name">${i.n}</div>
+        <div class="cart-sub">${i.m} · Tam. ${i.size}</div>
+        <div class="cart-price">R$ ${(i.basePrice * i.qty).toLocaleString('pt-BR', {minimumFractionDigits:0})}</div>
+        <div class="cart-qty">
+          <button class="qty-btn" onclick="changeQty(${i.uid},-1)">−</button>
+          <span class="qty-num">${i.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${i.uid},1)">+</button>
+        </div>
+      </div>
+      <button class="cart-del" onclick="removeFromCart(${i.uid})"><svg width="14" height="14" fill="none" stroke="#EF4444" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+    </div>`).join('');
+  const total = _cart.reduce((s, i) => s + i.basePrice * i.qty, 0);
+  totV.textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits:0});
+  tot.style.display = 'block';
+}
+function buildCarousel(imgs) {
+  const track = document.getElementById('dcarousel-track');
+  track.innerHTML = imgs.map(url =>
+    `<div class="dslide">${jphoto(url,800,'filter:drop-shadow(0 10px 32px rgba(0,0,0,.3));')}</div>`
+  ).join('');
+  track.style.transform = 'translateX(0)';
+  _cIdx = 0; _cImgs = imgs;
+  const dots = document.getElementById('gdots');
+  dots.innerHTML = imgs.map((_,i) => `<div class="gdot${i===0?' on':''}" onclick="goSlide(${i})"></div>`).join('');
+}
+function goSlide(n) {
+  _cIdx = Math.max(0, Math.min(n, _cImgs.length-1));
+  document.getElementById('dcarousel-track').style.transform = `translateX(-${_cIdx*100}%)`;
+  document.querySelectorAll('#gdots .gdot').forEach((d,i) => d.classList.toggle('on', i===_cIdx));
+}
+(function addSwipe() {
+  let sx=0;
+  document.addEventListener('DOMContentLoaded', () => {
+    const w = document.getElementById('dcarousel-wrap');
+    if (!w) return;
+    w.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+    w.addEventListener('touchend',   e => {
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 40) goSlide(_cIdx + (dx < 0 ? 1 : -1));
+    }, {passive:true});
+  });
+})();
+
+const JD = [
+  {sku:'FLA-2026-H-ADI', imgs:[
+    'https://images.tcdn.com.br/img/img_prod/398440/adidas_flamengo_2026_home_longsleeve_libertadores_1_20260407080330_f8cfb19a571a.jpg',
+   ],
+   bg:'linear-gradient(145deg,#fef2f2,#fecaca)', n:'Flamengo 2026',      m:'Adidas · Brasileirão',     p:'R$ 320', c:'cn', cl:'Novo',     bx:''},
+  {sku:'CBF-2026-H-NIK', imgs:[
+    'https://store.fifa.com/cdn/shop/files/image_02047e33-3b4e-41f2-869b-ac361dd4b283.jpg',
+    'https://store.fifa.com/cdn/shop/files/image_1e5c686d-6495-4fbd-afe7-5b25371c103e.jpg',
+    'https://store.fifa.com/cdn/shop/files/image_c5b55900-6c68-4c9a-b4e5-8e51c1c52fa3.jpg',
+    'https://store.fifa.com/cdn/shop/files/image_fd493210-0b12-4e94-8231-2e8b4d6721e9.jpg',
+   ],
+   bg:'linear-gradient(145deg,#fefce8,#fef9c3)', n:'Brasil 2026 Copa',   m:'Nike · Seleção',           p:'R$ 890', c:'cf', cl:'Excelente', bx:'🔥'},
+  {sku:'RMA-2627-H-ADI', imgs:[
+    'https://soccerwearhouse.com/cdn/shop/files/Men_s_Authentic_adidas_Real_Madrid_Home_Jersey_25_26.jpg?v=1751422573',
+    'https://soccerwearhouse.com/cdn/shop/files/Men_s_Authentic_adidas_Real_Madrid_Home_Jersey_25_26_2_5000x.jpg?v=1751422573',
+   ],
+   bg:'linear-gradient(145deg,#f8fafc,#e2e8f0)', n:'Real Madrid 2026-27', m:'Adidas · La Liga',        p:'R$ 450', c:'cn', cl:'Novo',     bx:''},
+  {sku:'AFA-2026-H-ADI', imgs:[
+    'https://store.fifa.com/cdn/shop/files/image_ab8f6ea2-c16a-4882-822e-aa52e9506054.png',
+    'https://store.fifa.com/cdn/shop/files/image_475d3a6c-8863-4a35-9bcc-16bd1dc1df0c.png',
+    'https://store.fifa.com/cdn/shop/files/image_220b3fe1-1aa8-4b96-905d-f2011446e83b.png',
+    'https://store.fifa.com/cdn/shop/files/image_d6552022-a71e-4ca6-ab09-dd5739ec2168.png',
+   ],
+   bg:'linear-gradient(145deg,#eff6ff,#dbeafe)', n:'Argentina 2026',      m:'Adidas · Copa 2026',      p:'R$ 680', c:'cn', cl:'Novo',     bx:'⭐'},
+  {sku:'PAL-2025-H-PUM', imgs:[
+    'https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_600,h_600/global/782425/01/mod01/fnd/PNA/fmt/png/SE-Palmeiras-Home-25-Home-Mens-Soccer-Jersey',
+   ],
+   bg:'linear-gradient(145deg,#f0fdf4,#dcfce7)', n:'Palmeiras 2025',      m:'Puma · Brasileirão',      p:'R$ 280', c:'cg', cl:'Bom',      bx:''},
+  {sku:'FCB-2526-H-NIK', imgs:[
+    'https://soccerwearhouse.com/cdn/shop/files/Nike_Barcelona_Home_Jersey_2.png?v=1752708807',
+    'https://soccerwearhouse.com/cdn/shop/files/Nike_Barcelona_Home_Jersey_3_5000x.png?v=1752116023',
+    'https://soccerwearhouse.com/cdn/shop/files/FCB_M_NK_DF_JSY_SS_STAD_HM_5000x.jpg?v=1753739355',
+    'https://soccerwearhouse.com/cdn/shop/files/FCB_M_NK_DF_JSY_SS_STAD_HM_635133d3-6368-4ec5-b85f-f77557e50985_5000x.jpg?v=1753739355',
+   ],
+   bg:'linear-gradient(145deg,#eef2ff,#e0e7ff)', n:'Barcelona 2025-26',   m:'Nike · La Liga',          p:'R$ 520', c:'cn', cl:'Novo',     bx:''},
+  {sku:'COR-2526-H-NIK', imgs:[
+    'https://soccerwearhouse.com/cdn/shop/files/NikeCorinthiansHomeJersey.png?v=1750448438',
+    'https://soccerwearhouse.com/cdn/shop/files/NikeCorinthiansHomeJersey1_5000x.png?v=1750448438',
+    'https://soccerwearhouse.com/cdn/shop/files/NikeCorinthiansHomeJersey2_5000x.png?v=1750448438',
+    'https://soccerwearhouse.com/cdn/shop/files/NikeCorinthiansHomeJersey3_5000x.png?v=1750448438',
+   ],
+   bg:'linear-gradient(145deg,#f5f5f5,#e5e5e5)', n:'Corinthians 2025-26', m:'Nike · Brasileirão',      p:'R$ 260', c:'cf', cl:'Bom',      bx:''},
+  {sku:'SAO-2025-H-NWB', imgs:[
+    'https://images.tcdn.com.br/img/img_prod/398440/new_balance_so_paulo_2025_home_jersey_1_20250926154212_908d26720ba0.jpg',
+   ],
+   bg:'linear-gradient(145deg,#fff5f5,#fee2e2)', n:'São Paulo 2025',       m:'New Balance · Brasileirão',p:'R$ 240', c:'cg', cl:'Bom',      bx:''},
+  {sku:'POR-2026-H-PUM', imgs:[
+    'https://store.fifa.com/cdn/shop/files/image_0c8a09d2-f012-494a-acd8-524248c421bd.jpg',
+    'https://store.fifa.com/cdn/shop/files/image_d46ad74a-b2cf-44d5-89c8-f764a1de78de.jpg',
+    'https://store.fifa.com/cdn/shop/files/image_fd36598d-746f-4314-8d55-4c2c3d3aaa86.jpg',
+    'https://store.fifa.com/cdn/shop/files/image_351c37c9-3cfa-48f4-a4aa-c490be1393b8.jpg',
+   ],
+   bg:'linear-gradient(145deg,#fff1f2,#ffe4e6)', n:'Portugal 2026',        m:'Puma · Copa 2026',        p:'R$ 390', c:'cn', cl:'Novo',     bx:''},
+  {sku:'FRA-2026-H-NIK', imgs:[
+    'https://soccerwearhouse.com/cdn/shop/files/nike-mens-france-hugo-ekitike-home-stadium-jersey-2026-game-royalmetallic-copper-soccerwearhouse-7367807.png?v=1776640991',
+    'https://soccerwearhouse.com/cdn/shop/files/nike-mens-france-hugo-ekitike-home-stadium-jersey-2026-game-royalmetallic-copper-soccerwearhouse-5113565_5000x.png?v=1776640992',
+    'https://soccerwearhouse.com/cdn/shop/files/nike-mens-france-kylian-mbappe-home-stadium-jersey-2026-game-royalmetallic-copper-soccerwearhouse-9038101_5000x.jpg?v=1776640992',
+   ],
+   bg:'linear-gradient(145deg,#eff6ff,#dbeafe)', n:'França 2026',           m:'Nike · Copa 2026',        p:'R$ 470', c:'cn', cl:'Novo',     bx:'⭐'},
+];
+
+function card(j, onclick) {
+  return `<div class="jcard" onclick="${onclick}">
+    <div class="jthumb" style="background:${j.bg}">
+      ${jphoto(j.imgs[0], 400)}
+      ${j.bx ? `<div class="jbadge-r">${j.bx}</div>` : ''}
+    </div>
+    <div class="jinfo">
+      <div class="jname">${j.n}</div>
+      <div class="jmeta">${j.m}</div>
+      <div class="jrow"><div class="jprice">${j.p}</div><span class="cond ${j.c}">${j.cl}</span></div>
+    </div>
+  </div>`;
+}
+
+/* ── Populate grids ── */
+document.getElementById('hot-scroll').innerHTML  = JD.slice(0,5).map((j,i)=>card(j,`openDetail(${i})`)).join('');
+document.getElementById('new-grid').innerHTML    = JD.slice(5).map((j,i)=>card(j,`openDetail(${i+5})`)).join('');
+document.getElementById('search-grid').innerHTML = JD.map((j,i)=>card(j,`openDetail(${i})`)).join('');
+document.getElementById('ptab-0').innerHTML      = JD.slice(0,6).map((j,i)=>card(j,`openDetail(${i})`)).join('');
+
+/* ── Detail jersey (init carousel) ── */
+buildCarousel(JD[1].imgs);
+
+/* ── Chat product jersey ── */
+document.getElementById('chat-prod-img').innerHTML = jphoto(JD[1].imgs[0], 200);
+
+/* ── Sell placeholders ── */
+document.getElementById('sku-jersey').innerHTML         = jphoto(JD[0].imgs[0], 200);
+document.getElementById('sell-review-jersey').innerHTML = jphoto(JD[0].imgs[0], 300);
+document.getElementById('ps-front').innerHTML           = jphoto(JD[0].imgs[0], 200);
+
+/* ── Profile sales ── */
+document.getElementById('prof-sale-1').innerHTML = jphoto(JD[0].imgs[0], 200);
+document.getElementById('prof-sale-2').innerHTML = jphoto(JD[3].imgs[0], 200);
+
+/* ── Hero jersey ── */
+document.getElementById('hero-jersey').innerHTML = jphoto(JD[1].imgs[0], 400);
+
+/* ── Chat list ── */
+const chats = [
+  {av:'PL',n:'Pedro Lima',msg:'Ainda disponível o Flamengo 2022?',t:'agora',u:2},
+  {av:'CF',n:'Carla Ferreira',msg:'Topo R$850 com frete incluído 👍',t:'5 min',u:0},
+  {av:'TN',n:'Thiago Nunes',msg:'Obrigado! Chegou perfeita',t:'1h',u:0},
+  {av:'AM',n:'Ana Martins',msg:'Tem tamanho P do Real Madrid?',t:'3h',u:1},
+  {av:'RS',n:'Rafael Santos',msg:'Pode mandar foto da etiqueta?',t:'ontem',u:0},
+];
+document.getElementById('chat-list').innerHTML = chats.map(c=>`
+  <div class="citem" onclick="navTo('s-cr')">
+    <div class="av" style="font-size:13px;">${c.av}</div>
+    <div class="cinfo">
+      <div class="ctop"><div class="cname">${c.n}</div><div class="ctime">${c.t}</div></div>
+      <div class="cmsg">${c.msg}</div>
+    </div>
+    ${c.u ? `<div class="cunread">${c.u}</div>` : ''}
+  </div>`).join('');
+
+/* ── Open detail for specific jersey ── */
+function openDetail(idx) {
+  _currentJIdx = idx;
+  const j = JD[idx];
+  buildCarousel(j.imgs);
+  document.getElementById('dgallery').style.background = j.bg;
+  document.querySelector('#s-detail .dtitle').textContent = j.n;
+  document.querySelector('#s-detail .dprice').textContent = j.p;
+  document.querySelector('#s-detail .dmeta').textContent = `⭐ 4.9 · ${j.m} · SKU: ${j.sku}`;
+  const condEl = document.querySelector('#s-detail .cond');
+  if (condEl) { condEl.className = `cond ${j.c}`; condEl.textContent = j.cl; }
+  navTo('s-detail');
+}
+
+/* ── Navigation ── */
+function navTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 's-sell') resetSell();
+  if (id === 's-cart') renderCart();
+}
+
+/* ── Toast ── */
+let tT;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(tT);
+  tT = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ── Filter sheet ── */
+function openSheet() {
+  document.getElementById('fsheet').classList.add('open');
+  document.getElementById('foverlay').classList.add('open');
+}
+function closeSheet() {
+  document.getElementById('fsheet').classList.remove('open');
+  document.getElementById('foverlay').classList.remove('open');
+}
+
+/* ── Save toggle ── */
+let saved = false;
+function toggleSave() {
+  saved = !saved;
+  const ico = document.getElementById('save-ico');
+  ico.setAttribute('fill', saved ? '#EF4444' : 'none');
+  ico.setAttribute('stroke', saved ? '#EF4444' : 'var(--t1)');
+  toast(saved ? '❤️ Salvo na lista de desejos' : 'Removido dos desejos');
+}
+
+/* ── Size selector ── */
+function selSize(el) {
+  if (el.classList.contains('na')) return;
+  document.querySelectorAll('#s-detail .sz').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+}
+
+/* ── Detail tabs ── */
+function setDTab(el, idx) {
+  document.querySelectorAll('.dtab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  [0,1,2].forEach(i => { const d = document.getElementById('dtab-'+i); if(d) d.style.display = i===idx?'block':'none'; });
+}
+
+/* ── Profile tabs ── */
+function setPTab(el, idx) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  [0,1,2].forEach(i => { const d = document.getElementById('ptab-'+i); if(d) d.style.display = i===idx?(i===0?'grid':'block'):'none'; });
+}
+
+/* ── Sell wizard ── */
+function sellNext(step) {
+  [1,2,3,4].forEach(i => { const s = document.getElementById('sell-s'+i); if(s) s.style.display = i===step?'block':'none'; });
+  [1,2,3,4].forEach(i => { const st = document.getElementById('st'+i); if(st) st.style.background = i<step?'var(--g)':i===step?'var(--p)':'var(--bd)'; });
+  document.getElementById('s-sell').querySelector('.sroll').scrollTop = 0;
+}
+function resetSell() { sellNext(1); }
+
+/* ── SKU search ── */
+function skuSearch() {
+  const v = document.getElementById('sku-inp').value.trim();
+  if (v) { document.getElementById('sku-result').style.display='flex'; toast('✅ SKU encontrado no banco de dados!'); }
+  else toast('⚠️ Digite um código SKU');
+}
+
+/* ── Publish ── */
+function publishListing() {
+  toast('🚀 Anúncio publicado com sucesso!');
+  setTimeout(() => navTo('s-home'), 1200);
+}
+
+/* ── Chat send ── */
+function sendMsg() {
+  const inp = document.getElementById('chat-inp');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const area = document.getElementById('msgs-area');
+  const now = new Date();
+  const t = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  area.innerHTML += `<div class="mb mout">${txt}<div class="mtime">${t}</div></div>`;
+  inp.value = '';
+  area.scrollTop = area.scrollHeight;
+  setTimeout(() => {
+    area.innerHTML += `<div class="mb min">Entendido! Posso ajudar com mais alguma coisa? 😊<div class="mtime">${t}</div></div>`;
+    area.scrollTop = area.scrollHeight;
+  }, 1200);
+}
+</script>
+</body>
+</html>

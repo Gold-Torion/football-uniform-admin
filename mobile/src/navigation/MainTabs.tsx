@@ -35,7 +35,7 @@ export function MainTabs() {
         component={FeedScreen}
         options={{
           title: 'Home',
-          headerTitle: 'Arena dos Mantos',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <TabExploreIcon color={color} size={size} />,
         }}
       />

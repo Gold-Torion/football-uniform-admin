@@ -6,4 +6,14 @@ CLIENT FEATURE REQUESTS (Eduardo)
 "I want to implement a Quiz inside the app.
 Like: We make the question and people will give the answer inside the app"
 
-Status: IN PROGRESS — being implemented
+Status: COMPLETED — Quiz module implemented (backend + mobile + admin)
+
+---
+
+--- 2026-05-11 ---
+"I need a new budget solicitation for a new feature.
+I totally forgot about Taxes and the IR (Imposto de Renda)."
+
+Status: PENDING CLARIFICATION — waiting for Eduardo to specify exact scope
+Notes: Not in original contract. New budget required.
+       Needs clarification on: type of tax handling, Nota Fiscal, IR withholding, Receita Federal reporting.

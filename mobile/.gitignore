@@ -16,3 +16,4 @@ web-build/
 ios/
 android/
 .DS_Store
+.vercel
