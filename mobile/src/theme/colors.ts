@@ -20,8 +20,8 @@ export const colors = {
 
   // ── Light surfaces ───────────────────────────────────────────────────────
   surface: '#FFFFFF',
-  surfaceSubtle: '#F4EFE3',
-  surfaceBorder: '#E5DCC4',
+  surfaceSubtle: '#EFEFEF',
+  surfaceBorder: '#E0E0E0',
 
   // ── Ink (text on light bg) ───────────────────────────────────────────────
   ink1: '#1C1A14',

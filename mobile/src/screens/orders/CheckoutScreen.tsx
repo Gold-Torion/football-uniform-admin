@@ -148,7 +148,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{
@@ -183,7 +183,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
         }}>
           <View style={{
             width: 64, height: 64, borderRadius: 12,
-            backgroundColor: '#F4EFE3',
+            backgroundColor: '#EFEFEF',
             alignItems: 'center', justifyContent: 'center',
           }}>
             <Shirt size={32} color="#335336" />
@@ -275,7 +275,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 maxLength={9}
                 style={{
                   flex: 1,
-                  backgroundColor: '#F4EFE3',
+                  backgroundColor: '#EFEFEF',
                   borderWidth: 1,
                   borderColor: '#E5DCC4',
                   borderRadius: 12,
@@ -390,7 +390,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
             </View>
           )}
 
-          <View style={{ height: 1, backgroundColor: '#F4EFE3', marginBottom: 12 }} />
+          <View style={{ height: 1, backgroundColor: '#EFEFEF', marginBottom: 12 }} />
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16 }}>Total</Text>
@@ -489,7 +489,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
       <View style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
-        backgroundColor: '#F4EFE3',
+        backgroundColor: '#EFEFEF',
         borderTopWidth: 1,
         borderColor: '#E5DCC4',
         padding: 16,

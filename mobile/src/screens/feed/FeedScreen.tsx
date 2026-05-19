@@ -226,10 +226,10 @@ function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () 
           flexDirection: 'row', justifyContent: 'center', gap: 8,
         })}
       >
-        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+        <Text style={{ color: '#D4AF37', fontWeight: '700', fontSize: 15 }}>
           Explorar Catálogo
         </Text>
-        <Text style={{ color: '#1C1A14', fontSize: 15 }}>→</Text>
+        <Text style={{ color: '#D4AF37', fontSize: 15 }}>→</Text>
       </Pressable>
 
       <Pressable
@@ -252,11 +252,11 @@ function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () 
 
 function EventsSection() {
   return (
-    <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
-      <Text style={{ color: '#1C1A14', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
+    <View style={{ paddingHorizontal: 16, marginBottom: 8, backgroundColor: '#1a3a1c', paddingTop: 16, paddingBottom: 4 }}>
+      <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
         Eventos
       </Text>
-      <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 14 }}>
+      <Text style={{ color: '#FFFFFF', fontSize: 13, marginBottom: 14, opacity: 0.8 }}>
         Encontros e feiras de colecionadores
       </Text>
       {EVENTS.map((ev) => (
@@ -315,7 +315,7 @@ function SellCTA({ onRegister, onLearnMore }: { onRegister: () => void; onLearnM
           alignItems: 'center', marginBottom: 10,
         })}
       >
-        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+        <Text style={{ color: '#D4AF37', fontWeight: '700', fontSize: 15 }}>
           Criar conta grátis
         </Text>
       </Pressable>
@@ -441,7 +441,7 @@ export function FeedScreen() {
   }, [filtered]);
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* ── Top bar ── */}
       <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>

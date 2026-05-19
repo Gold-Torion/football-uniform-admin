@@ -98,7 +98,7 @@ export function RateOrderScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{
@@ -161,7 +161,7 @@ export function RateOrderScreen({ route, navigation }: Props) {
               style={{
                 paddingVertical: 12,
                 borderBottomWidth: idx < criteria.length - 1 ? 1 : 0,
-                borderColor: '#F4EFE3',
+                borderColor: '#EFEFEF',
               }}
             >
               <Text style={{ color: '#1C1A14', fontSize: 14, lineHeight: 20 }}>

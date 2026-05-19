@@ -89,7 +89,7 @@ function getInitials(name: string): string {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#F4EFE3' }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#EFEFEF' }}>
       <Text style={{ color: '#9C9486', fontSize: 14 }}>{label}</Text>
       <Text style={{ color: '#1C1A14', fontSize: 14, fontWeight: '600', maxWidth: '60%', textAlign: 'right' }}>{value}</Text>
     </View>
@@ -125,7 +125,7 @@ function CommentCard({
       gap: 10,
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderColor: '#F4EFE3',
+      borderColor: '#EFEFEF',
     }}>
       {/* Avatar */}
       <View style={{
@@ -315,7 +315,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{
@@ -413,7 +413,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
             <InfoRow label="Gênero"     value={GENDER_LABEL[listing.gender] ?? listing.gender} />
             <View style={{ paddingVertical: 10 }}>
               <Text style={{ color: '#9C9486', fontSize: 14, marginBottom: 4 }}>Condição</Text>
-              <View style={{ alignSelf: 'flex-start', backgroundColor: '#F4EFE3', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+              <View style={{ alignSelf: 'flex-start', backgroundColor: '#EFEFEF', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
                 <Text style={{ color: '#335336', fontWeight: '700', fontSize: 13 }}>
                   {CONDITION_LABEL[listing.condition] ?? listing.condition}
                 </Text>
@@ -484,7 +484,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 gap: 8,
                 paddingVertical: 12,
                 borderTopWidth: comments.length > 0 ? 1 : 0,
-                borderColor: '#F4EFE3',
+                borderColor: '#EFEFEF',
               }}>
                 <TextInput
                   ref={commentInputRef}
@@ -535,7 +535,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
       {/* Botão de ação */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#F4EFE3',
+        backgroundColor: '#EFEFEF',
         paddingHorizontal: 16, paddingBottom: 28, paddingTop: 12,
         borderTopWidth: 1, borderColor: '#E5DCC4',
       }}>

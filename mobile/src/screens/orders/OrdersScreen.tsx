@@ -75,7 +75,7 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
       }}>
         <View style={{
           width: 48, height: 48, borderRadius: 10,
-          backgroundColor: '#F4EFE3',
+          backgroundColor: '#EFEFEF',
           alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
@@ -100,7 +100,7 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
         justifyContent: 'space-between',
         paddingHorizontal: 14,
         paddingVertical: 10,
-        backgroundColor: '#F4EFE3',
+        backgroundColor: '#EFEFEF',
       }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           {order.deliveryMethod === 'CORREIOS'
@@ -141,7 +141,7 @@ export function OrdersScreen({ navigation }: Props) {
   const displayed     = activeTab === 'buying' ? buyingOrders : sellingOrders;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{

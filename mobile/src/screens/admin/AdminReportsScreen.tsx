@@ -90,7 +90,7 @@ function ReportCard({
       </View>
 
       {/* Divider */}
-      <View style={{ height: 1, backgroundColor: '#F4EFE3' }} />
+      <View style={{ height: 1, backgroundColor: '#EFEFEF' }} />
 
       {/* Actions */}
       <View style={{ flexDirection: 'row' }}>
@@ -103,7 +103,7 @@ function ReportCard({
             paddingVertical: 14,
             backgroundColor: pressed ? '#FEE2E2' : '#fff',
             borderRightWidth: 1,
-            borderColor: '#F4EFE3',
+            borderColor: '#EFEFEF',
           })}
         >
           <Text style={{ color: '#B91C1C', fontWeight: '700', fontSize: 14 }}>
@@ -118,7 +118,7 @@ function ReportCard({
             flex: 1,
             alignItems: 'center',
             paddingVertical: 14,
-            backgroundColor: pressed ? '#F4EFE3' : '#fff',
+            backgroundColor: pressed ? '#EFEFEF' : '#fff',
           })}
         >
           <Text style={{ color: '#9C9486', fontWeight: '700', fontSize: 14 }}>
@@ -199,7 +199,7 @@ export function AdminReportsScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{

@@ -108,7 +108,7 @@ export function PixPaymentScreen({ route, navigation }: Props) {
 
   if (paid) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Text style={{ fontSize: 64, marginBottom: 20 }}>✅</Text>
           <Text style={{ color: '#335336', fontWeight: '900', fontSize: 24, textAlign: 'center', marginBottom: 8 }}>
@@ -136,7 +136,7 @@ export function PixPaymentScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{
@@ -205,7 +205,7 @@ export function PixPaymentScreen({ route, navigation }: Props) {
             style={{
               color: '#1C1A14', fontSize: 11, lineHeight: 18,
               fontFamily: 'monospace',
-              backgroundColor: '#F4EFE3', borderRadius: 8,
+              backgroundColor: '#EFEFEF', borderRadius: 8,
               padding: 12, marginBottom: 12,
             }}
             numberOfLines={3}

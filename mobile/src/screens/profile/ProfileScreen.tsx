@@ -45,7 +45,7 @@ function Row({ label, value, onPress, danger, icon }: {
         justifyContent: 'space-between',
         paddingVertical: 14,
         paddingHorizontal: 16,
-        backgroundColor: pressed ? '#F4EFE3' : '#fff',
+        backgroundColor: pressed ? '#EFEFEF' : '#fff',
       })}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
@@ -61,7 +61,7 @@ function Row({ label, value, onPress, danger, icon }: {
 }
 
 function Divider() {
-  return <View style={{ height: 1, backgroundColor: '#F4EFE3' }} />;
+  return <View style={{ height: 1, backgroundColor: '#EFEFEF' }} />;
 }
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -188,7 +188,7 @@ export function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
 
         {/* Avatar + info */}
@@ -269,9 +269,15 @@ export function ProfileScreen() {
           <Divider />
           <Row label="Meus pedidos" icon={<ShoppingBag size={17} color="#9C9486" />} onPress={() => navigation.navigate('Orders')} />
           <Divider />
-          <Row label="Quiz" icon={<HelpCircle size={17} color="#9C9486" />} onPress={() => navigation.navigate('Quiz')} />
-          <Divider />
           <Row label="Membro desde" value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '—'} />
+        </Card>
+
+        {/* Quiz — secção própria */}
+        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+          QUIZ
+        </Text>
+        <Card>
+          <Row label="Quiz" icon={<HelpCircle size={17} color="#9C9486" />} onPress={() => navigation.navigate('Quiz')} />
         </Card>
 
         {/* CEP de envio */}

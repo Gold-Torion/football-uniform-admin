@@ -62,7 +62,7 @@ function MiniListingCard({ listing }: { listing: ListingPublic }) {
     }}>
       <View style={{
         width: '100%', aspectRatio: 1.2,
-        backgroundColor: '#F4EFE3', borderRadius: 10,
+        backgroundColor: '#EFEFEF', borderRadius: 10,
         alignItems: 'center', justifyContent: 'center',
         marginBottom: 8,
       }}>
@@ -115,7 +115,7 @@ export function SellerProfileScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{

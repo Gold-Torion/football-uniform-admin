@@ -76,7 +76,7 @@ const GARMENT_LABEL: Record<string, string> = {
 
 function Badge({ text }: { text: string }) {
   return (
-    <View style={{ backgroundColor: '#F4EFE3', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+    <View style={{ backgroundColor: '#EFEFEF', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
       <Text style={{ color: '#6B6357', fontSize: 11, fontWeight: '600' }}>{text}</Text>
     </View>
   );
@@ -111,7 +111,7 @@ function ListingCard({
       <View
         style={{
           width: 100,
-          backgroundColor: '#F4EFE3',
+          backgroundColor: '#EFEFEF',
           alignItems: 'center',
           justifyContent: 'center',
           borderRightWidth: 1,
@@ -155,7 +155,7 @@ function ListingCard({
             onPress={() => onEditPrice(item)}
             hitSlop={8}
             style={({ pressed }) => ({
-              backgroundColor: pressed ? '#EDE8DC' : '#F4EFE3',
+              backgroundColor: pressed ? '#EDE8DC' : '#EFEFEF',
               borderRadius: 8,
               paddingHorizontal: 8,
               paddingVertical: 4,
@@ -286,7 +286,7 @@ export function HomeScreen() {
   const toggleOpen = () => { setOpen((v) => !v); };
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* ── Header card ─────────────────────────────────── */}
@@ -359,7 +359,7 @@ export function HomeScreen() {
               <View
                 style={{
                   width: 64, height: 64, borderRadius: 32,
-                  backgroundColor: '#F4EFE3',
+                  backgroundColor: '#EFEFEF',
                   alignItems: 'center', justifyContent: 'center',
                   marginBottom: 16,
                 }}

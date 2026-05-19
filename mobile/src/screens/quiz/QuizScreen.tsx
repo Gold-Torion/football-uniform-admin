@@ -184,7 +184,7 @@ export function QuizScreen() {
         {!result && (
           (isGuest || !accessToken) ? (
             <View style={{
-              backgroundColor: '#F4EFE3',
+              backgroundColor: '#EFEFEF',
               borderRadius: 16,
               paddingVertical: 16,
               alignItems: 'center',

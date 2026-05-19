@@ -33,7 +33,9 @@ PENDING ITEMS:
   Marketplace PIX not yet active — following up with support.
 ```
 
-**Status: IN PROGRESS — updating credentials + fixing PIX for PSP model**
+**Status: CONFIGURED**
+
+Pagar.me Arena Recipient ID: re_cmok9dpdd5f3v0l9tpj22vf3y
 
 ---
 

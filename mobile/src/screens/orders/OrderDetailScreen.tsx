@@ -146,7 +146,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
   const currentStepIndex = order ? STATUS_STEPS.indexOf(order.status) : -1;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Header */}
       <View style={{
@@ -242,7 +242,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
               <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center', marginBottom: 12 }}>
                 <View style={{
                   width: 64, height: 64, borderRadius: 12,
-                  backgroundColor: '#F4EFE3',
+                  backgroundColor: '#EFEFEF',
                   alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Shirt size={32} color="#335336" />
@@ -286,7 +286,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
                   {/* Tracking code */}
                   {order.shippingTrackingCode ? (
-                    <View style={{ backgroundColor: '#F4EFE3', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                    <View style={{ backgroundColor: '#EFEFEF', borderRadius: 10, padding: 12, marginBottom: 8 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                         <Truck size={14} color="#335336" />
                         <Text style={{ fontSize: 11, fontWeight: '700', color: '#335336', letterSpacing: 1 }}>
@@ -336,7 +336,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                 label="Frete"
                 value={order.deliveryMethod === 'ENTREGA_EM_MAOS' ? 'Grátis' : fmt(order.shippingCents)}
               />
-              <View style={{ height: 1, backgroundColor: '#F4EFE3', marginBottom: 10, marginTop: 2 }} />
+              <View style={{ height: 1, backgroundColor: '#EFEFEF', marginBottom: 10, marginTop: 2 }} />
               <SummaryRow label="Total" value={fmt(order.totalCents)} bold gold />
             </SectionCard>
 
@@ -387,7 +387,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
           {/* Confirm receipt button */}
           {canConfirm && (
-            <View style={{ backgroundColor: '#F4EFE3', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
+            <View style={{ backgroundColor: '#EFEFEF', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
               <Pressable
                 onPress={handleConfirmReceipt}
                 disabled={confirming}
@@ -406,7 +406,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
           {/* Rate button — after delivery */}
           {canRate && (
-            <View style={{ backgroundColor: '#F4EFE3', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
+            <View style={{ backgroundColor: '#EFEFEF', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
               <Pressable
                 onPress={() => navigation.navigate('RateOrder', {
                   orderId,

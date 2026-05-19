@@ -162,7 +162,7 @@ function RadioGroup({ options, value, onChange }: {
             onPress={() => onChange(o.value)}
             style={{
               flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
-              backgroundColor: active ? '#335336' : '#F4EFE3',
+              backgroundColor: active ? '#335336' : '#EFEFEF',
               borderWidth: 1,
               borderColor: active ? '#335336' : '#E5DCC4',
             }}
@@ -217,7 +217,7 @@ function SelectField({ label, value, placeholder, options, onChange, error, disa
       <Modal visible={open} animationType="slide" transparent>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={() => setOpen(false)} />
         <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '60%' }}>
-          <View style={{ padding: 16, borderBottomWidth: 1, borderColor: '#F4EFE3', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ padding: 16, borderBottomWidth: 1, borderColor: '#EFEFEF', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontWeight: '800', fontSize: 16, color: '#1C1A14' }}>{label}</Text>
             <Pressable onPress={() => setOpen(false)}>
               <Text style={{ color: '#9C9486', fontSize: 15 }}>Fechar</Text>
@@ -229,7 +229,7 @@ function SelectField({ label, value, placeholder, options, onChange, error, disa
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => { onChange(item.value); setOpen(false); }}
-                style={{ padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderColor: '#F4EFE3', backgroundColor: value === item.value ? '#F4EFE3' : '#fff' }}
+                style={{ padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderColor: '#EFEFEF', backgroundColor: value === item.value ? '#EFEFEF' : '#fff' }}
               >
                 <View style={{ flex: 1, marginRight: 8 }}>
                   <Text style={{ fontSize: 15, color: '#1C1A14', fontWeight: value === item.value ? '700' : '400' }}>
@@ -270,7 +270,7 @@ function SizeGrid({ value, onChange, error }: { value: string; onChange: (v: str
               onPress={() => onChange(s)}
               style={{
                 paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10,
-                backgroundColor: active ? '#335336' : '#F4EFE3',
+                backgroundColor: active ? '#335336' : '#EFEFEF',
                 borderWidth: 1, borderColor: active ? '#335336' : '#E5DCC4',
               }}
             >
@@ -484,7 +484,7 @@ export function NewListingScreen() {
   const e = attempted ? errors : {} as typeof errors;
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
 
       {/* Step indicator */}
       <View style={{ backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: '#E5DCC4' }}>
@@ -841,7 +841,7 @@ export function NewListingScreen() {
       {/* Submit button */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#F4EFE3', paddingHorizontal: 16, paddingBottom: 24, paddingTop: 12,
+        backgroundColor: '#EFEFEF', paddingHorizontal: 16, paddingBottom: 24, paddingTop: 12,
         borderTopWidth: 1, borderColor: '#E5DCC4',
       }}>
         {/* Missing fields counter shown before first attempt */}
