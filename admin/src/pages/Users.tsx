@@ -15,11 +15,13 @@ function maskCpf(cpf?: string) {
 }
 
 export function Users({ secret }: Props) {
-  const [users,    setUsers]    = useState<UserPublic[]>([]);
-  const [query,    setQuery]    = useState('');
-  const [loading,  setLoading]  = useState(true);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [error,    setError]    = useState('');
+  const [users,      setUsers]      = useState<UserPublic[]>([]);
+  const [query,      setQuery]      = useState('');
+  const [loading,    setLoading]    = useState(true);
+  const [expanded,   setExpanded]   = useState<string | null>(null);
+  const [error,      setError]      = useState('');
+  const [recipientInput, setRecipientInput] = useState<Record<string, string>>({});
+  const [savingRecipient, setSavingRecipient] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -155,6 +157,40 @@ export function Users({ secret }: Props) {
                 <DetailRow label="Criado em" value={fmtDate(u.createdAt)} />
                 <DetailRow label="TOTP"      value={u.totpEnabled ? 'Ativo' : 'Inativo'} />
                 <DetailRow label="MPC"       value={String(u.mpcPurchasesCount)} />
+
+                {/* Pagar.me Recipient ID */}
+                <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #E5DCC4' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 700, color: '#9C9486', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Pagar.me Recipient ID (Split de Pagamento)
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      value={recipientInput[u.userId] ?? u.pagarmeRecipientId ?? ''}
+                      onChange={e => setRecipientInput(prev => ({ ...prev, [u.userId]: e.target.value }))}
+                      placeholder="re_xxxxxxxxxxxxxxxxxx"
+                      style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1px solid #E5DCC4', fontSize: '13px', fontFamily: 'monospace' }}
+                    />
+                    <button
+                      disabled={savingRecipient === u.userId}
+                      onClick={async () => {
+                        const val = recipientInput[u.userId] ?? '';
+                        if (!val.trim()) return;
+                        setSavingRecipient(u.userId);
+                        await api.setRecipient(secret, u.userId, val.trim());
+                        setUsers(prev => prev.map(x => x.userId === u.userId ? { ...x, pagarmeRecipientId: val.trim() } : x));
+                        setSavingRecipient(null);
+                      }}
+                      style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: '#335336', color: '#D4AF37', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+                    >
+                      {savingRecipient === u.userId ? '…' : 'Salvar'}
+                    </button>
+                  </div>
+                  {u.pagarmeRecipientId && (
+                    <p style={{ fontSize: '11px', color: '#22c55e', marginTop: '4px' }}>
+                      ✅ Configurado: {u.pagarmeRecipientId}
+                    </p>
+                  )}
+                </div>
               </div>
             );
           })()}

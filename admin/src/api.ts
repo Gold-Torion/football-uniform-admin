@@ -19,6 +19,7 @@ export interface UserPublic {
   email?: string;
   phoneE164?: string;
   cpf?: string;
+  pagarmeRecipientId?: string;
   listingsActiveCount: number;
   ratingCountAsSeller: number;
   ratingAvgAsSeller?: number;
@@ -193,6 +194,16 @@ export const api = {
     fetch(`${BASE}/developer-earnings/withdrawal`, {
       method: 'POST', headers: headers(s),
       body: JSON.stringify({ amountCents, notes }),
+    }).then(r => r.json()),
+
+  // ── Recipients (Pagar.me split) ───────────────────────────────────────────
+  getRecipient: (s: string, userId: string) =>
+    fetch(`${BASE}/users/${userId}/recipient`, { headers: headers(s) }).then(r => r.json()) as Promise<{ pagarmeRecipientId?: string }>,
+
+  setRecipient: (s: string, userId: string, recipientId: string) =>
+    fetch(`${BASE}/users/${userId}/recipient`, {
+      method: 'PATCH', headers: headers(s),
+      body: JSON.stringify({ recipientId }),
     }).then(r => r.json()),
 
   // ── Fiscal ─────────────────────────────────────────────────────────────────
