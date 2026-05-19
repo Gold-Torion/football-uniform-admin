@@ -224,16 +224,18 @@ export function SignInScreen({ navigation }: Props) {
 
           {/* ── Bottom: CTAs ──────────────────────────────────────── */}
           <Animated.View style={ctaStyle} className="px-6 pb-6">
-            {/* Google Sign-In — all platforms */}
-            <Pressable
-              onPress={onGoogle}
-              disabled={busy}
-              className="flex-row items-center justify-center gap-3 bg-white rounded-2xl py-[14px] mb-3 active:opacity-80"
-              style={{ shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
-            >
-              <GoogleIcon size={20} />
-              <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
-            </Pressable>
+            {/* Google Sign-In — web and iOS only (Android needs Firebase setup) */}
+            {Platform.OS !== 'android' && (
+              <Pressable
+                onPress={onGoogle}
+                disabled={busy}
+                className="flex-row items-center justify-center gap-3 bg-white rounded-2xl py-[14px] mb-3 active:opacity-80"
+                style={{ shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+              >
+                <GoogleIcon size={20} />
+                <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
+              </Pressable>
+            )}
 
             {/* Apple Sign In — iOS only */}
             {Platform.OS === 'ios' && (
