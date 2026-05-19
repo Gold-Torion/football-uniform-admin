@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:281984451863:android:a1b2c3d4e5f60001",
+        "mobilesdk_app_id": "1:281984451863:android:dacc209125bfd154",
         "android_client_info": {
           "package_name": "com.arenadosmantos.app"
         }
@@ -18,7 +18,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.arenadosmantos.app",
-            "certificate_hash": ""
+            "certificate_hash": "DACC209125BFD154F497AA8265108E3886FE658E"
           }
         },
         {
@@ -28,7 +28,7 @@
       ],
       "api_key": [
         {
-          "current_key": "placeholder"
+          "current_key": "AIzaSyBFO9UjxuFRKiYyd8J2Nr5M_48Jr53Qoko"
         }
       ],
       "services": {

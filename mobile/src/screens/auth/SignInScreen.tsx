@@ -74,19 +74,20 @@ export function SignInScreen({ navigation }: Props) {
   const user             = useAuthStore((s) => s.user);
   const enterAsGuest     = useAuthStore((s) => s.enterAsGuest);
 
-  // expo-auth-session Google flow (works on Android without google-services.json)
+  // expo-auth-session Google flow — uses webClientId only to avoid SHA-1 requirement
+  // This opens a browser OAuth window that works on all platforms without google-services.json
   const [googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
-    androidClientId: '281984451863-r90b3qensith9hgg54apht08q7cbgv6j.apps.googleusercontent.com',
-    iosClientId:     '281984451863-p0khpjsuoaa0ltctomlvu5gca0es5rv4.apps.googleusercontent.com',
-    webClientId:     '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+    webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+    scopes: ['profile', 'email'],
   });
 
   useEffect(() => {
     if (googleResponse?.type === 'success') {
-      const { id_token } = googleResponse.params;
-      if (id_token) {
+      // Web client returns id_token directly
+      const token = googleResponse.params?.id_token ?? googleResponse.params?.access_token;
+      if (token) {
         setBusy(true);
-        AuthApi.google(id_token, Platform.OS as 'android' | 'ios' | 'web')
+        AuthApi.google(token, Platform.OS as 'android' | 'ios' | 'web')
           .then(async (result) => {
             if ('totpRequired' in result) {
               setTotpTempToken(result.tempToken);
@@ -94,7 +95,7 @@ export function SignInScreen({ navigation }: Props) {
               await setSession(result);
             }
           })
-          .catch(() => Alert.alert('Erro', 'Não foi possível fazer login com Google.'))
+          .catch(() => Alert.alert('Erro', 'Não foi possível fazer login com Google. Tente novamente.'))
           .finally(() => setBusy(false));
       }
     }
@@ -153,12 +154,6 @@ export function SignInScreen({ navigation }: Props) {
   };
 
   const onGoogle = async () => {
-    if (Platform.OS === 'android') {
-      // Use expo-auth-session on Android (no google-services.json required)
-      await promptGoogleAsync();
-      return;
-    }
-    // Web and iOS: use @react-native-google-signin
     setBusy(true);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
