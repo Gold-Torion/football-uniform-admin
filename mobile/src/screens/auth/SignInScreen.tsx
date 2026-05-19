@@ -38,8 +38,7 @@ import { GoogleIcon } from '../../components/BrandIcons';
 import { Mail } from 'lucide-react-native';
 
 GoogleSignin.configure({
-  webClientId:     '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
-  androidClientId: '265836821890-kvvbh3o5nbv4uurcum4lurn0gp79c4t4.apps.googleusercontent.com',
+  webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
   offlineAccess: true,
 });
 
@@ -225,16 +224,18 @@ export function SignInScreen({ navigation }: Props) {
 
           {/* ── Bottom: CTAs ──────────────────────────────────────── */}
           <Animated.View style={ctaStyle} className="px-6 pb-6">
-            {/* Google Sign-In — all platforms */}
-            <Pressable
-              onPress={onGoogle}
-              disabled={busy}
-              className="flex-row items-center justify-center gap-3 bg-white rounded-2xl py-[14px] mb-3 active:opacity-80"
-              style={{ shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
-            >
-              <GoogleIcon size={20} />
-              <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
-            </Pressable>
+            {/* Google Sign-In — web and iOS only (Android causes crash without Firebase native setup) */}
+            {Platform.OS !== 'android' && (
+              <Pressable
+                onPress={onGoogle}
+                disabled={busy}
+                className="flex-row items-center justify-center gap-3 bg-white rounded-2xl py-[14px] mb-3 active:opacity-80"
+                style={{ shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+              >
+                <GoogleIcon size={20} />
+                <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
+              </Pressable>
+            )}
 
             {/* Apple Sign In — iOS only */}
             {Platform.OS === 'ios' && (
