@@ -17,8 +17,6 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
-
-WebBrowser.maybeCompleteAuthSession();
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -37,10 +35,15 @@ import { FeatureChips } from '../../components/FeatureChips';
 import { GoogleIcon } from '../../components/BrandIcons';
 import { Mail } from 'lucide-react-native';
 
-GoogleSignin.configure({
-  webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
-  offlineAccess: true,
-});
+WebBrowser.maybeCompleteAuthSession();
+
+// Only configure GoogleSignin for non-Android (native plugin not used on Android)
+if (Platform.OS !== 'android') {
+  GoogleSignin.configure({
+    webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+    offlineAccess: true,
+  });
+}
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignIn'>;
 
@@ -70,24 +73,21 @@ export function SignInScreen({ navigation }: Props) {
   const [busy, setBusy] = useState(false);
   const setSession       = useAuthStore((s) => s.setSession);
   const setTotpTempToken = useAuthStore((s) => s.setTotpTempToken);
-  const accessToken      = useAuthStore((s) => s.accessToken);
-  const user             = useAuthStore((s) => s.user);
   const enterAsGuest     = useAuthStore((s) => s.enterAsGuest);
 
-  // expo-auth-session Google flow — uses webClientId only to avoid SHA-1 requirement
-  // This opens a browser OAuth window that works on all platforms without google-services.json
-  const [googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
-    webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
-    scopes: ['profile', 'email'],
+  // expo-auth-session for Android (browser-based, no native module needed)
+  const [, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
+    androidClientId: '265836821890-kvvbh3o5nbv4uurcum4lurn0gp79c4t4.apps.googleusercontent.com',
+    webClientId:     '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+    scopes: ['openid', 'profile', 'email'],
   });
 
   useEffect(() => {
     if (googleResponse?.type === 'success') {
-      // Web client returns id_token directly
       const token = googleResponse.params?.id_token ?? googleResponse.params?.access_token;
       if (token) {
         setBusy(true);
-        AuthApi.google(token, Platform.OS as 'android' | 'ios' | 'web')
+        AuthApi.google(token, 'android')
           .then(async (result) => {
             if ('totpRequired' in result) {
               setTotpTempToken(result.tempToken);
@@ -95,12 +95,11 @@ export function SignInScreen({ navigation }: Props) {
               await setSession(result);
             }
           })
-          .catch(() => Alert.alert('Erro', 'Não foi possível fazer login com Google. Tente novamente.'))
+          .catch(() => Alert.alert('Erro', 'Não foi possível fazer login com Google.'))
           .finally(() => setBusy(false));
       }
     }
   }, [googleResponse]);
-
 
   // Entrance animations
   const taglineY       = useSharedValue(12);
@@ -114,8 +113,6 @@ export function SignInScreen({ navigation }: Props) {
     ctaY.value           = withDelay(640, withTiming(0, { duration: 520, easing: Easing.out(Easing.cubic) }));
     ctaOpacity.value     = withDelay(640, withTiming(1, { duration: 520 }));
   }, [taglineY, taglineOpacity, ctaY, ctaOpacity]);
-
-
 
   const taglineStyle = useAnimatedStyle(() => ({
     opacity:   taglineOpacity.value,
@@ -154,13 +151,19 @@ export function SignInScreen({ navigation }: Props) {
   };
 
   const onGoogle = async () => {
+    if (Platform.OS === 'android') {
+      // Use expo-auth-session on Android (no native module, no crashes)
+      await promptGoogleAsync();
+      return;
+    }
+    // Web and iOS: use @react-native-google-signin
     setBusy(true);
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.data?.idToken;
       if (!idToken) throw new Error('No idToken received');
-      const result = await AuthApi.google(idToken, Platform.OS as 'android' | 'ios' | 'web');
+      const result = await AuthApi.google(idToken, Platform.OS as 'ios' | 'web');
       if ('totpRequired' in result) {
         setTotpTempToken(result.tempToken);
       } else {
@@ -174,7 +177,6 @@ export function SignInScreen({ navigation }: Props) {
       setBusy(false);
     }
   };
-
 
   return (
     <View className="flex-1">
@@ -207,7 +209,7 @@ export function SignInScreen({ navigation }: Props) {
             </View>
 
             <Animated.View style={taglineStyle} className="px-8 mt-2 items-center">
-              <View className="flex-row items-center gap-2 mb-4">
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2, marginBottom: 4 }}>
                 <View style={{ height: 1, width: 32, backgroundColor: '#D4AF37', opacity: 0.6 }} />
                 <View style={{ height: 6, width: 6, borderRadius: 3, backgroundColor: '#D4AF37' }} />
                 <View style={{ height: 1, width: 32, backgroundColor: '#D4AF37', opacity: 0.6 }} />
@@ -224,17 +226,16 @@ export function SignInScreen({ navigation }: Props) {
 
           {/* ── Bottom: CTAs ──────────────────────────────────────── */}
           <Animated.View style={ctaStyle} className="px-6 pb-6">
-            {/* Google Sign-In — web and iOS only (Android causes crash without Firebase native setup) */}
-            
-              <Pressable
-                onPress={onGoogle}
-                disabled={busy}
-                className="flex-row items-center justify-center gap-3 bg-white rounded-2xl py-[14px] mb-3 active:opacity-80"
-                style={{ shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
-              >
-                <GoogleIcon size={20} />
-                <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
-              </Pressable>
+            {/* Google Sign-In — all platforms */}
+            <Pressable
+              onPress={onGoogle}
+              disabled={busy}
+              className="flex-row items-center justify-center gap-3 bg-white rounded-2xl py-[14px] mb-3 active:opacity-80"
+              style={{ shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+            >
+              <GoogleIcon size={20} />
+              <Text className="text-ink-1 font-bold text-[15px]">Continuar com Google</Text>
+            </Pressable>
 
             {/* Apple Sign In — iOS only */}
             {Platform.OS === 'ios' && (
