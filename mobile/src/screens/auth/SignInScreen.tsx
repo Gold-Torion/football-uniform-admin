@@ -12,7 +12,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
+
+WebBrowser.maybeCompleteAuthSession();
+
+GoogleSignin.configure({
+  webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
+  offlineAccess: true,
+});
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -139,8 +150,29 @@ export function SignInScreen({ navigation }: Props) {
   };
 
   const onGoogle = async () => {
-    // Use expo-auth-session for all platforms (no native module needed)
-    await promptGoogleAsync();
+    if (Platform.OS === 'android') {
+      await promptGoogleAsync();
+      return;
+    }
+    setBusy(true);
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.data?.idToken;
+      if (!idToken) throw new Error('No idToken received');
+      const result = await AuthApi.google(idToken, Platform.OS as 'ios' | 'web');
+      if ('totpRequired' in result) {
+        setTotpTempToken(result.tempToken);
+      } else {
+        await setSession(result);
+      }
+    } catch (err: unknown) {
+      const e = err as { code?: string };
+      if (e.code === statusCodes.SIGN_IN_CANCELLED) return;
+      Alert.alert('Erro', 'Não foi possível fazer login com o Google. Tente novamente.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
