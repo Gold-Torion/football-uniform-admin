@@ -12,10 +12,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import Animated, {
   Easing,
@@ -29,7 +25,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/auth.store';
 import { AuthApi } from '../../api/auth';
-import { Env } from '../../utils/env';
 import { BrandLogo } from '../../components/BrandLogo';
 import { FeatureChips } from '../../components/FeatureChips';
 import { GoogleIcon } from '../../components/BrandIcons';
@@ -37,13 +32,6 @@ import { Mail } from 'lucide-react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
-// Only configure GoogleSignin for non-Android (native plugin not used on Android)
-if (Platform.OS !== 'android') {
-  GoogleSignin.configure({
-    webClientId: '281984451863-eo8u5kpoe0sugt0et3ctcpsqegq4997l.apps.googleusercontent.com',
-    offlineAccess: true,
-  });
-}
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignIn'>;
 
@@ -151,31 +139,8 @@ export function SignInScreen({ navigation }: Props) {
   };
 
   const onGoogle = async () => {
-    if (Platform.OS === 'android') {
-      // Use expo-auth-session on Android (no native module, no crashes)
-      await promptGoogleAsync();
-      return;
-    }
-    // Web and iOS: use @react-native-google-signin
-    setBusy(true);
-    try {
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      const userInfo = await GoogleSignin.signIn();
-      const idToken = userInfo.data?.idToken;
-      if (!idToken) throw new Error('No idToken received');
-      const result = await AuthApi.google(idToken, Platform.OS as 'ios' | 'web');
-      if ('totpRequired' in result) {
-        setTotpTempToken(result.tempToken);
-      } else {
-        await setSession(result);
-      }
-    } catch (err: unknown) {
-      const e = err as { code?: string };
-      if (e.code === statusCodes.SIGN_IN_CANCELLED) return;
-      Alert.alert('Erro', 'Não foi possível fazer login com o Google. Tente novamente.');
-    } finally {
-      setBusy(false);
-    }
+    // Use expo-auth-session for all platforms (no native module needed)
+    await promptGoogleAsync();
   };
 
   return (
