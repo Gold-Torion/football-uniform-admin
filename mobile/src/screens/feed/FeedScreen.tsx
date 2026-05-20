@@ -449,7 +449,7 @@ export function FeedScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Image
-              source={require('../assets/title.png')}
+              source={require('../../assets/title.png')}
               style={{ width: 30, height: 30 }}
               resizeMode="contain"
             />
