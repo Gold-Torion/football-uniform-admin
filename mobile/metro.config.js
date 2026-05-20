@@ -6,16 +6,9 @@ const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname);
 
-// Replace native-only packages with stubs for platforms that don't support them.
+// On web, replace native-only packages with stubs so the build succeeds.
 const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  // Android: stub out @react-native-google-signin (uses expo-auth-session instead)
-  if (platform === 'android' && moduleName === '@react-native-google-signin/google-signin') {
-    return {
-      type: 'sourceFile',
-      filePath: path.resolve(__dirname, './src/shims/google-signin.web.js'),
-    };
-  }
   if (platform === 'web') {
     if (moduleName === '@react-native-google-signin/google-signin') {
       return {
