@@ -82,7 +82,7 @@ const EVENTS = [
 
 // ── ListingCard (2-column grid) ───────────────────────────────────────────────
 
-function ListingCard({
+export function ListingCard({
   item,
   onPress,
   isFav,
@@ -235,7 +235,7 @@ function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () 
       <Pressable
         onPress={onSell}
         style={({ pressed }) => ({
-          backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+          backgroundColor: pressed ? '#e8e8e8' : '#fff',
           borderRadius: 10, paddingVertical: 13,
           alignItems: 'center',
         })}
@@ -252,11 +252,11 @@ function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () 
 
 function EventsSection() {
   return (
-    <View style={{ paddingHorizontal: 16, marginBottom: 8, backgroundColor: '#1a3a1c', paddingTop: 16, paddingBottom: 4 }}>
-      <Text style={{ color: '#FFFFFF', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
+    <View style={{ paddingHorizontal: 16, marginBottom: 8, paddingTop: 16, paddingBottom: 4 }}>
+      <Text style={{ color: '#1C1A14', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
         Eventos
       </Text>
-      <Text style={{ color: '#FFFFFF', fontSize: 13, marginBottom: 14, opacity: 0.8 }}>
+      <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 14 }}>
         Encontros e feiras de colecionadores
       </Text>
       {EVENTS.map((ev) => (
@@ -445,11 +445,18 @@ export function FeedScreen() {
 
       {/* ── Top bar ── */}
       <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
-        {/* Logo + avatar */}
+        {/* Logo + arena dos mantos + avatar */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 20 }}>
-            Arena dos Mantos
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Image
+              source={require('../assets/title.png')}
+              style={{ width: 30, height: 30 }}
+              resizeMode="contain"
+            />
+            <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 18 }}>
+              Arena dos Mantos
+            </Text>
+          </View>
           {user && (
             <View style={{
               width: 34, height: 34, borderRadius: 17, backgroundColor: '#D4AF37',

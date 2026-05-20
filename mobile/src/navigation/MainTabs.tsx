@@ -1,14 +1,32 @@
+import { Image, View, Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList } from './types';
+import { Search, Plus, Home, User } from 'lucide-react-native';
 
 import { FeedScreen } from '../screens/feed/FeedScreen';
+import { SearchScreen } from '../screens/search/SearchScreen';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { NewListingScreen } from '../screens/listing/NewListingScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
-import { TabExploreIcon, TabHomeIcon, TabPlusIcon, TabProfileIcon } from '../components/BrandIcons';
+import { TabExploreIcon } from '../components/BrandIcons';
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+
+function LogoHeader() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <Image
+        source={require('../assets/title.png')}
+        style={{ width: 28, height: 28 }}
+        resizeMode="contain"
+      />
+      <Text style={{ color: colors.arenaDouradoClaro, fontWeight: '800', fontSize: 17 }}>
+        Arena dos Mantos
+      </Text>
+    </View>
+  );
+}
 
 export function MainTabs() {
   return (
@@ -34,9 +52,18 @@ export function MainTabs() {
         name="Feed"
         component={FeedScreen}
         options={{
-          title: 'Home',
           headerShown: false,
+          title: 'Home',
           tabBarIcon: ({ color, size }) => <TabExploreIcon color={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Search"
+        component={SearchScreen}
+        options={{
+          headerShown: false,
+          title: 'Buscar',
+          tabBarIcon: ({ color, size }) => <Search color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -44,15 +71,16 @@ export function MainTabs() {
         component={NewListingScreen}
         options={{
           title: 'Anunciar',
-          tabBarIcon: ({ color, size }) => <TabPlusIcon color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Plus color={color} size={size} />,
         }}
       />
       <Tab.Screen
         name="Home"
         component={HomeScreen}
         options={{
+          headerTitle: () => <LogoHeader />,
           title: 'Minhas camisas',
-          tabBarIcon: ({ color, size }) => <TabHomeIcon color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
       <Tab.Screen
@@ -60,7 +88,7 @@ export function MainTabs() {
         component={ProfileScreen}
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color, size }) => <TabProfileIcon color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
     </Tab.Navigator>
