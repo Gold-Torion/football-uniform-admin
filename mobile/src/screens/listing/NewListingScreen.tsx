@@ -162,12 +162,12 @@ function RadioGroup({ options, value, onChange }: {
             onPress={() => onChange(o.value)}
             style={{
               flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
-              backgroundColor: active ? '#335336' : '#EFEFEF',
+              backgroundColor: active ? '#D4AF37' : '#EFEFEF',
               borderWidth: 1,
-              borderColor: active ? '#335336' : '#E5DCC4',
+              borderColor: active ? '#D4AF37' : '#E5DCC4',
             }}
           >
-            <Text style={{ color: active ? '#fff' : '#5C5547', fontWeight: '700', fontSize: 14 }}>
+            <Text style={{ color: active ? '#1C1A14' : '#5C5547', fontWeight: '700', fontSize: 14 }}>
               {o.label}
             </Text>
           </Pressable>
@@ -270,11 +270,11 @@ function SizeGrid({ value, onChange, error }: { value: string; onChange: (v: str
               onPress={() => onChange(s)}
               style={{
                 paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10,
-                backgroundColor: active ? '#335336' : '#EFEFEF',
-                borderWidth: 1, borderColor: active ? '#335336' : '#E5DCC4',
+                backgroundColor: active ? '#D4AF37' : '#EFEFEF',
+                borderWidth: 1, borderColor: active ? '#D4AF37' : '#E5DCC4',
               }}
             >
-              <Text style={{ color: active ? '#fff' : '#5C5547', fontWeight: '700', fontSize: 13 }}>{s}</Text>
+              <Text style={{ color: active ? '#1C1A14' : '#5C5547', fontWeight: '700', fontSize: 13 }}>{s}</Text>
             </Pressable>
           );
         })}
