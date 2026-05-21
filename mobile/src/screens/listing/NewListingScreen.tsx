@@ -111,9 +111,9 @@ const MODELS = [
 const CONDITIONS = [
   { value: 'COM_ETIQUETA', label: 'Com etiqueta', desc: 'Nunca usada, com etiqueta original do fabricante ainda fixada.' },
   { value: 'PERFEITA',     label: 'Perfeita',     desc: 'Sem nenhum sinal de uso. Estado impecável, indistinguível de nova.' },
-  { value: 'EXCELENTE',    label: 'Excelente',    desc: 'Pouquíssimos sinais de uso. Praticamente nova, sem defeitos.' },
-  { value: 'BOA',          label: 'Boa',          desc: 'Sinais leves de uso normal. Sem rasgos, furos ou manchas relevantes.' },
-  { value: 'REGULAR',      label: 'Regular',      desc: 'Sinais de uso visíveis. Pode ter desbotamento leve ou marcas de uso.' },
+  { value: 'EXCELENTE',    label: 'Excelente',    desc: 'Pouquíssimos sinais de uso, alguns pequenos fios puxados ou bolinhas.' },
+  { value: 'BOA',          label: 'Boa',          desc: 'Fios puxados e bolinhas notáveis, desgastes no patrocínio ou número nas costas.' },
+  { value: 'REGULAR',      label: 'Regular',      desc: 'Necessário reforma, pode possuír defeitos no tecido ou estar sem patrocínio ou número.' },
   { value: 'DESGASTADA',   label: 'Desgastada',   desc: 'Uso intenso. Apresenta defeitos, manchas ou desgaste visíveis.' },
 ];
 
