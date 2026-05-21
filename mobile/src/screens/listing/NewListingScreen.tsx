@@ -337,56 +337,17 @@ export function NewListingScreen() {
       quality: 0.8,
     });
     if (result.canceled || !result.assets[0]) return;
-
     const asset = result.assets[0];
-    const ext   = (asset.uri.split('.').pop() ?? 'jpg').toLowerCase();
-    const mime  = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
-
-    if (!createdListingId) {
-      webAlert('Atenção', 'Preencha os dados do anúncio antes de adicionar fotos.');
-      return;
-    }
-
-    setUploadingIdx(slotIndex);
-    try {
-      const { uploadUrl, key } = await ListingsApi.presignPhoto(createdListingId, mime);
-
-      const blob = await fetch(asset.uri).then((r) => r.blob());
-      const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': mime },
-        body: blob,
-      });
-      if (!uploadRes.ok) throw new Error('Upload failed');
-
-      await ListingsApi.confirmPhoto(createdListingId, key);
-
-      setPhotoUris((prev) => {
-        const next = [...prev];
-        next[slotIndex] = asset.uri;
-        return next;
-      });
-      setPhotoKeys((prev) => {
-        const next = [...prev];
-        next[slotIndex] = key;
-        return next;
-      });
-    } catch {
-      webAlert('Erro', 'Não foi possível enviar a foto. Tente novamente.');
-    } finally {
-      setUploadingIdx(null);
-    }
+    setPhotoUris((prev) => {
+      const next = [...prev];
+      next[slotIndex] = asset.uri;
+      return next;
+    });
   }
 
-  async function removePhoto(slotIndex: number) {
-    if (!createdListingId || !photoKeys[slotIndex]) return;
-    try {
-      await ListingsApi.deletePhoto(createdListingId, photoKeys[slotIndex]);
-      setPhotoUris((prev) => prev.filter((_, i) => i !== slotIndex));
-      setPhotoKeys((prev) => prev.filter((_, i) => i !== slotIndex));
-    } catch {
-      webAlert('Erro', 'Não foi possível remover a foto.');
-    }
+  function removePhoto(slotIndex: number) {
+    setPhotoUris((prev) => prev.filter((_, i) => i !== slotIndex));
+    setPhotoKeys((prev) => prev.filter((_, i) => i !== slotIndex));
   }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -470,14 +431,34 @@ export function NewListingScreen() {
         nonVerifiedSupplierAck: form.nonVerifiedAck,
       });
 
+      const listingId = result.listing.listingId;
+
+      // Upload any pre-selected photos
+      for (let i = 0; i < photoUris.length; i++) {
+        if (!photoUris[i]) continue;
+        try {
+          setUploadingIdx(i);
+          const uri  = photoUris[i];
+          const ext  = (uri.split('.').pop() ?? 'jpg').toLowerCase();
+          const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+          const { uploadUrl, key } = await ListingsApi.presignPhoto(listingId, mime);
+          const blob = await fetch(uri).then((r) => r.blob());
+          await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': mime }, body: blob });
+          await ListingsApi.confirmPhoto(listingId, key);
+          setPhotoKeys((prev) => { const next = [...prev]; next[i] = key; return next; });
+        } catch { /* skip failed photo */ }
+      }
+      setUploadingIdx(null);
+
       setListingsCount(result.listingsActiveCount);
-      setCreatedListingId(result.listing.listingId);
+      setCreatedListingId(listingId);
       setShowSuccess(true);
       scrollRef.current?.scrollTo({ y: 0, animated: true });
     } catch {
       webAlert('Erro', 'Não foi possível publicar o anúncio. Verifique sua conexão.');
     } finally {
       setBusy(false);
+      setUploadingIdx(null);
     }
   };
 
@@ -559,20 +540,6 @@ export function NewListingScreen() {
 
         {/* Fotos */}
         <SectionTitle text={`FOTOS (${photoUris.length}/${MAX_PHOTOS})`} />
-        {!createdListingId ? (
-          <View style={{
-            alignItems: 'center', justifyContent: 'center',
-            padding: 20, borderRadius: 12,
-            borderWidth: 1.5, borderColor: '#E5DCC4', borderStyle: 'dashed',
-            backgroundColor: '#fff',
-          }}>
-            <Camera size={28} color="#9C9486" style={{ marginBottom: 6 }} />
-            <Text style={{ color: '#9C9486', fontSize: 13, fontWeight: '600' }}>Foto principal</Text>
-            <Text style={{ color: '#335336', fontSize: 11, marginTop: 6, textAlign: 'center' }}>
-              Publique o anúncio primeiro para adicionar fotos
-            </Text>
-          </View>
-        ) : (<>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
           {Array.from({ length: Math.min(MAX_PHOTOS, photoUris.length + (photoUris.length < MAX_PHOTOS ? 1 : 0)) }).map((_, i) => {
             const hasPhoto = !!photoUris[i];
@@ -587,7 +554,7 @@ export function NewListingScreen() {
                   aspectRatio: 1,
                   borderRadius: 12,
                   borderWidth: 1.5,
-                  borderColor: hasPhoto ? '#335336' : '#E5DCC4',
+                  borderColor: hasPhoto ? '#D4AF37' : '#E5DCC4',
                   borderStyle: hasPhoto ? 'solid' : 'dashed',
                   backgroundColor: '#fff',
                   overflow: 'hidden',
@@ -616,10 +583,9 @@ export function NewListingScreen() {
             );
           })}
         </View>
-        <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 6 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 6 }}>
           Toque para adicionar · Toque na foto para remover · Máx. {MAX_PHOTOS} fotos
         </Text>
-        </> )}
 
         {/* Time ou Seleção */}
         <SectionTitle text="TIME OU SELEÇÃO" />
@@ -859,7 +825,14 @@ export function NewListingScreen() {
           }}
         >
           {busy
-            ? <ActivityIndicator color="#fff" />
+            ? <>
+                <ActivityIndicator color="#fff" />
+                {uploadingIdx !== null && (
+                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, marginTop: 4 }}>
+                    Enviando foto {uploadingIdx + 1} de {photoUris.length}...
+                  </Text>
+                )}
+              </>
             : <Text style={{ color: '#fff', fontWeight: '800', fontSize: 16 }}>
                 {hasErrors ? `Publicar anúncio (${missingCount} campo${missingCount !== 1 ? 's' : ''})` : 'Publicar anúncio ✓'}
               </Text>
