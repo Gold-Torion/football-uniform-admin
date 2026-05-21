@@ -540,42 +540,77 @@ export function NewListingScreen() {
 
         {/* Fotos */}
         <SectionTitle text={`FOTOS (${photoUris.length}/${MAX_PHOTOS})`} />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-          {Array.from({ length: Math.min(MAX_PHOTOS, photoUris.length + (photoUris.length < MAX_PHOTOS ? 1 : 0)) }).map((_, i) => {
-            const hasPhoto = !!photoUris[i];
-            const isUploading = uploadingIdx === i;
+
+        {/* Main photo slot */}
+        {(() => {
+          const hasPhoto = !!photoUris[0];
+          const isUploading = uploadingIdx === 0;
+          return (
+            <Pressable
+              onPress={() => hasPhoto ? removePhoto(0) : pickAndUpload(0)}
+              disabled={isUploading}
+              style={{
+                width: '100%', aspectRatio: 2.2,
+                borderRadius: 12, borderWidth: 1.5,
+                borderColor: hasPhoto ? '#D4AF37' : '#E5DCC4',
+                borderStyle: hasPhoto ? 'solid' : 'dashed',
+                backgroundColor: '#fff', overflow: 'hidden',
+                alignItems: 'center', justifyContent: 'center',
+                marginBottom: 8,
+              }}
+            >
+              {isUploading ? <ActivityIndicator color="#335336" /> : hasPhoto ? (
+                <>
+                  <Image source={{ uri: photoUris[0] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                  <View style={{ position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 10, padding: 3 }}>
+                    <X size={12} color="#fff" />
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Camera size={32} color="#9C9486" />
+                  <Text style={{ color: '#9C9486', fontSize: 13, fontWeight: '600', marginTop: 6 }}>Foto principal</Text>
+                </>
+              )}
+            </Pressable>
+          );
+        })()}
+
+        {/* Secondary named slots */}
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {[
+            { idx: 1, label: 'Foto costas', gold: false },
+            { idx: 2, label: 'Foto etiqueta', gold: false },
+            { idx: 3, label: 'Mais fotos', gold: true },
+          ].map(({ idx, label, gold }) => {
+            const hasPhoto = !!photoUris[idx];
+            const isUploading = uploadingIdx === idx;
             return (
               <Pressable
-                key={i}
-                onPress={() => hasPhoto ? removePhoto(i) : pickAndUpload(i)}
+                key={idx}
+                onPress={() => hasPhoto ? removePhoto(idx) : pickAndUpload(idx)}
                 disabled={isUploading}
                 style={{
-                  width: i === 0 ? '60%' : '23%',
-                  aspectRatio: 1,
-                  borderRadius: 12,
-                  borderWidth: 1.5,
-                  borderColor: hasPhoto ? '#D4AF37' : '#E5DCC4',
+                  flex: 1, aspectRatio: 1,
+                  borderRadius: 12, borderWidth: 1.5,
+                  borderColor: hasPhoto ? '#D4AF37' : gold ? '#D4AF37' : '#E5DCC4',
                   borderStyle: hasPhoto ? 'solid' : 'dashed',
-                  backgroundColor: '#fff',
-                  overflow: 'hidden',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  backgroundColor: '#fff', overflow: 'hidden',
+                  alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                {isUploading ? (
-                  <ActivityIndicator color="#335336" />
-                ) : hasPhoto ? (
+                {isUploading ? <ActivityIndicator color="#335336" /> : hasPhoto ? (
                   <>
-                    <Image source={{ uri: photoUris[i] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                    <Image source={{ uri: photoUris[idx] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 10, padding: 2 }}>
                       <X size={10} color="#fff" />
                     </View>
                   </>
                 ) : (
                   <>
-                    <Camera size={i === 0 ? 28 : 18} color="#9C9486" />
-                    <Text style={{ color: '#9C9486', fontSize: 9, marginTop: 2 }}>
-                      {i === 0 ? 'principal' : `foto ${i + 1}`}
+                    <Camera size={20} color={gold ? '#D4AF37' : '#9C9486'} />
+                    <Text style={{ color: gold ? '#D4AF37' : '#9C9486', fontSize: 10, fontWeight: gold ? '700' : '400', marginTop: 4, textAlign: 'center' }}>
+                      {label}
                     </Text>
                   </>
                 )}
@@ -583,6 +618,44 @@ export function NewListingScreen() {
             );
           })}
         </View>
+
+        {/* Extra slots (4-7) shown when slot 3 is filled */}
+        {photoUris.length >= 4 && (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+            {Array.from({ length: Math.min(MAX_PHOTOS - 4, photoUris.length - 3 + 1) }).map((_, j) => {
+              const i = j + 4;
+              const hasPhoto = !!photoUris[i];
+              const isUploading = uploadingIdx === i;
+              return (
+                <Pressable
+                  key={i}
+                  onPress={() => hasPhoto ? removePhoto(i) : pickAndUpload(i)}
+                  disabled={isUploading}
+                  style={{
+                    width: '23%', aspectRatio: 1,
+                    borderRadius: 12, borderWidth: 1.5,
+                    borderColor: hasPhoto ? '#D4AF37' : '#E5DCC4',
+                    borderStyle: hasPhoto ? 'solid' : 'dashed',
+                    backgroundColor: '#fff', overflow: 'hidden',
+                    alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  {isUploading ? <ActivityIndicator color="#335336" /> : hasPhoto ? (
+                    <>
+                      <Image source={{ uri: photoUris[i] }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                      <View style={{ position: 'absolute', top: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 10, padding: 2 }}>
+                        <X size={10} color="#fff" />
+                      </View>
+                    </>
+                  ) : (
+                    <Camera size={16} color="#9C9486" />
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+
         <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 11, marginTop: 6 }}>
           Toque para adicionar · Toque na foto para remover · Máx. {MAX_PHOTOS} fotos
         </Text>
