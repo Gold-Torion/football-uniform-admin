@@ -235,12 +235,12 @@ function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () 
       <Pressable
         onPress={onSell}
         style={({ pressed }) => ({
-          backgroundColor: pressed ? '#e8e8e8' : '#fff',
+          backgroundColor: pressed ? '#555' : '#3c3c3c',
           borderRadius: 10, paddingVertical: 13,
           alignItems: 'center',
         })}
       >
-        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+        <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>
           Anunciar Camisa
         </Text>
       </Pressable>
