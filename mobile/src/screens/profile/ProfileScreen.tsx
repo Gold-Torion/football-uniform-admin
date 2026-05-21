@@ -40,22 +40,26 @@ function Row({ label, value, onPress, danger, icon }: {
       onPress={onPress}
       disabled={!onPress}
       style={({ pressed }) => ({
+        backgroundColor: pressed ? '#EFEFEF' : '#fff',
+      })}
+    >
+      <View style={{
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingVertical: 16,
-        paddingHorizontal: 20,
-        backgroundColor: pressed ? '#EFEFEF' : '#fff',
-      })}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-        {icon}
-        <Text style={{ fontSize: 15, color: danger ? '#EF4444' : '#1C1A14', fontWeight: danger ? '600' : '400' }}>
-          {label}
-        </Text>
+        paddingLeft: 20,
+        paddingRight: 16,
+      }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+          {icon}
+          <Text style={{ fontSize: 15, color: danger ? '#EF4444' : '#1C1A14', fontWeight: danger ? '600' : '400' }}>
+            {label}
+          </Text>
+        </View>
+        {value && <Text style={{ fontSize: 14, color: '#9C9486' }}>{value}</Text>}
+        {onPress && !danger && <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>}
       </View>
-      {value && <Text style={{ fontSize: 14, color: '#9C9486' }}>{value}</Text>}
-      {onPress && !danger && <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>}
     </Pressable>
   );
 }
@@ -71,6 +75,7 @@ function Card({ children }: { children: React.ReactNode }) {
       borderRadius: 16,
       borderWidth: 1,
       borderColor: '#E5DCC4',
+      overflow: 'hidden',
       marginBottom: 12,
     }}>
       {children}
@@ -410,21 +415,21 @@ export function ProfileScreen() {
           borderRadius: 16,
           borderWidth: 1,
           borderColor: '#E5DCC4',
+          overflow: 'hidden',
           marginBottom: 12,
         }}>
           <Pressable
             onPress={onSignOut}
             android_ripple={{ color: '#FEE2E2' }}
             style={({ pressed }) => ({
-              paddingVertical: 28,
-              alignItems: 'center',
-              justifyContent: 'center',
               backgroundColor: pressed ? '#FEE2E2' : 'transparent',
             })}
           >
-            <Text style={{ fontSize: 20, color: '#EF4444', fontWeight: '700', textAlign: 'center', width: '100%' }}>
-              Sair da conta
-            </Text>
+            <View style={{ paddingVertical: 28, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontSize: 20, color: '#EF4444', fontWeight: '700', textAlign: 'center' }}>
+                Sair da conta
+              </Text>
+            </View>
           </Pressable>
         </View>
 
