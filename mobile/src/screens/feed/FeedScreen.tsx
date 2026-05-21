@@ -253,7 +253,7 @@ function HeroSection({ onExplore, onSell }: { onExplore: () => void; onSell: () 
 function EventsSection() {
   return (
     <View style={{ paddingHorizontal: 16, marginBottom: 8, paddingTop: 16, paddingBottom: 4 }}>
-      <Text style={{ color: '#1C1A14', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
+      <Text style={{ color: '#fff', fontWeight: '900', fontSize: 18, marginBottom: 4 }}>
         Eventos
       </Text>
       <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 14 }}>
@@ -608,11 +608,11 @@ export function FeedScreen() {
           {/* Latest listings */}
           <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <Text style={{ color: '#1C1A14', fontWeight: '900', fontSize: 17 }}>
+              <Text style={{ color: '#fff', fontWeight: '900', fontSize: 17 }}>
                 As últimas camisas publicadas
               </Text>
               <Pressable onPress={() => setCatalogMode(true)}>
-                <Text style={{ color: '#335336', fontWeight: '700', fontSize: 13 }}>Ver todos →</Text>
+                <Text style={{ color: '#D4AF37', fontWeight: '700', fontSize: 13 }}>Ver todos →</Text>
               </Pressable>
             </View>
 

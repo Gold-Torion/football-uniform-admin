@@ -286,7 +286,7 @@ export function ProfileScreen() {
 
         {/* CEP de envio */}
         <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
-          ENDEREÇO DE ENVIO
+          ENDEREÇO
         </Text>
         <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
