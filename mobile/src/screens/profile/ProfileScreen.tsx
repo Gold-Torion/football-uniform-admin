@@ -43,8 +43,8 @@ function Row({ label, value, onPress, danger, icon }: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingVertical: 14,
-        paddingHorizontal: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
         backgroundColor: pressed ? '#EFEFEF' : '#fff',
       })}
     >
@@ -71,7 +71,6 @@ function Card({ children }: { children: React.ReactNode }) {
       borderRadius: 16,
       borderWidth: 1,
       borderColor: '#E5DCC4',
-      overflow: 'hidden',
       marginBottom: 12,
     }}>
       {children}
