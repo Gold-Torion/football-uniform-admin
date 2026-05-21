@@ -86,7 +86,8 @@ export function MainTabs() {
         options={{
           headerTitle: () => <LogoHeader />,
           title: 'Minhas camisas',
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+          tabBarIcon: ({ size }) => <Home color="#D4AF37" size={size} />,
+          tabBarLabel: () => <Text style={{ color: '#fff', fontSize: 11, fontWeight: '600' }}>Minhas camisas</Text>,
         }}
       />
       <Tab.Screen
