@@ -447,15 +447,17 @@ export function FeedScreen() {
       <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
         {/* Logo + arena dos mantos + avatar */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Image
-              source={require('../../assets/title.png')}
-              style={{ width: 30, height: 30 }}
+              source={require('../../assets/stadium.png')}
+              style={{ width: 36, height: 36 }}
               resizeMode="contain"
             />
-            <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 18 }}>
-              Arena dos Mantos
-            </Text>
+            <Image
+              source={require('../../assets/title.png')}
+              style={{ width: 90, height: 33 }}
+              resizeMode="contain"
+            />
           </View>
           {user && (
             <View style={{

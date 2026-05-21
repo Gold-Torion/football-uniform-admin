@@ -15,15 +15,17 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 function LogoHeader() {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <Image
-        source={require('../assets/title.png')}
-        style={{ width: 28, height: 28 }}
+        source={require('../assets/stadium.png')}
+        style={{ width: 32, height: 32 }}
         resizeMode="contain"
       />
-      <Text style={{ color: colors.arenaDouradoClaro, fontWeight: '800', fontSize: 17 }}>
-        Arena dos Mantos
-      </Text>
+      <Image
+        source={require('../assets/title.png')}
+        style={{ width: 80, height: 29 }}
+        resizeMode="contain"
+      />
     </View>
   );
 }
