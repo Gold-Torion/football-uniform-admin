@@ -8,7 +8,6 @@ import { SearchScreen } from '../screens/search/SearchScreen';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { NewListingScreen } from '../screens/listing/NewListingScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
-import { TabExploreIcon } from '../components/BrandIcons';
 import { colors } from '../theme/colors';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -56,7 +55,13 @@ export function MainTabs() {
         options={{
           headerShown: false,
           title: 'Home',
-          tabBarIcon: ({ color, size }) => <TabExploreIcon color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('../assets/stadium.png')}
+              style={{ width: size, height: size, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tab.Screen
