@@ -4,7 +4,6 @@ import type { MainTabParamList } from './types';
 import { Search, Plus, Home, User } from 'lucide-react-native';
 
 import { FeedScreen } from '../screens/feed/FeedScreen';
-import { SearchScreen } from '../screens/search/SearchScreen';
 import { HomeScreen } from '../screens/home/HomeScreen';
 import { NewListingScreen } from '../screens/listing/NewListingScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
@@ -66,7 +65,7 @@ export function MainTabs() {
       />
       <Tab.Screen
         name="Search"
-        component={SearchScreen}
+        component={FeedScreen}
         options={{
           headerShown: false,
           title: 'Buscar',
