@@ -188,7 +188,7 @@ export function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
 
         {/* Avatar + info */}
@@ -259,7 +259,7 @@ export function ProfileScreen() {
         </View>
 
         {/* Conta */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4 }}>
           CONTA
         </Text>
         <Card>
@@ -273,7 +273,7 @@ export function ProfileScreen() {
         </Card>
 
         {/* Quiz — secção própria */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           QUIZ
         </Text>
         <Card>
@@ -281,7 +281,7 @@ export function ProfileScreen() {
         </Card>
 
         {/* CEP de envio */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           ENDEREÇO DE ENVIO
         </Text>
         <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
@@ -325,7 +325,7 @@ export function ProfileScreen() {
         </View>
 
         {/* Segurança */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           SEGURANÇA
         </Text>
         <Card>
@@ -346,7 +346,7 @@ export function ProfileScreen() {
         </Card>
 
         {/* Cupons */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           CUPONS
         </Text>
         <Card>
@@ -354,7 +354,7 @@ export function ProfileScreen() {
         </Card>
 
         {/* Novidades */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           NOVIDADES
         </Text>
         <Pressable
@@ -396,7 +396,7 @@ export function ProfileScreen() {
         </Pressable>
 
         {/* Legal */}
-        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           LEGAL
         </Text>
         <Card>

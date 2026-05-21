@@ -140,7 +140,7 @@ function SectionTitle({ text, error }: { text: string; error?: boolean }) {
     <Text style={{
       fontSize: 11, fontWeight: '700', letterSpacing: 1,
       marginTop: 20, marginBottom: 8,
-      color: error ? ERR_COLOR : '#9C9486',
+      color: error ? ERR_COLOR : 'rgba(255,255,255,0.55)',
     }}>
       {text}{error ? '  ←  obrigatório' : ''}
     </Text>
@@ -484,7 +484,7 @@ export function NewListingScreen() {
   const e = attempted ? errors : {} as typeof errors;
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Step indicator */}
       <View style={{ backgroundColor: '#fff', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: '#E5DCC4' }}>
@@ -841,7 +841,7 @@ export function NewListingScreen() {
       {/* Submit button */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#EFEFEF', paddingHorizontal: 16, paddingBottom: 24, paddingTop: 12,
+        backgroundColor: '#3c3c3c', paddingHorizontal: 16, paddingBottom: 24, paddingTop: 12,
         borderTopWidth: 1, borderColor: '#E5DCC4',
       }}>
         {/* Missing fields counter shown before first attempt */}

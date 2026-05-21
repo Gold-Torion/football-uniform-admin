@@ -441,7 +441,7 @@ export function FeedScreen() {
   }, [filtered]);
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* ── Top bar ── */}
       <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
@@ -694,7 +694,7 @@ export function FeedScreen() {
               <RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} tintColor="#335336" colors={['#335336']} />
             }
             ListHeaderComponent={
-              <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '700', marginLeft: 16, marginBottom: 12 }}>
+              <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: '700', marginLeft: 16, marginBottom: 12 }}>
                 {filtered.length} camisa{filtered.length !== 1 ? 's' : ''} disponíve{filtered.length !== 1 ? 'is' : 'l'}
               </Text>
             }

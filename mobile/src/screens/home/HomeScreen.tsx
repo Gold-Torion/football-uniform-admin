@@ -286,7 +286,7 @@ export function HomeScreen() {
   const toggleOpen = () => { setOpen((v) => !v); };
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* ── Header card ─────────────────────────────────── */}
