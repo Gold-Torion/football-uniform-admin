@@ -364,7 +364,7 @@ export function ProfileScreen() {
             borderWidth: 1,
             borderColor: '#E5DCC4',
             marginBottom: 12,
-            padding: 16,
+            padding: 20,
             flexDirection: 'row',
             alignItems: 'center',
             gap: 14,
@@ -410,7 +410,6 @@ export function ProfileScreen() {
           borderRadius: 16,
           borderWidth: 1,
           borderColor: '#E5DCC4',
-          overflow: 'hidden',
           marginBottom: 12,
         }}>
           <Pressable
