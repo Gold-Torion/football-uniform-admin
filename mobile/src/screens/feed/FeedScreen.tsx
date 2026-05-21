@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { Heart, MapPin, Calendar, SlidersHorizontal, ChevronDown, ChevronUp, Star, Shirt, Building2, Search, X } from 'lucide-react-native';
 
@@ -339,6 +339,8 @@ function SellCTA({ onRegister, onLearnMore }: { onRegister: () => void; onLearnM
 
 export function FeedScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const route = useRoute();
+  const isBuscarTab = route.name === 'Search';
   const user    = useAuthStore((s) => s.user);
   const isGuest = useAuthStore((s) => s.isGuest);
   const enterAsGuest = useAuthStore((s) => s.enterAsGuest);
@@ -357,7 +359,7 @@ export function FeedScreen() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [condFilter,  setCondFilter]  = useState<string | null>(null);
   const [sizeFilter,  setSizeFilter]  = useState<string | null>(null);
-  const [catalogMode, setCatalogMode] = useState(false);
+  const [catalogMode, setCatalogMode] = useState(isBuscarTab);
 
   const hasLoaded   = useRef(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -375,7 +377,10 @@ export function FeedScreen() {
     }
   }, []);
 
-  useFocusEffect(useCallback(() => { void load(); }, [load]));
+  useFocusEffect(useCallback(() => {
+    void load();
+    if (isBuscarTab) setCatalogMode(true);
+  }, [load, isBuscarTab]));
 
   const runSearch = useCallback(async (q: string) => {
     if (q.trim().length < 2) { setIsSearchMode(false); setSearchResults([]); return; }
