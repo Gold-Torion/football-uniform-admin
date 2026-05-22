@@ -1,4 +1,4 @@
-import { Image, View, Text } from 'react-native';
+import { Image, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { MainTabParamList } from './types';
 import { Search, Plus, Home, User } from 'lucide-react-native';
@@ -86,8 +86,7 @@ export function MainTabs() {
         options={{
           headerTitle: () => <LogoHeader />,
           title: 'Minhas camisas',
-          tabBarIcon: ({ size }) => <Home color="#D4AF37" size={size} />,
-          tabBarLabel: () => <Text style={{ color: '#fff', fontSize: 11, fontWeight: '600' }}>Minhas camisas</Text>,
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
       <Tab.Screen
