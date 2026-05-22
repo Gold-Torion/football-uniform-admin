@@ -27,7 +27,7 @@ const MAX_PHOTOS = 8;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const VERIFIED_SUPPLIERS = ['NIKE', 'ADIDAS', 'PUMA'];
+const VERIFIED_SUPPLIERS = ['NIKE', 'ADIDAS', 'PUMA', 'NEW_BALANCE'];
 
 const COUNTRIES: Record<string, string[]> = {
   AMERICA: [
