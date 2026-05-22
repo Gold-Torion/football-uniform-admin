@@ -129,7 +129,7 @@ export function ProfileScreen() {
     if (clean.length !== 8) { webAlert('CEP inválido', 'Digite um CEP com 8 dígitos.'); return; }
     setSavingCep(true);
     try {
-      const updated = await UsersApi.updateSellerCep(clean);
+      const updated = await UsersApi.updateSellerCep(clean, ruaInput, numeroInput, cidadeInput, estadoInput);
       if (user && accessToken && refreshToken) {
         await setSession({ accessToken, refreshToken, user: { ...user, ...updated } });
       }
