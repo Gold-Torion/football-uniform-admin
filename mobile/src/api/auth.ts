@@ -33,7 +33,7 @@ export const AuthApi = {
   totpAuthenticate(tempToken: string, code: string): Promise<AuthSession> {
     return api.post('/auth/totp/authenticate', { tempToken, code }).then((r) => r.data);
   },
-  totpSetup(): Promise<{ qrCodeDataUrl: string }> {
+  totpSetup(): Promise<{ qrCodeDataUrl: string; secret: string }> {
     return api.post('/auth/totp/setup').then((r) => r.data);
   },
   totpActivate(code: string): Promise<void> {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Clipboard,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -29,15 +30,24 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
 
   const [step, setStep]               = useState<Step>('qr');
   const [qrDataUrl, setQrDataUrl]     = useState('');
+  const [secret, setSecret]           = useState('');
+  const [copied, setCopied]           = useState(false);
   const [code, setCode]               = useState('');
   const [loadingQr, setLoadingQr]     = useState(false);
   const [loadingOk, setLoadingOk]     = useState(false);
 
+  const copySecret = () => {
+    Clipboard.setString(secret);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const startSetup = async () => {
     setLoadingQr(true);
     try {
-      const { qrCodeDataUrl } = await AuthApi.totpSetup();
+      const { qrCodeDataUrl, secret: s } = await AuthApi.totpSetup();
       setQrDataUrl(qrCodeDataUrl);
+      setSecret(s);
       setStep('qr');
     } catch {
       Alert.alert('Erro', 'Não foi possível iniciar o setup. Tente novamente.');
@@ -124,20 +134,36 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
                   </View>
                 ) : null}
 
-                <View
-                  style={{
-                    backgroundColor: '#FFF8E7',
-                    borderRadius: 12,
-                    padding: 16,
-                    borderWidth: 1,
-                    borderColor: '#E5DCC4',
-                    marginBottom: 32,
-                  }}
-                >
+                {/* Manual entry section — for single-device users */}
+                <View style={{ backgroundColor: '#F0F7F0', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#335336', marginBottom: 16 }}>
+                  <Text style={{ color: '#335336', fontWeight: '800', fontSize: 13, marginBottom: 6 }}>
+                    📱 Usando o app neste celular?
+                  </Text>
+                  <Text style={{ color: '#4a6b4c', fontSize: 13, lineHeight: 20, marginBottom: 12 }}>
+                    Se não consegue escanear o QR, abra o Google Authenticator → toque em{' '}
+                    <Text style={{ fontWeight: '700' }}>+ → Inserir chave de configuração</Text>{' '}
+                    e cole o código abaixo:
+                  </Text>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 8, padding: 12, borderWidth: 1, borderColor: '#E5DCC4', flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <Text style={{ flex: 1, fontSize: 13, color: '#1C1A14', fontFamily: 'monospace', letterSpacing: 1 }} selectable>
+                      {secret}
+                    </Text>
+                    <Pressable
+                      onPress={copySecret}
+                      style={{ backgroundColor: copied ? '#335336' : '#D4AF37', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}
+                    >
+                      <Text style={{ color: copied ? '#fff' : '#211B15', fontWeight: '700', fontSize: 12 }}>
+                        {copied ? '✓ Copiado' : 'Copiar'}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View style={{ backgroundColor: '#FFF8E7', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#E5DCC4', marginBottom: 32 }}>
                   <Text style={{ color: '#6B6357', fontSize: 13, lineHeight: 20 }}>
                     💡 Não tem o app?{' '}
                     <Text style={{ fontWeight: '700' }}>
-                      Baixe "Google Authenticator" na App Store ou Google Play, depois escaneie.
+                      Baixe "Google Authenticator" na App Store ou Google Play, depois escaneie ou insira o código manualmente.
                     </Text>
                   </Text>
                 </View>
