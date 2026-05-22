@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { webAlert } from '../../utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { ShoppingBag, Shield, ShieldOff, Camera, AtSign, MapPin, HelpCircle } from 'lucide-react-native';
+import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
-import { QRScannerScreen } from '../coupon/QRScannerScreen';
+import { CouponsApi } from '../../api/coupons';
 import { TotpSetupScreen } from '../auth/TotpSetupScreen';
 import { RatingsApi, type UserRatingSummary } from '../../api/ratings';
 import { UsersApi } from '../../api/users';
@@ -88,8 +88,29 @@ export function ProfileScreen() {
   const clear      = useAuthStore((s) => s.clear);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const [scannerVisible, setScannerVisible]     = useState(false);
   const [totpSetupVisible, setTotpSetupVisible] = useState(false);
+  const [couponCode,    setCouponCode]    = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
+  const [couponError,   setCouponError]   = useState<string | null>(null);
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    setCouponSuccess(null);
+    try {
+      const result = await CouponsApi.redeem(code);
+      setCouponSuccess(`Cupom "${result.code}" aplicado! ${result.discountPct}% de desconto.`);
+      setCouponCode('');
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      setCouponError(typeof msg === 'string' ? msg : 'Cupom inválido ou expirado.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
   const setTotpEnabled = useAuthStore((s) => s.setTotpEnabled);
   const setSession     = useAuthStore((s) => s.setSession);
   const accessToken    = useAuthStore((s) => s.accessToken);
@@ -408,9 +429,52 @@ export function ProfileScreen() {
         <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           CUPONS
         </Text>
-        <Card>
-          <Row label="Escanear cupom QR" icon={<Camera size={17} color="#9C9486" />} onPress={() => setScannerVisible(true)} />
-        </Card>
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
+          {couponSuccess ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Ticket size={20} color="#166534" />
+              <Text style={{ flex: 1, color: '#166534', fontWeight: '700', fontSize: 14 }}>{couponSuccess}</Text>
+              <Pressable onPress={() => setCouponSuccess(null)} hitSlop={8}>
+                <X size={16} color="#9C9486" />
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TextInput
+                  value={couponCode}
+                  onChangeText={(t) => { setCouponCode(t.toUpperCase()); setCouponError(null); }}
+                  placeholder="CÓDIGO DO CUPOM"
+                  placeholderTextColor="#C4BDB5"
+                  autoCapitalize="characters"
+                  style={{
+                    flex: 1, borderWidth: 1,
+                    borderColor: couponError ? '#ef4444' : '#E5DCC4',
+                    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
+                    fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8',
+                  }}
+                />
+                <Pressable
+                  onPress={handleApplyCoupon}
+                  disabled={couponLoading || !couponCode.trim()}
+                  style={({ pressed }) => ({
+                    backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+                    borderRadius: 10, paddingHorizontal: 18, justifyContent: 'center',
+                    opacity: (!couponCode.trim() || couponLoading) ? 0.5 : 1,
+                  })}
+                >
+                  {couponLoading
+                    ? <ActivityIndicator size="small" color="#211B15" />
+                    : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 14 }}>Aplicar</Text>
+                  }
+                </Pressable>
+              </View>
+              {couponError && (
+                <Text style={{ color: '#ef4444', fontSize: 12, marginTop: 6 }}>{couponError}</Text>
+              )}
+            </>
+          )}
+        </View>
 
         {/* Novidades */}
         <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
@@ -489,11 +553,6 @@ export function ProfileScreen() {
         </View>
 
       </ScrollView>
-
-      <QRScannerScreen
-        visible={scannerVisible}
-        onClose={() => setScannerVisible(false)}
-      />
 
       <TotpSetupScreen
         visible={totpSetupVisible}
