@@ -638,7 +638,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
       <View style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
-        backgroundColor: '#3c3c3c',
+        backgroundColor: '#fff',
         borderTopWidth: 1,
         borderColor: '#E5DCC4',
         padding: 16,
