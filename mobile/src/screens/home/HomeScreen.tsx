@@ -24,6 +24,7 @@ import { useAuthStore } from '../../store/auth.store';
 import type { MainTabParamList } from '../../navigation/types';
 import { ListingsApi, type ListingPublic } from '../../api/listings';
 import { TabHomeIcon } from '../../components/BrandIcons';
+import { webAlert, webConfirm } from '../../utils/webAlert';
 
 const LISTING_CAP = 20;
 
@@ -221,19 +222,23 @@ export function HomeScreen() {
   const [saving, setSaving]             = useState(false);
   const inputRef                        = useRef<TextInput>(null);
 
-  const confirmRemove = async (item: ListingPublic) => {
-    const ok = typeof window !== 'undefined'
-      ? window.confirm(`Remover "${item.teamName}"? Esta ação não pode ser desfeita.`)
-      : true;
-    if (!ok) return;
-    try {
-      await ListingsApi.remove(item.listingId);
-      setListings((prev) => prev.filter((l) => l.listingId !== item.listingId));
-      const store = useAuthStore.getState();
-      store.setListingsActiveCount(Math.max(0, (store.user?.listingsActiveCount ?? 1) - 1));
-    } catch {
-      if (typeof window !== 'undefined') window.alert('Não foi possível remover o anúncio.');
-    }
+  const confirmRemove = (item: ListingPublic) => {
+    webConfirm(
+      'Remover anúncio',
+      `Tem certeza que quer remover "${item.teamName}"? Esta ação não pode ser desfeita.`,
+      async () => {
+        try {
+          await ListingsApi.remove(item.listingId);
+          setListings((prev) => prev.filter((l) => l.listingId !== item.listingId));
+          const store = useAuthStore.getState();
+          store.setListingsActiveCount(Math.max(0, (store.user?.listingsActiveCount ?? 1) - 1));
+        } catch {
+          webAlert('Erro', 'Não foi possível remover o anúncio.');
+        }
+      },
+      undefined,
+      'Remover',
+    );
   };
 
   const openPriceSheet = (item: ListingPublic) => {
