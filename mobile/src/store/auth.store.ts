@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
+import { useCartStore } from './cart.store';
 
 export interface PublicUser {
   userId: string;
@@ -72,6 +73,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       refreshToken: refreshToken ?? null,
       user,
     });
+    // Restore cart from backend after session is hydrated
+    if (accessToken && user) {
+      void useCartStore.getState().loadCart();
+    }
   },
 
   async setSession(s) {
