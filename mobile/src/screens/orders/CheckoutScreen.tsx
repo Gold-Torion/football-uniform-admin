@@ -441,13 +441,20 @@ export function CheckoutScreen({ route, navigation }: Props) {
                   onPress={handleApplyCoupon}
                   disabled={couponLoading || !couponInput.trim()}
                   style={({ pressed }) => ({
-                    backgroundColor: (!couponInput.trim() || couponLoading) ? '#E5DCC4' : (pressed ? '#B8962B' : '#D4AF37'),
-                    borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center',
+                    backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+                    borderRadius: 10,
+                    paddingHorizontal: 20,
+                    paddingVertical: 14,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    opacity: (!couponInput.trim() || couponLoading) ? 0.5 : 1,
+                    minWidth: 90,
                   })}
                 >
-                  <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
-                    {couponLoading ? '...' : 'Aplicar'}
-                  </Text>
+                  {couponLoading
+                    ? <ActivityIndicator size="small" color="#211B15" />
+                    : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>Aplicar</Text>
+                  }
                 </Pressable>
               </View>
               {couponError ? (
