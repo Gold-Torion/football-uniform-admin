@@ -34,6 +34,6 @@ export const OrdersApi = {
     api.get<OrderPublic>(`/orders/${orderId}`).then((r: { data: OrderPublic }) => r.data),
   confirmReceipt: (orderId: string) =>
     api.patch(`/orders/${orderId}/confirm-receipt`),
-  estimateShipping: (fromCep: string, toCep: string) =>
-    api.post<ShippingOption[]>('/orders/shipping-estimate', { fromCep, toCep }).then((r: { data: ShippingOption[] }) => r.data),
+  estimateShipping: (listingId: string, toCep: string) =>
+    api.post<ShippingOption[]>('/orders/shipping-estimate', { listingId, toCep }).then((r: { data: ShippingOption[] }) => r.data),
 };

@@ -69,7 +69,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
     setShippingOptions([]);
     setSelectedShipping(null);
     try {
-      const options = await OrdersApi.estimateShipping('01310100', cleanCep);
+      const options = await OrdersApi.estimateShipping(listing.listingId, cleanCep);
       setShippingOptions(options);
     } catch {
       // silently ignore
@@ -148,7 +148,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -284,29 +284,25 @@ export function CheckoutScreen({ route, navigation }: Props) {
                   color: '#1C1A14',
                 }}
               />
-              {calculatingShipping ? (
-                <View style={{
-                  backgroundColor: '#D4AF37',
+              <Pressable
+                onPress={handleCalculateShipping}
+                disabled={cleanCep.length < 8 || calculatingShipping}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? '#B8942E' : '#D4AF37',
                   borderRadius: 12,
                   paddingHorizontal: 20,
+                  paddingVertical: 14,
                   justifyContent: 'center',
-                }}>
-                  <ActivityIndicator size="small" color="#211B15" />
-                </View>
-              ) : (
-                <Pressable
-                  onPress={handleCalculateShipping}
-                  disabled={cleanCep.length < 8}
-                  style={({ pressed }) => ({
-                    backgroundColor: cleanCep.length < 8 ? '#E5DCC4' : pressed ? '#B8942E' : '#D4AF37',
-                    borderRadius: 12,
-                    paddingHorizontal: 20,
-                    justifyContent: 'center',
-                  })}
-                >
-                  <Text style={{ color: '#211B15', fontWeight: '700', fontSize: 14 }}>Calcular</Text>
-                </Pressable>
-              )}
+                  alignItems: 'center',
+                  opacity: cleanCep.length < 8 ? 0.5 : 1,
+                  minWidth: 90,
+                })}
+              >
+                {calculatingShipping
+                  ? <ActivityIndicator size="small" color="#211B15" />
+                  : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>Calcular</Text>
+                }
+              </Pressable>
             </View>
 
             {/* Shipping options */}
@@ -489,7 +485,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
       <View style={{
         position: 'absolute',
         bottom: 0, left: 0, right: 0,
-        backgroundColor: '#EFEFEF',
+        backgroundColor: '#3c3c3c',
         borderTopWidth: 1,
         borderColor: '#E5DCC4',
         padding: 16,
