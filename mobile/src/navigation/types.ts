@@ -66,6 +66,7 @@ export type RootStackParamList = {
   Orders: undefined;
   OrderDetail: { orderId: string };
   Quiz: undefined;
+  Cart: undefined;
 };
 
 declare global {

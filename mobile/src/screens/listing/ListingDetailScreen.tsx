@@ -15,10 +15,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Shirt, Building2, Pencil, Trash2 } from 'lucide-react-native';
+import { Shirt, Building2, Pencil, Trash2, ShoppingCart } from 'lucide-react-native';
 
 import type { RootStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/auth.store';
+import { useCartStore } from '../../store/cart.store';
 import { ListingsApi } from '../../api/listings';
 import { CommentsApi, type CommentPublic } from '../../api/comments';
 import { getPhotoUrl } from '../../utils/env';
@@ -168,6 +169,8 @@ function CommentCard({
 export function ListingDetailScreen({ route, navigation }: Props) {
   const { listing } = route.params;
   const currentUser = useAuthStore((s) => s.user);
+  const cartItemCount = useCartStore((s) => s.items.length);
+  const addToCart     = useCartStore((s) => s.addItem);
 
   const [priceCents, setPriceCents] = useState(listing.priceCents);
   const [editingPrice, setEditingPrice] = useState(false);
@@ -333,6 +336,14 @@ export function ListingDetailScreen({ route, navigation }: Props) {
           {listing.teamName}
         </Text>
         <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 18 }}>{price}</Text>
+        <Pressable onPress={() => navigation.navigate('Cart')} hitSlop={8} style={{ position: 'relative' }}>
+          <ShoppingCart size={22} color="#D4AF37" />
+          {cartItemCount > 0 && (
+            <View style={{ position: 'absolute', top: -6, right: -6, backgroundColor: '#EF4444', borderRadius: 8, minWidth: 16, height: 16, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 }}>
+              <Text style={{ color: '#fff', fontSize: 9, fontWeight: '900' }}>{cartItemCount}</Text>
+            </View>
+          )}
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView
@@ -566,17 +577,41 @@ export function ListingDetailScreen({ route, navigation }: Props) {
             </Pressable>
           </View>
         ) : (
-          <Pressable
-            onPress={() => navigation.navigate('Checkout', { listing })}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? '#B8942E' : '#D4AF37',
-              borderRadius: 16, paddingVertical: 16, alignItems: 'center',
-            })}
-          >
-            <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
-              Comprar — R$ {(priceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Pressable
+              onPress={() => {
+                const { alreadyInCart } = addToCart({ ...listing, priceCents });
+                if (alreadyInCart) {
+                  webAlert('Já no carrinho', 'Esta camisa já está no seu carrinho.');
+                } else {
+                  webAlert('Adicionado!', `${listing.teamName} foi adicionado ao carrinho.`);
+                }
+              }}
+              style={({ pressed }) => ({
+                flex: 1,
+                backgroundColor: pressed ? '#2a4429' : '#335336',
+                borderRadius: 16, paddingVertical: 16, alignItems: 'center',
+                flexDirection: 'row', justifyContent: 'center', gap: 6,
+              })}
+            >
+              <ShoppingCart size={16} color="#D4AF37" />
+              <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 14 }}>
+                Carrinho
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => navigation.navigate('Checkout', { listing: { ...listing, priceCents } })}
+              style={({ pressed }) => ({
+                flex: 2,
+                backgroundColor: pressed ? '#B8942E' : '#D4AF37',
+                borderRadius: 16, paddingVertical: 16, alignItems: 'center',
+              })}
+            >
+              <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
+                Comprar — R$ {(priceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </Text>
+            </Pressable>
+          </View>
         )}
       </View>
 
