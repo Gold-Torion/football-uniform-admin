@@ -592,7 +592,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 placeholderTextColor="#C4BDB5"
                 keyboardType="numeric"
                 maxLength={4}
-                secureTextEntry
                 style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
               />
             </View>
