@@ -10,13 +10,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Shirt, Package, Handshake, Ticket, Tag, X } from 'lucide-react-native';
+import { Shirt, Package, Handshake, Ticket, Tag, X, CreditCard, QrCode } from 'lucide-react-native';
 
 import type { RootStackParamList } from '../../navigation/types';
 import { OrdersApi, type DeliveryMethod, type ShippingOption } from '../../api/orders';
 import { PaymentsApi } from '../../api/payments';
 import { CouponsApi, type RedeemResult } from '../../api/coupons';
 import { webAlert } from '../../utils/webAlert';
+
+type PaymentMethod = 'PIX' | 'CREDIT_CARD';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Checkout'>;
 
@@ -44,6 +46,15 @@ export function CheckoutScreen({ route, navigation }: Props) {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [calculatingShipping, setCalculatingShipping] = useState(false);
   const [creatingOrder, setCreatingOrder]   = useState(false);
+
+  const [paymentMethod, setPaymentMethod]   = useState<PaymentMethod>('PIX');
+
+  // Credit card fields
+  const [cardNumber,     setCardNumber]     = useState('');
+  const [cardName,       setCardName]       = useState('');
+  const [cardExpiry,     setCardExpiry]     = useState('');
+  const [cardCvv,        setCardCvv]        = useState('');
+  const [installments,   setInstallments]   = useState(1);
 
   const [couponInput,    setCouponInput]    = useState('');
   const [couponResult,   setCouponResult]   = useState<RedeemResult | null>(null);
@@ -110,11 +121,30 @@ export function CheckoutScreen({ route, navigation }: Props) {
     }
   };
 
-  const canProceed = deliveryMethod === 'ENTREGA_EM_MAOS' || selectedShipping !== null;
+  const formatCardNumber = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 16);
+    return d.replace(/(.{4})/g, '$1 ').trim();
+  };
 
-  const handlePayWithPix = async () => {
+  const formatExpiry = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 4);
+    return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  };
+
+  const cardValid = paymentMethod === 'PIX' || (
+    cardNumber.replace(/\D/g, '').length >= 13 &&
+    cardName.trim().length >= 2 &&
+    cardExpiry.length === 5 &&
+    cardCvv.length >= 3
+  );
+
+  const canProceed = (deliveryMethod === 'ENTREGA_EM_MAOS' || selectedShipping !== null) && cardValid;
+
+  const handlePay = async () => {
     if (!canProceed) {
-      webAlert('Frete', 'Selecione uma opção de entrega primeiro.');
+      webAlert('Atenção', deliveryMethod === 'CORREIOS' && !selectedShipping
+        ? 'Selecione uma opção de frete primeiro.'
+        : 'Preencha os dados do cartão.');
       return;
     }
     setCreatingOrder(true);
@@ -127,18 +157,39 @@ export function CheckoutScreen({ route, navigation }: Props) {
         couponCode: couponResult?.code,
       });
 
-      // 2. Initiate PIX payment
-      const pix = await PaymentsApi.initiatePixPayment(order.orderId);
-
-      // 3. Navigate to PIX payment screen
-      navigation.replace('PixPayment', {
-        orderId:      order.orderId,
-        pixQrCode:    pix.pixQrCode,
-        pixQrCodeUrl: pix.pixQrCodeUrl,
-        pixExpiresAt: pix.pixExpiresAt,
-        totalCents:   pix.totalCents,
-        teamName:     listing.teamName,
-      });
+      if (paymentMethod === 'PIX') {
+        // 2a. PIX flow
+        const pix = await PaymentsApi.initiatePixPayment(order.orderId);
+        navigation.replace('PixPayment', {
+          orderId:      order.orderId,
+          pixQrCode:    pix.pixQrCode,
+          pixQrCodeUrl: pix.pixQrCodeUrl,
+          pixExpiresAt: pix.pixExpiresAt,
+          totalCents:   pix.totalCents,
+          teamName:     listing.teamName,
+        });
+      } else {
+        // 2b. Credit card flow
+        const [expMonth, expYear] = cardExpiry.split('/').map(Number);
+        const result = await PaymentsApi.initiateCardPayment({
+          orderId:        order.orderId,
+          installments,
+          cardNumber:     cardNumber.replace(/\D/g, ''),
+          cardHolderName: cardName.trim(),
+          cardExpMonth:   expMonth,
+          cardExpYear:    2000 + expYear,
+          cardCvv:        cardCvv.trim(),
+        });
+        if (result.status === 'authorized') {
+          webAlert('Pagamento aprovado! ✅', 'Seu pedido foi confirmado. Acompanhe em Meus Pedidos.');
+          navigation.navigate('Orders');
+        } else if (result.status === 'refused') {
+          webAlert('Cartão recusado', 'Verifique os dados do cartão ou tente outro método de pagamento.');
+        } else {
+          webAlert('Pagamento pendente', 'Seu pagamento está sendo processado. Acompanhe em Meus Pedidos.');
+          navigation.navigate('Orders');
+        }
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Tente novamente.';
       webAlert('Erro ao criar pedido', msg);
@@ -464,23 +515,118 @@ export function CheckoutScreen({ route, navigation }: Props) {
           )}
         </View>
 
-        {/* Payment method info */}
-        <View style={{
-          backgroundColor: '#fff',
-          borderRadius: 16,
-          borderWidth: 1,
-          borderColor: '#E5DCC4',
-          padding: 16,
-          marginBottom: 12,
-        }}>
+        {/* Payment method selector */}
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>
+          FORMA DE PAGAMENTO
+        </Text>
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
+          <Pressable
+            onPress={() => setPaymentMethod('PIX')}
+            style={{
+              flex: 1, backgroundColor: '#fff', borderRadius: 14, padding: 14, alignItems: 'center',
+              borderWidth: paymentMethod === 'PIX' ? 2 : 1,
+              borderColor: paymentMethod === 'PIX' ? '#D4AF37' : '#E5DCC4',
+            }}
+          >
+            <QrCode size={22} color={paymentMethod === 'PIX' ? '#335336' : '#9C9486'} style={{ marginBottom: 4 }} />
+            <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>PIX</Text>
+            <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 2 }}>Instantâneo</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setPaymentMethod('CREDIT_CARD')}
+            style={{
+              flex: 1, backgroundColor: '#fff', borderRadius: 14, padding: 14, alignItems: 'center',
+              borderWidth: paymentMethod === 'CREDIT_CARD' ? 2 : 1,
+              borderColor: paymentMethod === 'CREDIT_CARD' ? '#D4AF37' : '#E5DCC4',
+            }}
+          >
+            <CreditCard size={22} color={paymentMethod === 'CREDIT_CARD' ? '#335336' : '#9C9486'} style={{ marginBottom: 4 }} />
+            <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>Cartão</Text>
+            <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 2 }}>Crédito</Text>
+          </Pressable>
+        </View>
+
+        {/* Credit card form */}
+        {paymentMethod === 'CREDIT_CARD' && (
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
+            <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 12 }}>
+              DADOS DO CARTÃO
+            </Text>
+
+            {/* Card number */}
+            <TextInput
+              value={cardNumber}
+              onChangeText={(t) => setCardNumber(formatCardNumber(t))}
+              placeholder="0000 0000 0000 0000"
+              placeholderTextColor="#C4BDB5"
+              keyboardType="numeric"
+              maxLength={19}
+              style={{ borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 16, color: '#1C1A14', backgroundColor: '#FAFAF8', marginBottom: 10, letterSpacing: 2 }}
+            />
+
+            {/* Card name */}
+            <TextInput
+              value={cardName}
+              onChangeText={setCardName}
+              placeholder="Nome como no cartão"
+              placeholderTextColor="#C4BDB5"
+              autoCapitalize="characters"
+              style={{ borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8', marginBottom: 10 }}
+            />
+
+            {/* Expiry + CVV */}
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+              <TextInput
+                value={cardExpiry}
+                onChangeText={(t) => setCardExpiry(formatExpiry(t))}
+                placeholder="MM/AA"
+                placeholderTextColor="#C4BDB5"
+                keyboardType="numeric"
+                maxLength={5}
+                style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              />
+              <TextInput
+                value={cardCvv}
+                onChangeText={(t) => setCardCvv(t.replace(/\D/g, '').slice(0, 4))}
+                placeholder="CVV"
+                placeholderTextColor="#C4BDB5"
+                keyboardType="numeric"
+                maxLength={4}
+                secureTextEntry
+                style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              />
+            </View>
+
+            {/* Installments */}
+            <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '600', marginBottom: 8 }}>Parcelas</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {[1, 2, 3, 6, 12].map((n) => (
+                <Pressable
+                  key={n}
+                  onPress={() => setInstallments(n)}
+                  style={{
+                    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10,
+                    backgroundColor: installments === n ? '#D4AF37' : '#EFEFEF',
+                    borderWidth: 1, borderColor: installments === n ? '#D4AF37' : '#E5DCC4',
+                  }}
+                >
+                  <Text style={{ color: installments === n ? '#211B15' : '#5C5547', fontWeight: '700', fontSize: 13 }}>
+                    {n}x
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Pagar.me security badge */}
+        <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Tag size={22} color="#335336" />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
-                Pagamento via Pagar.me
-              </Text>
+              <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>Pagamento via Pagar.me</Text>
               <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 2 }}>
-                PIX instantâneo · Ambiente seguro
+                {paymentMethod === 'PIX' ? 'PIX instantâneo' : 'Cartão de crédito'} · Ambiente seguro
               </Text>
             </View>
           </View>
@@ -499,19 +645,11 @@ export function CheckoutScreen({ route, navigation }: Props) {
         paddingBottom: 28,
       }}>
         <Pressable
-          onPress={handlePayWithPix}
+          onPress={handlePay}
           disabled={creatingOrder || !canProceed}
           style={({ pressed }) => ({
-            backgroundColor: !canProceed
-              ? '#9C9486'
-              : creatingOrder
-              ? '#B8942E'
-              : pressed
-              ? '#B8942E'
-              : '#D4AF37',
-            borderRadius: 16,
-            paddingVertical: 16,
-            alignItems: 'center',
+            backgroundColor: !canProceed ? '#9C9486' : creatingOrder ? '#B8942E' : pressed ? '#B8942E' : '#D4AF37',
+            borderRadius: 16, paddingVertical: 16, alignItems: 'center',
           })}
         >
           {creatingOrder ? (
@@ -519,8 +657,10 @@ export function CheckoutScreen({ route, navigation }: Props) {
           ) : (
             <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
               {!canProceed
-                ? 'Selecione o frete primeiro'
-                : `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com PIX`}
+                ? (deliveryMethod === 'CORREIOS' && !selectedShipping ? 'Selecione o frete primeiro' : 'Preencha os dados do cartão')
+                : paymentMethod === 'PIX'
+                  ? `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com PIX`
+                  : `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com Cartão`}
             </Text>
           )}
         </Pressable>

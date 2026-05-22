@@ -16,9 +16,28 @@ export interface PaymentStatusResult {
   pagarmeStatus: string | null;
 }
 
+export interface CardPaymentData {
+  orderId:       string;
+  installments:  number;
+  cardNumber:    string;
+  cardHolderName: string;
+  cardExpMonth:  number;
+  cardExpYear:   number;
+  cardCvv:       string;
+}
+
+export interface CardPaymentResult {
+  status:   'authorized' | 'refused' | 'pending';
+  orderId:  string;
+  chargeId: string;
+}
+
 export const PaymentsApi = {
   initiatePixPayment: (orderId: string): Promise<PixPaymentResult> =>
     api.post<PixPaymentResult>(`/payments/pix/${orderId}`).then((r) => r.data),
+
+  initiateCardPayment: (data: CardPaymentData): Promise<CardPaymentResult> =>
+    api.post<CardPaymentResult>('/payments/card', data).then((r) => r.data),
 
   getPaymentStatus: (orderId: string): Promise<PaymentStatusResult> =>
     api.get<PaymentStatusResult>(`/payments/status/${orderId}`).then((r) => r.data),
