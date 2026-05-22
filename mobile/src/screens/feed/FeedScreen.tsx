@@ -447,6 +447,7 @@ export function FeedScreen() {
 
   return (
     <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#335336' }}>
+      <View style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* ── Top bar ── */}
       <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
@@ -708,6 +709,7 @@ export function FeedScreen() {
           />
         )
       )}
+      </View>
     </SafeAreaView>
   );
 }
