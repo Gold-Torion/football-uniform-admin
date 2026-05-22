@@ -96,11 +96,32 @@ export function ProfileScreen() {
   const refreshToken   = useAuthStore((s) => s.refreshToken);
 
   const [cepInput,   setCepInput]   = useState(user?.sellerCep ?? '');
+  const [ruaInput,   setRuaInput]   = useState('');
+  const [numeroInput, setNumeroInput] = useState('');
+  const [cidadeInput, setCidadeInput] = useState('');
+  const [estadoInput, setEstadoInput] = useState('');
   const [savingCep,  setSavingCep]  = useState(false);
 
   const formatCep = (v: string) => {
     const d = v.replace(/\D/g, '').slice(0, 8);
     return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+  };
+
+  const onCepChange = async (v: string) => {
+    const formatted = formatCep(v);
+    setCepInput(formatted);
+    const clean = formatted.replace(/\D/g, '');
+    if (clean.length === 8) {
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+        const data = await res.json() as { logradouro?: string; localidade?: string; uf?: string; erro?: boolean };
+        if (!data.erro) {
+          setRuaInput(data.logradouro ?? '');
+          setCidadeInput(data.localidade ?? '');
+          setEstadoInput(data.uf ?? '');
+        }
+      } catch { /* silently ignore */ }
+    }
   };
 
   const onSaveCep = async () => {
@@ -112,9 +133,9 @@ export function ProfileScreen() {
       if (user && accessToken && refreshToken) {
         await setSession({ accessToken, refreshToken, user: { ...user, ...updated } });
       }
-      webAlert('CEP salvo!', 'Seu CEP de envio foi atualizado.');
+      webAlert('Endereço salvo!', 'Seu endereço de envio foi atualizado.');
     } catch {
-      webAlert('Erro', 'Não foi possível salvar o CEP.');
+      webAlert('Erro', 'Não foi possível salvar o endereço.');
     } finally {
       setSavingCep(false);
     }
@@ -293,38 +314,61 @@ export function ProfileScreen() {
             <MapPin size={16} color="#9C9486" />
             <Text style={{ fontSize: 13, color: '#9C9486', fontWeight: '600' }}>CEP de origem para cálculo de frete</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+
+          {/* CEP + Salvar */}
+          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
             <TextInput
               value={cepInput}
-              onChangeText={(t) => setCepInput(formatCep(t))}
+              onChangeText={onCepChange}
               placeholder="00000-000"
               keyboardType="numeric"
-              style={{
-                flex: 1,
-                borderWidth: 1,
-                borderColor: '#E5DCC4',
-                borderRadius: 10,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                fontSize: 15,
-                color: '#1C1A14',
-                backgroundColor: '#FAFAF8',
-              }}
+              style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
             />
             <Pressable
               onPress={onSaveCep}
               disabled={savingCep}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? '#B8962B' : '#D4AF37',
-                borderRadius: 10,
-                paddingHorizontal: 16,
-                justifyContent: 'center',
-              })}
+              style={({ pressed }) => ({ backgroundColor: pressed ? '#B8962B' : '#D4AF37', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' })}
             >
-              <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
-                {savingCep ? '...' : 'Salvar'}
-              </Text>
+              <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>{savingCep ? '...' : 'Salvar'}</Text>
             </Pressable>
+          </View>
+
+          {/* Rua + Nº */}
+          <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
+            <TextInput
+              value={ruaInput}
+              onChangeText={setRuaInput}
+              placeholder="Rua (auto-fill com CEP)"
+              placeholderTextColor="#C4BDB5"
+              style={{ flex: 2, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+            />
+            <TextInput
+              value={numeroInput}
+              onChangeText={setNumeroInput}
+              placeholder="Nº"
+              placeholderTextColor="#C4BDB5"
+              keyboardType="numeric"
+              style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+            />
+          </View>
+
+          {/* Cidade + Estado */}
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <TextInput
+              value={cidadeInput}
+              onChangeText={setCidadeInput}
+              placeholder="Cidade (auto-fill)"
+              placeholderTextColor="#C4BDB5"
+              style={{ flex: 2, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+            />
+            <TextInput
+              value={estadoInput}
+              onChangeText={setEstadoInput}
+              placeholder="UF"
+              placeholderTextColor="#C4BDB5"
+              maxLength={2}
+              style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+            />
           </View>
         </View>
 
