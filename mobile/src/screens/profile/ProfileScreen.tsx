@@ -95,33 +95,44 @@ export function ProfileScreen() {
   const accessToken    = useAuthStore((s) => s.accessToken);
   const refreshToken   = useAuthStore((s) => s.refreshToken);
 
-  const [cepInput,   setCepInput]   = useState(user?.sellerCep ?? '');
-  const [ruaInput,   setRuaInput]   = useState('');
-  const [numeroInput, setNumeroInput] = useState('');
-  const [cidadeInput, setCidadeInput] = useState('');
-  const [estadoInput, setEstadoInput] = useState('');
-  const [savingCep,  setSavingCep]  = useState(false);
+  const [cepInput,    setCepInput]    = useState(user?.sellerCep ?? '');
+  const [ruaInput,    setRuaInput]    = useState(user?.sellerRua    ?? '');
+  const [numeroInput, setNumeroInput] = useState(user?.sellerNumero ?? '');
+  const [cidadeInput, setCidadeInput] = useState(user?.sellerCidade ?? '');
+  const [estadoInput, setEstadoInput] = useState(user?.sellerEstado ?? '');
+  const [savingCep,   setSavingCep]   = useState(false);
 
   const formatCep = (v: string) => {
     const d = v.replace(/\D/g, '').slice(0, 8);
     return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
   };
 
+  const lookupCep = async (clean: string) => {
+    if (clean.length !== 8) return;
+    try {
+      const res  = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
+      const data = await res.json() as { logradouro?: string; localidade?: string; uf?: string; erro?: boolean };
+      if (!data.erro) {
+        setRuaInput(data.logradouro ?? '');
+        setCidadeInput(data.localidade ?? '');
+        setEstadoInput(data.uf ?? '');
+      }
+    } catch { /* silently ignore */ }
+  };
+
+  // Auto-fill on mount if CEP is saved but address fields are empty
+  useEffect(() => {
+    const clean = (user?.sellerCep ?? '').replace(/\D/g, '');
+    if (clean.length === 8 && !user?.sellerRua) {
+      void lookupCep(clean);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const onCepChange = async (v: string) => {
     const formatted = formatCep(v);
     setCepInput(formatted);
-    const clean = formatted.replace(/\D/g, '');
-    if (clean.length === 8) {
-      try {
-        const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-        const data = await res.json() as { logradouro?: string; localidade?: string; uf?: string; erro?: boolean };
-        if (!data.erro) {
-          setRuaInput(data.logradouro ?? '');
-          setCidadeInput(data.localidade ?? '');
-          setEstadoInput(data.uf ?? '');
-        }
-      } catch { /* silently ignore */ }
-    }
+    await lookupCep(formatted.replace(/\D/g, ''));
   };
 
   const onSaveCep = async () => {
