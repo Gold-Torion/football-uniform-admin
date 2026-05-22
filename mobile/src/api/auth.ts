@@ -54,4 +54,7 @@ export const AuthApi = {
   recordLgpdConsent(accepted: boolean, version: string): Promise<AuthSession> {
     return api.post('/auth/lgpd/consent', { accepted, version }).then((r) => r.data);
   },
+  logout(refreshToken: string): Promise<void> {
+    return api.post('/auth/logout', { refreshToken }).then(() => undefined);
+  },
 };

@@ -7,6 +7,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
+import { AuthApi } from '../../api/auth';
 import { CouponsApi } from '../../api/coupons';
 import { TotpSetupScreen } from '../auth/TotpSetupScreen';
 import { RatingsApi, type UserRatingSummary } from '../../api/ratings';
@@ -207,10 +208,19 @@ export function ProfileScreen() {
   };
 
   const onSignOut = () => {
-    const ok = typeof window !== 'undefined'
-      ? window.confirm('Tem certeza que deseja sair da conta?')
-      : true;
-    if (ok) void clear();
+    webConfirm(
+      'Sair da conta',
+      'Tem certeza que deseja sair? Sua sessão será encerrada.',
+      async () => {
+        // Revoke refresh token on backend before clearing local state
+        if (refreshToken) {
+          try { await AuthApi.logout(refreshToken); } catch { /* ignore */ }
+        }
+        void clear();
+      },
+      undefined,
+      'Sair',
+    );
   };
 
   const onPrivacy = () => {
