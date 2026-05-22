@@ -15,7 +15,14 @@ export interface CreateListingPayload {
   priceCents: number;
   description?: string;
   weightGrams?: number;
+  sku?: string;
   nonVerifiedSupplierAck: boolean;
+}
+
+export interface JerseyImageResult {
+  url:       string;
+  thumbnail: string;
+  title:     string;
 }
 
 export interface ListingPublic {
@@ -71,5 +78,11 @@ export const ListingsApi = {
 
   deletePhoto(listingId: string, key: string): Promise<ListingPublic> {
     return api.delete(`/listings/${listingId}/photos`, { data: { key } }).then((r) => r.data);
+  },
+
+  searchJerseyImage(supplier: string, sku: string): Promise<JerseyImageResult[]> {
+    return api.get<{ images: JerseyImageResult[] }>(
+      `/listings/jersey-image?supplier=${encodeURIComponent(supplier)}&sku=${encodeURIComponent(sku)}`
+    ).then((r) => r.data.images);
   },
 };

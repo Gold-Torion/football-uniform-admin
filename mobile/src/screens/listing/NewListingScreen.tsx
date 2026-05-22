@@ -19,7 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { Camera, X } from 'lucide-react-native';
 
-import { ListingsApi } from '../../api/listings';
+import { ListingsApi, type JerseyImageResult } from '../../api/listings';
 import { useAuthStore } from '../../store/auth.store';
 import type { MainTabParamList } from '../../navigation/types';
 
@@ -301,13 +301,15 @@ interface FormState {
   priceText: string;
   description: string;
   weightGrams: string;
+  sku: string;
   nonVerifiedAck: boolean;
 }
 
 const INITIAL: FormState = {
   kind: 'TIME', teamName: '', continent: '', country: '', season: '',
   supplier: '', model: '', garmentType: 'LOJA', size: '', condition: '',
-  gender: 'MASCULINO', priceText: '', description: '', weightGrams: '300', nonVerifiedAck: false,
+  gender: 'MASCULINO', priceText: '', description: '', weightGrams: '300',
+  sku: '', nonVerifiedAck: false,
 };
 
 // ── Main screen ───────────────────────────────────────────────────────────────
@@ -321,6 +323,9 @@ export function NewListingScreen() {
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [createdListingId, setCreatedListingId] = useState<string | null>(null);
   const [showSuccess, setShowSuccess]           = useState(false);
+  const [skuImages, setSkuImages]               = useState<JerseyImageResult[]>([]);
+  const [skuSearching, setSkuSearching]         = useState(false);
+  const skuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef               = useRef<ScrollView>(null);
   const setListingsCount        = useAuthStore((s) => s.setListingsActiveCount);
   const nav                     = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
@@ -384,6 +389,18 @@ export function NewListingScreen() {
 
   const isVerifiedSupplier = VERIFIED_SUPPLIERS.includes(form.supplier);
 
+  const triggerSkuSearch = (supplier: string, sku: string) => {
+    if (skuTimer.current) clearTimeout(skuTimer.current);
+    if (!supplier || sku.trim().length < 3) { setSkuImages([]); return; }
+    skuTimer.current = setTimeout(async () => {
+      setSkuSearching(true);
+      try {
+        const results = await ListingsApi.searchJerseyImage(supplier, sku.trim());
+        setSkuImages(results);
+      } catch { setSkuImages([]); } finally { setSkuSearching(false); }
+    }, 700);
+  };
+
   // Validation map — each key = true if that field has an error
   const errors = {
     teamName:  form.teamName.trim().length < 2,
@@ -428,6 +445,7 @@ export function NewListingScreen() {
         priceCents,
         description: form.description.trim() || undefined,
         weightGrams: form.weightGrams ? parseInt(form.weightGrams, 10) : undefined,
+        sku: form.sku.trim() || undefined,
         nonVerifiedSupplierAck: form.nonVerifiedAck,
       });
 
@@ -740,9 +758,67 @@ export function NewListingScreen() {
           value={form.supplier}
           placeholder="Selecione..."
           options={SUPPLIERS}
-          onChange={(v) => set('supplier', v)}
+          onChange={(v) => { set('supplier', v); triggerSkuSearch(v, form.sku); }}
           error={e.supplier}
         />
+
+        {/* SKU Code */}
+        {form.supplier !== '' && (
+          <View style={{ marginTop: 12 }}>
+            <SectionTitle text="CÓDIGO SKU (opcional)" />
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+              <TextInput
+                value={form.sku}
+                onChangeText={(t) => { set('sku', t); triggerSkuSearch(form.supplier, t); }}
+                placeholder="ex: DV9436-410, DN0680-012..."
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                autoCapitalize="characters"
+                style={{
+                  flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10,
+                  paddingHorizontal: 14, paddingVertical: 12, fontSize: 14,
+                  color: '#1C1A14', backgroundColor: '#fff',
+                }}
+              />
+              {skuSearching && <ActivityIndicator color="#D4AF37" size="small" />}
+            </View>
+
+            {/* Image results */}
+            {skuImages.length > 0 && (
+              <View style={{ marginTop: 12 }}>
+                <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>
+                  IMAGENS ENCONTRADAS — toque para usar
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -4 }}>
+                  {skuImages.map((img, idx) => (
+                    <Pressable
+                      key={idx}
+                      onPress={() => {
+                        if (!photoUris.includes(img.url)) {
+                          setPhotoUris((prev) => {
+                            const next = [...prev];
+                            const emptySlot = next.findIndex((u) => !u);
+                            if (emptySlot >= 0) { next[emptySlot] = img.url; return next; }
+                            return prev.length < 8 ? [...prev, img.url] : prev;
+                          });
+                        }
+                      }}
+                      style={{ marginHorizontal: 4 }}
+                    >
+                      <Image
+                        source={{ uri: img.thumbnail }}
+                        style={{ width: 90, height: 90, borderRadius: 10, borderWidth: 2, borderColor: '#D4AF37' }}
+                        resizeMode="cover"
+                      />
+                    </Pressable>
+                  ))}
+                </ScrollView>
+                <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 6 }}>
+                  Toque na imagem para adicioná-la às fotos do anúncio
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* Aviso fornecedora não verificada */}
         {form.supplier !== '' && !isVerifiedSupplier && (
