@@ -579,8 +579,8 @@ export function ListingDetailScreen({ route, navigation }: Props) {
         ) : (
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <Pressable
-              onPress={() => {
-                const { alreadyInCart } = addToCart({ ...listing, priceCents });
+              onPress={async () => {
+                const { alreadyInCart } = await addToCart({ ...listing, priceCents });
                 if (alreadyInCart) {
                   webAlert('Já no carrinho', 'Esta camisa já está no seu carrinho.');
                 } else {

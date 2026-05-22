@@ -12,10 +12,10 @@ export function CartScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { items, removeItem, clearCart } = useCartStore();
 
-  const totalCents = items.reduce((sum, i) => sum + i.listing.priceCents, 0);
+  const totalCents = items.reduce((sum, i) => sum + i.priceCents, 0);
   const totalBrl   = (totalCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const sellerIds = [...new Set(items.map((i) => i.listing.sellerId))];
+  const sellerIds = [...new Set(items.map((i) => i.sellerId))];
   const multiSeller = sellerIds.length > 1;
 
   if (items.length === 0) {
@@ -66,11 +66,11 @@ export function CartScreen() {
       )}
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
-        {items.map(({ listing }) => {
-          const photoUrl = listing.photoKeys?.[0] ? getPhotoUrl(listing.photoKeys[0]) : null;
-          const price = (listing.priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        {items.map((item) => {
+          const photoUrl = item.photoKeys?.[0] ? getPhotoUrl(item.photoKeys[0]) : null;
+          const price = (item.priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
           return (
-            <View key={listing.listingId} style={{
+            <View key={item.listingId} style={{
               backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#E5DCC4',
               flexDirection: 'row', marginBottom: 12, overflow: 'hidden',
             }}>
@@ -83,17 +83,17 @@ export function CartScreen() {
               </View>
               <View style={{ flex: 1, padding: 12 }}>
                 <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
-                  {listing.teamName}
+                  {item.teamName}
                 </Text>
                 <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 2 }}>
-                  {listing.supplier} · {listing.season} · Tam. {listing.size}
+                  {item.supplier} · {item.season} · Tam. {item.size}
                 </Text>
                 <Text style={{ color: '#335336', fontWeight: '900', fontSize: 16, marginTop: 6 }}>
                   {price}
                 </Text>
               </View>
               <Pressable
-                onPress={() => removeItem(listing.listingId)}
+                onPress={() => removeItem(item.listingId)}
                 hitSlop={8}
                 style={{ padding: 12, justifyContent: 'center' }}
               >
@@ -119,12 +119,12 @@ export function CartScreen() {
         {multiSeller ? (
           <View style={{ gap: 10 }}>
             {sellerIds.map((sellerId) => {
-              const sellerItems = items.filter((i) => i.listing.sellerId === sellerId);
-              const sellerName = sellerItems[0].listing.sellerName ?? 'Vendedor';
+              const sellerItems = items.filter((i) => i.sellerId === sellerId);
+              const sellerName = sellerItems[0].sellerName ?? 'Vendedor';
               return (
                 <Pressable
                   key={sellerId}
-                  onPress={() => navigation.navigate('Checkout', { listing: sellerItems[0].listing })}
+                  onPress={() => navigation.navigate('Checkout', { listing: sellerItems[0] as unknown as import('../../navigation/types').ListingParam })}
                   style={({ pressed }) => ({
                     backgroundColor: pressed ? '#B8942E' : '#D4AF37',
                     borderRadius: 14, paddingVertical: 14, alignItems: 'center',
@@ -139,7 +139,7 @@ export function CartScreen() {
           </View>
         ) : (
           <Pressable
-            onPress={() => navigation.navigate('Checkout', { listing: items[0].listing })}
+            onPress={() => navigation.navigate('Checkout', { listing: items[0] as unknown as import('../../navigation/types').ListingParam })}
             style={({ pressed }) => ({
               backgroundColor: pressed ? '#B8942E' : '#D4AF37',
               borderRadius: 14, paddingVertical: 16, alignItems: 'center',
