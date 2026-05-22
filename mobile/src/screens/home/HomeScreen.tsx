@@ -339,7 +339,7 @@ export function HomeScreen() {
         </LinearGradient>
 
         {/* ── Content area ────────────────────────────────── */}
-        <View style={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32 }}>
+        <View style={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 100 }}>
 
           {loading ? (
             <ActivityIndicator color="#335336" size="large" style={{ marginTop: 40 }} />
