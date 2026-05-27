@@ -71,10 +71,10 @@ export function CartScreen() {
           const price = (item.priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
           return (
             <View key={item.listingId} style={{
-              backgroundColor: '#fff', borderRadius: 14, borderWidth: 1, borderColor: '#E5DCC4',
+              backgroundColor: '#444444', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
               flexDirection: 'row', marginBottom: 12, overflow: 'hidden',
             }}>
-              <View style={{ width: 90, backgroundColor: '#EFEFEF', alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ width: 90, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' }}>
                 {photoUrl ? (
                   <Image source={{ uri: photoUrl }} style={{ width: 90, height: 90 }} resizeMode="cover" />
                 ) : (
@@ -82,10 +82,10 @@ export function CartScreen() {
                 )}
               </View>
               <View style={{ flex: 1, padding: 12 }}>
-                <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
+                <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
                   {item.teamName}
                 </Text>
-                <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 2 }}>
+                <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 12, marginTop: 2 }}>
                   {item.supplier} · {item.season} · Tam. {item.size}
                 </Text>
                 <Text style={{ color: '#335336', fontWeight: '900', fontSize: 16, marginTop: 6 }}>
@@ -107,11 +107,11 @@ export function CartScreen() {
       {/* Bottom bar */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#fff', paddingHorizontal: 16, paddingBottom: 28, paddingTop: 12,
-        borderTopWidth: 1, borderColor: '#E5DCC4',
+        backgroundColor: '#444444', paddingHorizontal: 16, paddingBottom: 28, paddingTop: 12,
+        borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
       }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+          <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 15 }}>
             Total ({items.length} {items.length === 1 ? 'item' : 'itens'})
           </Text>
           <Text style={{ color: '#335336', fontWeight: '900', fontSize: 18 }}>{totalBrl}</Text>

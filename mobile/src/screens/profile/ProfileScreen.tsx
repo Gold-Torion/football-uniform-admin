@@ -4,7 +4,7 @@ import { webAlert, webConfirm } from '../../utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X } from 'lucide-react-native';
+import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X, CreditCard } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import { AuthApi } from '../../api/auth';
@@ -14,7 +14,7 @@ import { RatingsApi, type UserRatingSummary } from '../../api/ratings';
 import { UsersApi } from '../../api/users';
 import type { RootStackParamList } from '../../navigation/types';
 
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '0.9.0';
 const PRIVACY_URL = 'http://localhost:3001/privacidade';
 const INSTAGRAM_USERNAME = 'arenadosmantos.app';
 const INSTAGRAM_APP_URL  = `instagram://user?username=${INSTAGRAM_USERNAME}`;
@@ -41,7 +41,7 @@ function Row({ label, value, onPress, danger, icon }: {
       onPress={onPress}
       disabled={!onPress}
       style={({ pressed }) => ({
-        backgroundColor: pressed ? '#EFEFEF' : '#fff',
+        backgroundColor: pressed ? 'rgba(255,255,255,0.06)' : 'transparent',
       })}
     >
       <View style={{
@@ -54,28 +54,28 @@ function Row({ label, value, onPress, danger, icon }: {
       }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
           {icon}
-          <Text style={{ fontSize: 15, color: danger ? '#EF4444' : '#1C1A14', fontWeight: danger ? '600' : '400' }}>
+          <Text style={{ fontSize: 15, color: danger ? '#EF4444' : '#EAEAEA', fontWeight: danger ? '600' : '400' }}>
             {label}
           </Text>
         </View>
-        {value && <Text style={{ fontSize: 14, color: '#9C9486' }}>{value}</Text>}
-        {onPress && !danger && <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>}
+        {value && <Text style={{ fontSize: 14, color: 'rgba(234,234,234,0.55)' }}>{value}</Text>}
+        {onPress && !danger && <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 18 }}>›</Text>}
       </View>
     </Pressable>
   );
 }
 
 function Divider() {
-  return <View style={{ height: 1, backgroundColor: '#EFEFEF' }} />;
+  return <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.06)' }} />;
 }
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
     <View style={{
-      backgroundColor: '#fff',
+      backgroundColor: '#444444',
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: '#E5DCC4',
+      borderColor: 'rgba(255,255,255,0.1)',
       overflow: 'hidden',
       marginBottom: 12,
     }}>
@@ -351,10 +351,10 @@ export function ProfileScreen() {
         <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           ENDEREÇO
         </Text>
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
+        <View style={{ backgroundColor: '#444444', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 16, marginBottom: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <MapPin size={16} color="#9C9486" />
-            <Text style={{ fontSize: 13, color: '#9C9486', fontWeight: '600' }}>CEP de origem para cálculo de frete</Text>
+            <MapPin size={16} color="rgba(234,234,234,0.55)" />
+            <Text style={{ fontSize: 13, color: 'rgba(234,234,234,0.55)', fontWeight: '600' }}>CEP de origem para cálculo de frete</Text>
           </View>
 
           {/* CEP + Salvar */}
@@ -364,7 +364,7 @@ export function ProfileScreen() {
               onChangeText={onCepChange}
               placeholder="00000-000"
               keyboardType="numeric"
-              style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              style={{ flex: 1, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: '#EAEAEA', backgroundColor: 'rgba(255,255,255,0.08)' }}
             />
             <Pressable
               onPress={onSaveCep}
@@ -380,36 +380,37 @@ export function ProfileScreen() {
             <TextInput
               value={ruaInput}
               onChangeText={setRuaInput}
-              placeholder="Rua (auto-fill com CEP)"
-              placeholderTextColor="#C4BDB5"
-              style={{ flex: 2, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              placeholder="Rua"
+              placeholderTextColor="rgba(234,234,234,0.4)"
+              style={{ flex: 1, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#EAEAEA', backgroundColor: 'rgba(255,255,255,0.08)' }}
             />
             <TextInput
               value={numeroInput}
               onChangeText={setNumeroInput}
               placeholder="Nº"
-              placeholderTextColor="#C4BDB5"
+              placeholderTextColor="rgba(234,234,234,0.4)"
               keyboardType="numeric"
-              style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              style={{ width: 56, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 10, fontSize: 13, color: '#EAEAEA', backgroundColor: 'rgba(255,255,255,0.08)' }}
             />
           </View>
 
-          {/* Cidade + Estado */}
+          {/* Cidade + UF */}
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <TextInput
               value={cidadeInput}
               onChangeText={setCidadeInput}
-              placeholder="Cidade (auto-fill)"
-              placeholderTextColor="#C4BDB5"
-              style={{ flex: 2, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              placeholder="Cidade"
+              placeholderTextColor="rgba(234,234,234,0.4)"
+              style={{ flex: 1, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#EAEAEA', backgroundColor: 'rgba(255,255,255,0.08)' }}
             />
             <TextInput
               value={estadoInput}
               onChangeText={setEstadoInput}
               placeholder="UF"
-              placeholderTextColor="#C4BDB5"
+              placeholderTextColor="rgba(234,234,234,0.4)"
+              autoCapitalize="characters"
               maxLength={2}
-              style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+              style={{ width: 48, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 10, fontSize: 13, color: '#EAEAEA', backgroundColor: 'rgba(255,255,255,0.08)' }}
             />
           </View>
         </View>
@@ -435,17 +436,29 @@ export function ProfileScreen() {
           )}
         </Card>
 
+        {/* Cartões */}
+        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
+          CARTÕES
+        </Text>
+        <Card>
+          <Row
+            label="Gerenciar meus cartões"
+            icon={<CreditCard size={17} color="#9C9486" />}
+            onPress={() => Alert.alert('Cartões', 'Gerencie seus cartões salvos durante o pagamento.')}
+          />
+        </Card>
+
         {/* Cupons */}
         <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8, marginLeft: 4, marginTop: 8 }}>
           CUPONS
         </Text>
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', padding: 16, marginBottom: 12 }}>
+        <View style={{ backgroundColor: '#444444', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 16, marginBottom: 12 }}>
           {couponSuccess ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Ticket size={20} color="#166534" />
               <Text style={{ flex: 1, color: '#166534', fontWeight: '700', fontSize: 14 }}>{couponSuccess}</Text>
               <Pressable onPress={() => setCouponSuccess(null)} hitSlop={8}>
-                <X size={16} color="#9C9486" />
+                <X size={16} color="rgba(234,234,234,0.55)" />
               </Pressable>
             </View>
           ) : (
@@ -455,13 +468,13 @@ export function ProfileScreen() {
                   value={couponCode}
                   onChangeText={(t) => { setCouponCode(t.toUpperCase()); setCouponError(null); }}
                   placeholder="CÓDIGO DO CUPOM"
-                  placeholderTextColor="#C4BDB5"
+                  placeholderTextColor="rgba(234,234,234,0.4)"
                   autoCapitalize="characters"
                   style={{
                     flex: 1, borderWidth: 1,
-                    borderColor: couponError ? '#ef4444' : '#E5DCC4',
+                    borderColor: couponError ? '#ef4444' : 'rgba(255,255,255,0.15)',
                     borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12,
-                    fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8',
+                    fontSize: 14, color: '#EAEAEA', backgroundColor: 'rgba(255,255,255,0.08)',
                   }}
                 />
                 <Pressable
@@ -470,7 +483,7 @@ export function ProfileScreen() {
                   style={({ pressed }) => ({
                     backgroundColor: pressed ? '#B8962B' : '#D4AF37',
                     borderRadius: 10, paddingHorizontal: 18, justifyContent: 'center',
-                    opacity: (!couponCode.trim() || couponLoading) ? 0.5 : 1,
+                    paddingVertical: 12,
                   })}
                 >
                   {couponLoading
@@ -493,10 +506,10 @@ export function ProfileScreen() {
         <Pressable
           onPress={onInstagram}
           style={({ pressed }) => ({
-            backgroundColor: pressed ? '#F0E8D0' : '#fff',
+            backgroundColor: pressed ? '#3a3a3a' : '#444444',
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: '#E5DCC4',
+            borderColor: 'rgba(255,255,255,0.1)',
             marginBottom: 12,
             padding: 20,
             flexDirection: 'row',
@@ -517,15 +530,15 @@ export function ProfileScreen() {
           </View>
 
           <View style={{ flex: 1 }}>
-            <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15, marginBottom: 2 }}>
+            <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 15, marginBottom: 2 }}>
               Fique ligado nas próximas atualizações
             </Text>
-            <Text style={{ color: '#9C9486', fontSize: 13 }}>
+            <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 13 }}>
               @{INSTAGRAM_USERNAME}
             </Text>
           </View>
 
-          <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>
+          <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 18 }}>›</Text>
         </Pressable>
 
         {/* Legal */}
@@ -540,10 +553,10 @@ export function ProfileScreen() {
 
         {/* Sair */}
         <View style={{
-          backgroundColor: '#fff',
+          backgroundColor: '#444444',
           borderRadius: 16,
           borderWidth: 1,
-          borderColor: '#E5DCC4',
+          borderColor: 'rgba(255,255,255,0.1)',
           overflow: 'hidden',
           marginBottom: 12,
         }}>
@@ -551,7 +564,7 @@ export function ProfileScreen() {
             onPress={onSignOut}
             android_ripple={{ color: '#FEE2E2' }}
             style={({ pressed }) => ({
-              backgroundColor: pressed ? '#FEE2E2' : 'transparent',
+              backgroundColor: pressed ? 'rgba(239,68,68,0.1)' : 'transparent',
             })}
           >
             <View style={{ paddingVertical: 28, alignItems: 'center', justifyContent: 'center' }}>

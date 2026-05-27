@@ -90,9 +90,9 @@ function getInitials(name: string): string {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#EFEFEF' }}>
-      <Text style={{ color: '#9C9486', fontSize: 14 }}>{label}</Text>
-      <Text style={{ color: '#1C1A14', fontSize: 14, fontWeight: '600', maxWidth: '60%', textAlign: 'right' }}>{value}</Text>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+      <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14 }}>{label}</Text>
+      <Text style={{ color: '#EAEAEA', fontSize: 14, fontWeight: '600', maxWidth: '60%', textAlign: 'right' }}>{value}</Text>
     </View>
   );
 }
@@ -100,10 +100,10 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{ marginBottom: 12 }}>
-      <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>
+      <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>
         {title}
       </Text>
-      <View style={{ backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4', paddingHorizontal: 16 }}>
+      <View style={{ backgroundColor: '#2a2a2a', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 16 }}>
         {children}
       </View>
     </View>
@@ -126,7 +126,7 @@ function CommentCard({
       gap: 10,
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderColor: '#EFEFEF',
+      borderColor: 'rgba(255,255,255,0.08)',
     }}>
       {/* Avatar */}
       <View style={{
@@ -143,13 +143,13 @@ function CommentCard({
 
       {/* Content */}
       <View style={{ flex: 1 }}>
-        <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14, marginBottom: 2 }}>
+        <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 14, marginBottom: 2 }}>
           {comment.authorName}
         </Text>
-        <Text style={{ color: '#1C1A14', fontSize: 14, lineHeight: 20 }}>
+        <Text style={{ color: 'rgba(234,234,234,0.8)', fontSize: 14, lineHeight: 20 }}>
           {comment.body}
         </Text>
-        <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 4 }}>
+        <Text style={{ color: 'rgba(234,234,234,0.4)', fontSize: 11, marginTop: 4 }}>
           {timeAgo(comment.createdAt)}
         </Text>
       </View>
@@ -157,7 +157,7 @@ function CommentCard({
       {/* Flag button — only if not the author */}
       {currentUserId !== comment.authorId && (
         <Pressable onPress={() => onReport(comment)} hitSlop={8} style={{ paddingTop: 2 }}>
-          <Text style={{ fontSize: 14, color: '#9C9486' }}>⚑</Text>
+          <Text style={{ fontSize: 14, color: 'rgba(234,234,234,0.4)' }}>⚑</Text>
         </Pressable>
       )}
     </View>
@@ -318,7 +318,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -351,13 +351,13 @@ export function ListingDetailScreen({ route, navigation }: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
       >
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 160 }}>
 
           {/* Fotos */}
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
             <View style={{
               flex: 2, aspectRatio: 1, borderRadius: 16,
-              backgroundColor: '#fff', borderWidth: 1, borderColor: '#E5DCC4',
+              backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
               alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
             }}>
               {listing.photoKeys?.[0] && getPhotoUrl(listing.photoKeys[0]) ? (
@@ -368,10 +368,10 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 />
               ) : (
                 <>
-                  <Shirt size={56} color="rgba(0,0,0,0.15)" />
+                  <Shirt size={56} color="rgba(255,255,255,0.15)" />
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 }}>
-                    <Building2 size={12} color="#9C9486" />
-                    <Text style={{ color: '#9C9486', fontSize: 12 }}>
+                    <Building2 size={12} color="rgba(234,234,234,0.4)" />
+                    <Text style={{ color: 'rgba(234,234,234,0.4)', fontSize: 12 }}>
                       {listing.kind === 'SELECAO' ? 'Seleção' : 'Time'}
                     </Text>
                   </View>
@@ -384,13 +384,13 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 return (
                   <View key={i} style={{
                     flex: 1, borderRadius: 12, minHeight: 80,
-                    backgroundColor: '#fff', borderWidth: 1, borderColor: '#E5DCC4',
+                    backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
                     alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
                   }}>
                     {photoUrl ? (
                       <Image source={{ uri: photoUrl }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                     ) : (
-                      <Text style={{ color: '#E5DCC4', fontSize: 22 }}>+</Text>
+                      <Text style={{ color: 'rgba(255,255,255,0.2)', fontSize: 22 }}>+</Text>
                     )}
                   </View>
                 );
@@ -423,8 +423,8 @@ export function ListingDetailScreen({ route, navigation }: Props) {
             <InfoRow label="Tamanho"    value={listing.size} />
             <InfoRow label="Gênero"     value={GENDER_LABEL[listing.gender] ?? listing.gender} />
             <View style={{ paddingVertical: 10 }}>
-              <Text style={{ color: '#9C9486', fontSize: 14, marginBottom: 4 }}>Condição</Text>
-              <View style={{ alignSelf: 'flex-start', backgroundColor: '#EFEFEF', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+              <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14, marginBottom: 4 }}>Condição</Text>
+              <View style={{ alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
                 <Text style={{ color: '#335336', fontWeight: '700', fontSize: 13 }}>
                   {CONDITION_LABEL[listing.condition] ?? listing.condition}
                 </Text>
@@ -435,7 +435,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
           {/* Descrição */}
           {listing.description ? (
             <SectionCard title="DESCRIÇÃO">
-              <Text style={{ color: '#1C1A14', fontSize: 14, lineHeight: 22, paddingVertical: 14 }}>
+              <Text style={{ color: 'rgba(234,234,234,0.85)', fontSize: 14, lineHeight: 22, paddingVertical: 14 }}>
                 {listing.description}
               </Text>
             </SectionCard>
@@ -459,21 +459,21 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 </Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }}>
+                <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 15 }}>
                   {listing.sellerName ?? 'Vendedor'}
                 </Text>
-                <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 2 }}>
+                <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12, marginTop: 2 }}>
                   Membro desde {new Date(listing.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
                 </Text>
               </View>
-              <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>
+              <Text style={{ color: 'rgba(234,234,234,0.4)', fontSize: 18 }}>›</Text>
             </Pressable>
           </SectionCard>
 
           {/* Comentários */}
           <SectionCard title="COMENTÁRIOS">
             {comments.length === 0 ? (
-              <Text style={{ color: '#9C9486', fontSize: 14, textAlign: 'center', paddingVertical: 20 }}>
+              <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14, textAlign: 'center', paddingVertical: 20 }}>
                 Seja o primeiro a comentar
               </Text>
             ) : (
@@ -495,21 +495,21 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 gap: 8,
                 paddingVertical: 12,
                 borderTopWidth: comments.length > 0 ? 1 : 0,
-                borderColor: '#EFEFEF',
+                borderColor: 'rgba(255,255,255,0.08)',
               }}>
                 <TextInput
                   ref={commentInputRef}
                   value={commentText}
                   onChangeText={setCommentText}
                   placeholder="Adicionar comentário..."
-                  placeholderTextColor="#9C9486"
+                  placeholderTextColor="rgba(234,234,234,0.4)"
                   multiline
                   style={{
                     flex: 1,
                     fontSize: 14,
-                    color: '#1C1A14',
+                    color: '#EAEAEA',
                     borderWidth: 1,
-                    borderColor: '#E5DCC4',
+                    borderColor: 'rgba(255,255,255,0.15)',
                     borderRadius: 14,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
@@ -524,7 +524,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                     width: 40, height: 40, borderRadius: 14,
                     backgroundColor:
                       !commentText.trim() || sendingComment
-                        ? '#E5DCC4'
+                        ? 'rgba(255,255,255,0.15)'
                         : pressed
                           ? '#B8942E'
                           : '#D4AF37',
@@ -546,9 +546,9 @@ export function ListingDetailScreen({ route, navigation }: Props) {
       {/* Botão de ação */}
       <View style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        backgroundColor: '#EFEFEF',
-        paddingHorizontal: 16, paddingBottom: 28, paddingTop: 12,
-        borderTopWidth: 1, borderColor: '#E5DCC4',
+        backgroundColor: '#2a2a2a',
+        paddingHorizontal: 16, paddingBottom: 32, paddingTop: 14,
+        borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
       }}>
         {isOwner ? (
           <View style={{ flexDirection: 'row', gap: 10, justifyContent: 'center' }}>
@@ -577,38 +577,47 @@ export function ListingDetailScreen({ route, navigation }: Props) {
             </Pressable>
           </View>
         ) : (
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ gap: 10 }}>
+            {/* Add to cart — outline button */}
             <Pressable
               onPress={async () => {
                 const { alreadyInCart } = await addToCart({ ...listing, priceCents });
                 if (alreadyInCart) {
                   webAlert('Já no carrinho', 'Esta camisa já está no seu carrinho.');
                 } else {
-                  webAlert('Adicionado!', `${listing.teamName} foi adicionado ao carrinho.`);
+                  webAlert('Adicionado! 🛒', `${listing.teamName} foi adicionado ao carrinho.`);
                 }
               }}
               style={({ pressed }) => ({
-                flex: 1,
-                backgroundColor: pressed ? '#2a4429' : '#335336',
-                borderRadius: 16, paddingVertical: 16, alignItems: 'center',
-                flexDirection: 'row', justifyContent: 'center', gap: 6,
+                backgroundColor: pressed ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.08)',
+                borderRadius: 16,
+                paddingVertical: 14,
+                alignItems: 'center',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 8,
+                borderWidth: 1.5,
+                borderColor: '#D4AF37',
               })}
             >
-              <ShoppingCart size={16} color="#D4AF37" />
-              <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 14 }}>
-                Carrinho
+              <ShoppingCart size={18} color="#D4AF37" />
+              <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 15 }} numberOfLines={1}>
+                Adicionar ao Carrinho
               </Text>
             </Pressable>
+
+            {/* Buy now — filled gold button */}
             <Pressable
               onPress={() => navigation.navigate('Checkout', { listing: { ...listing, priceCents } })}
               style={({ pressed }) => ({
-                flex: 2,
                 backgroundColor: pressed ? '#B8942E' : '#D4AF37',
-                borderRadius: 16, paddingVertical: 16, alignItems: 'center',
+                borderRadius: 16,
+                paddingVertical: 16,
+                alignItems: 'center',
               })}
             >
-              <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
-                Comprar — R$ {(priceCents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              <Text style={{ color: '#211B15', fontWeight: '900', fontSize: 17 }} numberOfLines={1}>
+                Comprar — {price}
               </Text>
             </Pressable>
           </View>
@@ -620,12 +629,12 @@ export function ListingDetailScreen({ route, navigation }: Props) {
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' }} onPress={() => setEditingPrice(false)} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={{
-            backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+            backgroundColor: '#2a2a2a', borderTopLeftRadius: 24, borderTopRightRadius: 24,
             padding: 24, paddingBottom: 36,
           }}>
-            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: '#E5DCC4', alignSelf: 'center', marginBottom: 20 }} />
-            <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 4 }}>Atualizar preço</Text>
-            <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 20 }}>
+            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.15)', alignSelf: 'center', marginBottom: 20 }} />
+            <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 17, marginBottom: 4 }}>Atualizar preço</Text>
+            <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13, marginBottom: 20 }}>
               {listing.teamName} · {listing.supplier} · {listing.season}
             </Text>
             <View style={{
@@ -637,9 +646,9 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 value={priceText}
                 onChangeText={setPriceText}
                 keyboardType="decimal-pad"
-                style={{ flex: 1, fontSize: 22, fontWeight: '800', color: '#1C1A14' }}
+                style={{ flex: 1, fontSize: 22, fontWeight: '800', color: '#EAEAEA' }}
                 placeholder="0,00"
-                placeholderTextColor="#C4BDB5"
+                placeholderTextColor="rgba(234,234,234,0.4)"
                 selectTextOnFocus
                 autoFocus
               />
@@ -662,7 +671,7 @@ export function ListingDetailScreen({ route, navigation }: Props) {
                 onPress={() => setEditingPrice(false)}
                 disabled={saving}
               >
-                <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 16 }}>Cancelar</Text>
+                <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 16 }}>Cancelar</Text>
               </Pressable>
             </View>
           </View>

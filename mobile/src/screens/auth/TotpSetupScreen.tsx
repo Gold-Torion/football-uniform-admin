@@ -106,7 +106,8 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
-          <ScrollView contentContainerStyle={{ padding: 24 }}>
+          {/* ── Scrollable content ── */}
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24, paddingBottom: 16 }}>
 
             {loadingQr ? (
               <ActivityIndicator color="#335336" size="large" style={{ marginTop: 60 }} />
@@ -124,17 +125,12 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
                   <View style={{ alignItems: 'center', marginBottom: 24 }}>
                     <Image
                       source={{ uri: qrDataUrl }}
-                      style={{
-                        width: 220, height: 220,
-                        borderRadius: 12,
-                        borderWidth: 1,
-                        borderColor: '#E5DCC4',
-                      }}
+                      style={{ width: 220, height: 220, borderRadius: 12, borderWidth: 1, borderColor: '#E5DCC4' }}
                     />
                   </View>
                 ) : null}
 
-                {/* Manual entry section — for single-device users */}
+                {/* Manual entry */}
                 <View style={{ backgroundColor: '#F0F7F0', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#335336', marginBottom: 16 }}>
                   <Text style={{ color: '#335336', fontWeight: '800', fontSize: 13, marginBottom: 6 }}>
                     📱 Usando o app neste celular?
@@ -159,7 +155,7 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
                   </View>
                 </View>
 
-                <View style={{ backgroundColor: '#FFF8E7', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#E5DCC4', marginBottom: 32 }}>
+                <View style={{ backgroundColor: '#FFF8E7', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#E5DCC4' }}>
                   <Text style={{ color: '#6B6357', fontSize: 13, lineHeight: 20 }}>
                     💡 Não tem o app?{' '}
                     <Text style={{ fontWeight: '700' }}>
@@ -167,20 +163,6 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
                     </Text>
                   </Text>
                 </View>
-
-                <Pressable
-                  onPress={() => setStep('verify')}
-                  style={({ pressed }) => ({
-                    backgroundColor: pressed ? '#B8942E' : '#D4AF37',
-                    borderRadius: 14,
-                    paddingVertical: 15,
-                    alignItems: 'center',
-                  })}
-                >
-                  <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
-                    Já escaneei → Próximo
-                  </Text>
-                </Pressable>
               </>
             ) : (
               <>
@@ -209,51 +191,86 @@ export function TotpSetupScreen({ visible, onClose }: Props) {
                     color: '#335336',
                     letterSpacing: 10,
                     textAlign: 'center',
-                    marginBottom: 24,
+                    marginBottom: 8,
                     backgroundColor: '#FFF',
                   }}
                   placeholder="––––––"
                   placeholderTextColor="#C4BDB5"
                 />
-
-                <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <Pressable
-                    onPress={() => setStep('qr')}
-                    style={{
-                      flex: 1,
-                      borderWidth: 2,
-                      borderColor: '#E5DCC4',
-                      borderRadius: 14,
-                      paddingVertical: 14,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Text style={{ color: '#6B6357', fontWeight: '700', fontSize: 15 }}>← Voltar</Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={handleActivate}
-                    disabled={code.length !== 6 || loadingOk}
-                    style={({ pressed }) => ({
-                      flex: 2,
-                      backgroundColor:
-                        code.length !== 6 ? '#C4BDB5' :
-                        pressed ? '#2A4429' : '#335336',
-                      borderRadius: 14,
-                      paddingVertical: 14,
-                      alignItems: 'center',
-                    })}
-                  >
-                    {loadingOk
-                      ? <ActivityIndicator color="#FFF" />
-                      : <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 15 }}>Ativar 2FA</Text>
-                    }
-                  </Pressable>
-                </View>
               </>
             )}
 
           </ScrollView>
+
+          {/* ── Fixed bottom button — always fully visible ── */}
+          <View style={{
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: 20,
+            borderTopWidth: 1,
+            borderColor: '#E5DCC4',
+            backgroundColor: '#F4EFE3',
+          }}>
+            {step === 'qr' ? (
+              <Pressable
+                onPress={() => setStep('verify')}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? '#B8942E' : '#D4AF37',
+                  borderRadius: 14,
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                })}
+              >
+                <Text style={{ color: '#211B15', fontWeight: '900', fontSize: 16 }} numberOfLines={1}>
+                  Já validei — Próximo →
+                </Text>
+              </Pressable>
+            ) : (
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <Pressable
+                  onPress={() => setStep('qr')}
+                  style={{
+                    flex: 1,
+                    borderWidth: 2,
+                    borderColor: '#E5DCC4',
+                    borderRadius: 14,
+                    paddingVertical: 15,
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text style={{ color: '#6B6357', fontWeight: '700', fontSize: 15 }}>← Voltar</Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleActivate}
+                  disabled={code.length !== 6 || loadingOk}
+                  style={({ pressed }) => ({
+                    flex: 2,
+                    backgroundColor:
+                      code.length !== 6
+                        ? 'rgba(0,0,0,0.08)'
+                        : pressed ? '#2A4429' : '#335336',
+                    borderRadius: 14,
+                    paddingVertical: 15,
+                    alignItems: 'center',
+                    borderWidth: code.length !== 6 ? 1 : 0,
+                    borderColor: '#C4BDB5',
+                  })}
+                >
+                  {loadingOk
+                    ? <ActivityIndicator color="#FFF" />
+                    : <Text style={{
+                        color: code.length !== 6 ? '#9C9486' : '#FFF',
+                        fontWeight: '800',
+                        fontSize: 15,
+                      }}>
+                        Ativar 2FA
+                      </Text>
+                  }
+                </Pressable>
+              </View>
+            )}
+          </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </Modal>

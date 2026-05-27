@@ -35,6 +35,24 @@ PENDING ITEMS:
 
 **Status: CONFIGURED**
 
+---
+
+## 2026-05-20
+
+### Original Message
+```
+The app is working well.
+Email registration is working.
+But it gave a message "already registered" — check if popup shows correctly.
+CEP is working ✅
+Quiz in its own section ✅
+Needs background change to match: https://www.arenadosmantos.app.br/inicio-app
+I want exactly same design and color guide. Background and color text.
+```
+
+**Status: IN PROGRESS**
+Website colors: bg=#2F5D3A (dark green), text=#EAEAEA (white), theme=#335336
+
 Pagar.me Arena Recipient ID: re_cmok9dpdd5f3v0l9tpj22vf3y
 
 ---

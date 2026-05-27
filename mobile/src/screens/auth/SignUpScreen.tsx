@@ -26,12 +26,21 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 export function SignUpScreen({ navigation }: Props) {
   const setSession = useAuthStore((s) => s.setSession);
 
-  const [name,     setName]     = useState('');
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm,  setConfirm]  = useState('');
-  const [showPwd,  setShowPwd]  = useState(false);
-  const [busy,     setBusy]     = useState(false);
+  const [name,             setName]             = useState('');
+  const [email,            setEmail]            = useState('');
+  const [phone,            setPhone]            = useState('');
+  const [password,         setPassword]         = useState('');
+  const [confirm,          setConfirm]          = useState('');
+  const [showPwd,          setShowPwd]          = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [busy,             setBusy]             = useState(false);
+
+  const formatPhone = (v: string) => {
+    const d = v.replace(/\D/g, '').slice(0, 11);
+    if (d.length <= 2)  return d.length ? `(${d}` : '';
+    if (d.length <= 7)  return `(${d.slice(0,2)}) ${d.slice(2)}`;
+    return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  };
 
   const onRegister = async () => {
     const n = name.trim();
@@ -52,11 +61,12 @@ export function SignUpScreen({ navigation }: Props) {
 
     setBusy(true);
     try {
-      const session = await AuthApi.register(n, e, password);
+      const session = await AuthApi.register(n, e, password, phone.trim() || undefined, marketingConsent || undefined);
       await setSession(session);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })
+      const raw = (err as { response?: { data?: { message?: string | string[] } } })
         ?.response?.data?.message;
+      const msg = Array.isArray(raw) ? raw[0] : raw;
       Alert.alert('Erro', typeof msg === 'string' ? msg : 'Não foi possível criar a conta. Tente novamente.');
     } finally {
       setBusy(false);
@@ -117,6 +127,19 @@ export function SignUpScreen({ navigation }: Props) {
               style={input}
             />
 
+            {/* Celular */}
+            <Text style={[label, { marginTop: 16 }]}>Celular</Text>
+            <TextInput
+              value={phone}
+              onChangeText={(t) => setPhone(formatPhone(t))}
+              placeholder="(xx) xxxxx-xxxx"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              keyboardType={Platform.OS === 'web' ? 'default' : 'phone-pad'}
+              autoComplete="off"
+              maxLength={15}
+              style={input}
+            />
+
             {/* Senha */}
             <Text style={[label, { marginTop: 16 }]}>Senha</Text>
             <View style={{ position: 'relative' }}>
@@ -166,6 +189,27 @@ export function SignUpScreen({ navigation }: Props) {
                 ))}
               </View>
             )}
+
+            {/* Marketing consent checkbox */}
+            <Pressable
+              onPress={() => setMarketingConsent((v) => !v)}
+              style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginTop: 24 }}
+            >
+              <View style={{
+                width: 22, height: 22, borderRadius: 6, marginTop: 1,
+                borderWidth: 2,
+                borderColor: marketingConsent ? '#4CAF50' : 'rgba(255,255,255,0.35)',
+                backgroundColor: marketingConsent ? '#4CAF50' : 'transparent',
+                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                {marketingConsent && (
+                  <Text style={{ color: '#fff', fontSize: 13, fontWeight: '900', lineHeight: 16 }}>✓</Text>
+                )}
+              </View>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, lineHeight: 20, flex: 1 }}>
+                Aceito receber comunicações sobre o desenvolvimento do app
+              </Text>
+            </Pressable>
 
             {/* Botão criar conta */}
             <Pressable
@@ -219,4 +263,9 @@ const input: object = {
   fontSize: 15,
   paddingHorizontal: 14,
   paddingVertical: 13,
+  // Override Chrome autofill white background on web
+  ...(Platform.OS === 'web' ? {
+    WebkitBoxShadow: '0 0 0 30px #3a5c3c inset',
+    WebkitTextFillColor: '#FFF',
+  } : {}),
 };

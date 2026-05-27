@@ -33,6 +33,7 @@ export type AuthStackParamList = {
   SignIn: undefined;
   EmailSignIn: undefined;
   SignUp: undefined;
+  ForgotPassword: undefined;
   TotpLogin: undefined;
   VerifyPhone: undefined;
   VerifyCpf: undefined;

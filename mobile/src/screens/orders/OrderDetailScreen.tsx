@@ -51,15 +51,15 @@ function getInitials(name: string): string {
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{
-      backgroundColor: '#fff',
+      backgroundColor: '#2a2a2a',
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: '#E5DCC4',
+      borderColor: 'rgba(255,255,255,0.1)',
       padding: 16,
       marginBottom: 12,
     }}>
       <Text style={{
-        color: '#9C9486', fontSize: 11, fontWeight: '700',
+        color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: '700',
         letterSpacing: 1, marginBottom: 12,
       }}>
         {title}
@@ -74,8 +74,8 @@ function SummaryRow({ label, value, bold, gold }: {
 }) {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-      <Text style={{ color: '#1C1A14', fontSize: 14, fontWeight: bold ? '700' : '400' }}>{label}</Text>
-      <Text style={{ color: gold ? '#D4AF37' : '#1C1A14', fontSize: bold ? 16 : 14, fontWeight: bold ? '700' : '400' }}>
+      <Text style={{ color: '#EAEAEA', fontSize: 14, fontWeight: bold ? '700' : '400' }}>{label}</Text>
+      <Text style={{ color: gold ? '#D4AF37' : '#EAEAEA', fontSize: bold ? 16 : 14, fontWeight: bold ? '700' : '400' }}>
         {value}
       </Text>
     </View>
@@ -146,7 +146,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
   const currentStepIndex = order ? STATUS_STEPS.indexOf(order.status) : -1;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -171,7 +171,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
         </View>
       ) : !order ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: '#9C9486', fontSize: 15 }}>Pedido não encontrado</Text>
+          <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 15 }}>Pedido não encontrado</Text>
         </View>
       ) : (
         <>
@@ -210,20 +210,20 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                                 ? '#335336'
                                 : 'transparent',
                             borderWidth: isFuture ? 2 : 0,
-                            borderColor: '#9C9486',
+                            borderColor: 'rgba(255,255,255,0.3)',
                           }} />
                           {!isLast && (
                             <View style={{
                               width: 2,
                               height: 20,
-                              backgroundColor: isCompleted ? '#D4AF37' : '#E5DCC4',
+                              backgroundColor: isCompleted ? '#D4AF37' : 'rgba(255,255,255,0.15)',
                             }} />
                           )}
                         </View>
 
                         {/* Label */}
                         <Text style={{
-                          color: isFuture ? '#9C9486' : '#1C1A14',
+                          color: isFuture ? 'rgba(234,234,234,0.35)' : '#EAEAEA',
                           fontSize: 14,
                           fontWeight: isCurrent ? '700' : '400',
                           paddingVertical: 10,
@@ -242,26 +242,26 @@ export function OrderDetailScreen({ route, navigation }: Props) {
               <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center', marginBottom: 12 }}>
                 <View style={{
                   width: 64, height: 64, borderRadius: 12,
-                  backgroundColor: '#EFEFEF',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
                   alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Shirt size={32} color="#335336" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16, marginBottom: 2 }}>
+                  <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 16, marginBottom: 2 }}>
                     {order.teamName}
                   </Text>
-                  <Text style={{ color: '#9C9486', fontSize: 13 }}>
+                  <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13 }}>
                     {order.supplier} · {order.season}
                   </Text>
-                  <Text style={{ color: '#9C9486', fontSize: 13 }}>
+                  <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13 }}>
                     Tam. {order.size} · {CONDITION_LABEL[order.condition] ?? order.condition}
                   </Text>
                 </View>
               </View>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: '#9C9486', fontSize: 14 }}>Valor do item</Text>
-                <Text style={{ color: '#1C1A14', fontSize: 14, fontWeight: '600' }}>{fmt(order.priceCents)}</Text>
+                <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14 }}>Valor do item</Text>
+                <Text style={{ color: '#EAEAEA', fontSize: 14, fontWeight: '600' }}>{fmt(order.priceCents)}</Text>
               </View>
             </SectionCard>
 
@@ -270,30 +270,30 @@ export function OrderDetailScreen({ route, navigation }: Props) {
               {order.deliveryMethod === 'CORREIOS' ? (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <Package size={18} color="#9C9486" />
-                    <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
+                    <Package size={18} color="rgba(234,234,234,0.4)" />
+                    <Text style={{ color: '#EAEAEA', fontWeight: '600', fontSize: 14 }}>
                       {order.shippingCarrier ?? 'Correios'} {order.shippingService ? `— ${order.shippingService}` : ''}
                     </Text>
                   </View>
                   {order.buyerCep ? (
-                    <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 4 }}>
+                    <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13, marginBottom: 4 }}>
                       CEP do comprador: {order.buyerCep}
                     </Text>
                   ) : null}
-                  <Text style={{ color: '#1C1A14', fontSize: 14, marginBottom: 8 }}>
+                  <Text style={{ color: '#EAEAEA', fontSize: 14, marginBottom: 8 }}>
                     Frete: {fmt(order.shippingCents)}
                   </Text>
 
                   {/* Tracking code */}
                   {order.shippingTrackingCode ? (
-                    <View style={{ backgroundColor: '#EFEFEF', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+                    <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                         <Truck size={14} color="#335336" />
                         <Text style={{ fontSize: 11, fontWeight: '700', color: '#335336', letterSpacing: 1 }}>
                           CÓDIGO DE RASTREIO
                         </Text>
                       </View>
-                      <Text style={{ fontSize: 15, fontWeight: '800', color: '#1C1A14', letterSpacing: 1 }}>
+                      <Text style={{ fontSize: 15, fontWeight: '800', color: '#EAEAEA', letterSpacing: 1 }}>
                         {order.shippingTrackingCode}
                       </Text>
                     </View>
@@ -319,8 +319,8 @@ export function OrderDetailScreen({ route, navigation }: Props) {
               ) : (
                 <>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <Package size={18} color="#9C9486" />
-                    <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>Entrega em Mãos</Text>
+                    <Package size={18} color="rgba(234,234,234,0.4)" />
+                    <Text style={{ color: '#EAEAEA', fontWeight: '600', fontSize: 14 }}>Entrega em Mãos</Text>
                   </View>
                   <Text style={{ color: '#9C9486', fontSize: 13 }}>
                     Entrega pessoal combinada entre comprador e vendedor
@@ -336,7 +336,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                 label="Frete"
                 value={order.deliveryMethod === 'ENTREGA_EM_MAOS' ? 'Grátis' : fmt(order.shippingCents)}
               />
-              <View style={{ height: 1, backgroundColor: '#EFEFEF', marginBottom: 10, marginTop: 2 }} />
+              <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginBottom: 10, marginTop: 2 }} />
               <SummaryRow label="Total" value={fmt(order.totalCents)} bold gold />
             </SectionCard>
 
@@ -356,12 +356,12 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                   </Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#9C9486', fontSize: 11 }}>Vendedor</Text>
-                  <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
+                  <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 11 }}>Vendedor</Text>
+                  <Text style={{ color: '#EAEAEA', fontWeight: '600', fontSize: 14 }}>
                     {order.sellerName}
                   </Text>
                 </View>
-                <Text style={{ color: '#9C9486', fontSize: 18 }}>›</Text>
+                <Text style={{ color: 'rgba(234,234,234,0.4)', fontSize: 18 }}>›</Text>
               </Pressable>
 
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -375,8 +375,8 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                   </Text>
                 </View>
                 <View>
-                  <Text style={{ color: '#9C9486', fontSize: 11 }}>Comprador</Text>
-                  <Text style={{ color: '#1C1A14', fontWeight: '600', fontSize: 14 }}>
+                  <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 11 }}>Comprador</Text>
+                  <Text style={{ color: '#EAEAEA', fontWeight: '600', fontSize: 14 }}>
                     {order.buyerName}
                   </Text>
                 </View>
@@ -387,7 +387,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
           {/* Confirm receipt button */}
           {canConfirm && (
-            <View style={{ backgroundColor: '#EFEFEF', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
+            <View style={{ backgroundColor: '#2a2a2a', borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 16, paddingBottom: 28 }}>
               <Pressable
                 onPress={handleConfirmReceipt}
                 disabled={confirming}
@@ -406,7 +406,7 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
           {/* Rate button — after delivery */}
           {canRate && (
-            <View style={{ backgroundColor: '#EFEFEF', borderTopWidth: 1, borderColor: '#E5DCC4', padding: 16, paddingBottom: 28 }}>
+            <View style={{ backgroundColor: '#2a2a2a', borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 16, paddingBottom: 28 }}>
               <Pressable
                 onPress={() => navigation.navigate('RateOrder', {
                   orderId,

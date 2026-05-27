@@ -114,7 +114,7 @@ export function SearchScreen() {
   }, [filtered]);
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
       {/* Search header */}
       <View style={{ backgroundColor: '#335336', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -206,7 +206,7 @@ export function SearchScreen() {
       ) : filtered.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Text style={{ fontSize: 36, marginBottom: 12 }}>🔍</Text>
-          <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 8, textAlign: 'center' }}>
+          <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 17, marginBottom: 8, textAlign: 'center' }}>
             {query.length >= 2 ? 'Nenhum resultado encontrado' : 'Busque por time, marca ou temporada'}
           </Text>
         </View>
@@ -228,7 +228,7 @@ export function SearchScreen() {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} tintColor="#335336" colors={['#335336']} />}
           ListHeaderComponent={
-            <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '700', marginLeft: 16, marginBottom: 12 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: '700', marginLeft: 16, marginBottom: 12 }}>
               {filtered.length} camisa{filtered.length !== 1 ? 's' : ''} encontrada{filtered.length !== 1 ? 's' : ''}
             </Text>
           }

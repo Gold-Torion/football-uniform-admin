@@ -77,8 +77,8 @@ const GARMENT_LABEL: Record<string, string> = {
 
 function Badge({ text }: { text: string }) {
   return (
-    <View style={{ backgroundColor: '#EFEFEF', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-      <Text style={{ color: '#6B6357', fontSize: 11, fontWeight: '600' }}>{text}</Text>
+    <View style={{ backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+      <Text style={{ color: 'rgba(234,234,234,0.75)', fontSize: 11, fontWeight: '600' }}>{text}</Text>
     </View>
   );
 }
@@ -98,30 +98,24 @@ function ListingCard({
   });
 
   return (
-    <View
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#E5DCC4',
-        marginBottom: 10,
-        flexDirection: 'row',
-      }}
-    >
-      {/* Photo */}
-      <View
-        style={{
-          width: 100,
-          backgroundColor: '#EFEFEF',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRightWidth: 1,
-          borderColor: '#E5DCC4',
-          overflow: 'hidden',
-          borderTopLeftRadius: 15,
-          borderBottomLeftRadius: 15,
-        }}
-      >
+    <View style={{
+      backgroundColor: '#444444',
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: 'rgba(255,255,255,0.1)',
+      marginBottom: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 10,
+      gap: 12,
+    }}>
+      {/* Thumbnail */}
+      <View style={{
+        width: 56, height: 56, borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', flexShrink: 0,
+      }}>
         {item.photoKeys?.[0] && getPhotoUrl(item.photoKeys[0]) ? (
           <Image
             source={{ uri: getPhotoUrl(item.photoKeys[0])! }}
@@ -129,66 +123,59 @@ function ListingCard({
             resizeMode="cover"
           />
         ) : (
-          <Shirt size={36} color="#335336" />
+          <Shirt size={24} color="#335336" />
         )}
       </View>
 
       {/* Info */}
-      <View style={{ flex: 1, padding: 12 }}>
-        <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 14 }} numberOfLines={1}>
           {item.teamName}
         </Text>
-        <Text style={{ color: '#6B6357', fontSize: 12, marginTop: 2 }}>
-          {item.supplier} · {item.season}
+        <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 11, marginTop: 2 }} numberOfLines={1}>
+          {item.supplier} · {item.season} · Tam. {item.size}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
-          <Badge text={`Tam. ${item.size}`} />
-          <Badge text={GARMENT_LABEL[item.garmentType] ?? item.garmentType} />
-          <Badge text={CONDITION_LABEL[item.condition] ?? item.condition} />
-        </View>
+        <Text style={{ color: '#D4AF37', fontWeight: '700', fontSize: 13, marginTop: 4 }}>
+          {price}
+        </Text>
+      </View>
 
-        {/* Price + buttons on same row */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, flexWrap: 'wrap', gap: 6 }}>
-          <Text style={{ color: '#335336', fontWeight: '800', fontSize: 15, marginRight: 4 }}>
-            {price}
-          </Text>
-          <Pressable
-            onPress={() => onEditPrice(item)}
-            hitSlop={8}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? '#EDE8DC' : '#EFEFEF',
-              borderRadius: 8,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 3,
-              borderWidth: 1,
-              borderColor: '#E5DCC4',
-            })}
-          >
-            <Pencil size={11} color="#335336" />
-            <Text style={{ color: '#335336', fontSize: 11, fontWeight: '700' }}>Preço</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => onRemove(item)}
-            hitSlop={8}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? '#F5D0D0' : '#FEE2E2',
-              borderRadius: 8,
-              paddingHorizontal: 8,
-              paddingVertical: 4,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 3,
-              borderWidth: 1,
-              borderColor: '#FECACA',
-            })}
-          >
-            <Trash2 size={11} color="#B91C1C" />
-            <Text style={{ color: '#B91C1C', fontSize: 11, fontWeight: '700' }}>Remover</Text>
-          </Pressable>
-        </View>
+      {/* Action buttons */}
+      <View style={{ flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+        <Pressable
+          onPress={() => onEditPrice(item)}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
+            borderRadius: 8,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.15)',
+          })}
+        >
+          <Pencil size={11} color="#D4AF37" />
+          <Text style={{ color: '#D4AF37', fontSize: 11, fontWeight: '700' }}>Preço</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onRemove(item)}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? '#F5D0D0' : '#FEE2E2',
+            borderRadius: 8,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+          })}
+        >
+          <Trash2 size={11} color="#B91C1C" />
+          <Text style={{ color: '#B91C1C', fontSize: 11, fontWeight: '700' }}>Remover</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -196,7 +183,7 @@ function ListingCard({
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (
-    <Text style={{ color: '#9C9486', fontSize: 18, transform: [{ rotate: open ? '90deg' : '0deg' }] }}>
+    <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 18, transform: [{ rotate: open ? '90deg' : '0deg' }] }}>
       ›
     </Text>
   );
@@ -292,7 +279,7 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
         {/* ── Header card ─────────────────────────────────── */}
         <LinearGradient
@@ -352,29 +339,29 @@ export function HomeScreen() {
             /* Empty state */
             <View
               style={{
-                backgroundColor: '#FFFFFF',
+                backgroundColor: '#444444',
                 borderRadius: 20,
                 padding: 32,
                 alignItems: 'center',
                 borderWidth: 1,
-                borderColor: '#E5DCC4',
+                borderColor: 'rgba(255,255,255,0.1)',
                 borderStyle: 'dashed',
               }}
             >
               <View
                 style={{
                   width: 64, height: 64, borderRadius: 32,
-                  backgroundColor: '#EFEFEF',
+                  backgroundColor: 'rgba(255,255,255,0.06)',
                   alignItems: 'center', justifyContent: 'center',
                   marginBottom: 16,
                 }}
               >
                 <Shirt size={28} color="#335336" />
               </View>
-              <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 8 }}>
+              <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 17, marginBottom: 8 }}>
                 Nenhuma camisa ainda
               </Text>
-              <Text style={{ color: '#9C9486', textAlign: 'center', fontSize: 14, lineHeight: 20, marginBottom: 24 }}>
+              <Text style={{ color: 'rgba(234,234,234,0.55)', textAlign: 'center', fontSize: 14, lineHeight: 20, marginBottom: 24 }}>
                 Publique suas camisas autênticas e comece a vender para colecionadores de todo o Brasil.
               </Text>
               <Pressable
@@ -397,14 +384,14 @@ export function HomeScreen() {
               <Pressable
                 onPress={toggleOpen}
                 style={({ pressed }) => ({
-                  backgroundColor: pressed ? '#EDE8DC' : '#FFFFFF',
+                  backgroundColor: pressed ? '#3a3a3a' : '#444444',
                   borderRadius: open ? undefined : 16,
                   borderTopLeftRadius: 16,
                   borderTopRightRadius: 16,
                   borderBottomLeftRadius: open ? 0 : 16,
                   borderBottomRightRadius: open ? 0 : 16,
                   borderWidth: 1,
-                  borderColor: '#E5DCC4',
+                  borderColor: 'rgba(255,255,255,0.1)',
                   borderBottomWidth: open ? 0 : 1,
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -413,7 +400,7 @@ export function HomeScreen() {
                 })}
               >
                 <TabHomeIcon size={20} color="#335336" />
-                <Text style={{ flex: 1, color: '#1C1A14', fontWeight: '700', fontSize: 15, marginLeft: 10 }}>
+                <Text style={{ flex: 1, color: '#EAEAEA', fontWeight: '700', fontSize: 15, marginLeft: 10 }}>
                   Minhas camisas
                 </Text>
                 <View
@@ -434,10 +421,10 @@ export function HomeScreen() {
               {open && (
                 <View
                   style={{
-                    backgroundColor: '#FDFAF5',
+                    backgroundColor: '#3c3c3c',
                     borderWidth: 1,
                     borderTopWidth: 0,
-                    borderColor: '#E5DCC4',
+                    borderColor: 'rgba(255,255,255,0.1)',
                     borderBottomLeftRadius: 16,
                     borderBottomRightRadius: 16,
                     padding: 12,
@@ -476,7 +463,7 @@ export function HomeScreen() {
         >
           <View
             style={{
-              backgroundColor: '#FFFFFF',
+              backgroundColor: '#444444',
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
               padding: 24,
@@ -487,16 +474,16 @@ export function HomeScreen() {
             <View
               style={{
                 width: 40, height: 4, borderRadius: 2,
-                backgroundColor: '#E5DCC4',
+                backgroundColor: 'rgba(255,255,255,0.15)',
                 alignSelf: 'center',
                 marginBottom: 20,
               }}
             />
 
-            <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 17, marginBottom: 4 }}>
+            <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 17, marginBottom: 4 }}>
               Atualizar preço
             </Text>
-            <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: 20 }}>
+            <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 13, marginBottom: 20 }}>
               {editingItem?.teamName} · {editingItem?.supplier} · {editingItem?.season}
             </Text>
 
@@ -519,9 +506,9 @@ export function HomeScreen() {
                 value={priceText}
                 onChangeText={setPriceText}
                 keyboardType="decimal-pad"
-                style={{ flex: 1, fontSize: 22, fontWeight: '800', color: '#1C1A14' }}
+                style={{ flex: 1, fontSize: 22, fontWeight: '800', color: '#EAEAEA' }}
                 placeholder="0,00"
-                placeholderTextColor="#C4BDB5"
+                placeholderTextColor="rgba(234,234,234,0.4)"
                 selectTextOnFocus
               />
             </View>

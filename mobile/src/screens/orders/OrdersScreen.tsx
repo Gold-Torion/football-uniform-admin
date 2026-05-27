@@ -56,10 +56,10 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        backgroundColor: '#fff',
+        backgroundColor: '#2a2a2a',
         borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#E5DCC4',
+        borderColor: 'rgba(255,255,255,0.1)',
         marginHorizontal: 16,
         marginBottom: 10,
         overflow: 'hidden',
@@ -75,20 +75,20 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
       }}>
         <View style={{
           width: 48, height: 48, borderRadius: 10,
-          backgroundColor: '#EFEFEF',
+          backgroundColor: 'rgba(255,255,255,0.08)',
           alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
           <Shirt size={24} color="#335336" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 15 }} numberOfLines={1}>
+          <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 15 }} numberOfLines={1}>
             {order.teamName}
           </Text>
-          <Text style={{ color: '#9C9486', fontSize: 12, marginTop: 1 }}>
+          <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12, marginTop: 1 }}>
             {order.supplier} · {order.season}
           </Text>
-          <Text style={{ color: '#9C9486', fontSize: 12 }}>Tam. {order.size}</Text>
+          <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12 }}>Tam. {order.size}</Text>
         </View>
         <StatusChip status={order.status} />
       </View>
@@ -100,14 +100,14 @@ function OrderCard({ order, onPress }: { order: OrderPublic; onPress: () => void
         justifyContent: 'space-between',
         paddingHorizontal: 14,
         paddingVertical: 10,
-        backgroundColor: '#EFEFEF',
+        backgroundColor: 'rgba(255,255,255,0.05)',
       }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           {order.deliveryMethod === 'CORREIOS'
-            ? <Package size={12} color="#9C9486" />
-            : <Handshake size={12} color="#9C9486" />
+            ? <Package size={12} color="rgba(234,234,234,0.4)" />
+            : <Handshake size={12} color="rgba(234,234,234,0.4)" />
           }
-          <Text style={{ color: '#9C9486', fontSize: 12 }}>
+          <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12 }}>
             {order.deliveryMethod === 'CORREIOS' ? 'Correios' : 'Em Mãos'}
           </Text>
         </View>
@@ -141,7 +141,7 @@ export function OrdersScreen({ navigation }: Props) {
   const displayed     = activeTab === 'buying' ? buyingOrders : sellingOrders;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -162,13 +162,13 @@ export function OrdersScreen({ navigation }: Props) {
 
       {/* Toggle tabs */}
       <View style={{
-        backgroundColor: '#fff',
+        backgroundColor: 'rgba(255,255,255,0.08)',
         borderRadius: 12,
         padding: 4,
         margin: 16,
         flexDirection: 'row',
         borderWidth: 1,
-        borderColor: '#E5DCC4',
+        borderColor: 'rgba(255,255,255,0.1)',
       }}>
         {([
           { key: 'buying' as TabKey, label: 'Comprando' },
@@ -186,7 +186,7 @@ export function OrdersScreen({ navigation }: Props) {
             }}
           >
             <Text style={{
-              color: activeTab === key ? '#211B15' : '#9C9486',
+              color: activeTab === key ? '#211B15' : 'rgba(234,234,234,0.5)',
               fontWeight: activeTab === key ? '700' : '400',
               fontSize: 14,
             }}>
@@ -202,11 +202,11 @@ export function OrdersScreen({ navigation }: Props) {
         </View>
       ) : displayed.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-          <Package size={32} color="#9C9486" style={{ marginBottom: 12 }} />
-          <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 16, marginBottom: 6, textAlign: 'center' }}>
+          <Package size={32} color="rgba(234,234,234,0.35)" style={{ marginBottom: 12 }} />
+          <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 16, marginBottom: 6, textAlign: 'center' }}>
             Nenhum pedido ainda
           </Text>
-          <Text style={{ color: '#9C9486', fontSize: 14, textAlign: 'center' }}>
+          <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14, textAlign: 'center' }}>
             {activeTab === 'buying'
               ? 'Suas compras aparecerão aqui'
               : 'Suas vendas aparecerão aqui'}

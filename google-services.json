@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "265836821890",
+    "project_id": "arena-dos-mantos-495611",
+    "storage_bucket": "arena-dos-mantos-495611.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:265836821890:android:879aa27dda205ef9aee39b",
+        "android_client_info": {
+          "package_name": "com.arenadosmantos.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAh5Umhjd5-GiMncWUIOzMI8zQsBLhbsxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

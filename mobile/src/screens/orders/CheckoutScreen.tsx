@@ -64,7 +64,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
   const priceCents    = listing.priceCents;
   const shippingCents = deliveryMethod === 'ENTREGA_EM_MAOS' ? 0 : (selectedShipping?.priceCents ?? null);
   const discountCents = couponResult ? Math.round(priceCents * (couponResult.discountPct / 100)) : 0;
-  // Show discounted subtotal even before shipping is selected
   const totalCents    = shippingCents !== null
     ? priceCents + shippingCents - discountCents
     : discountCents > 0 ? priceCents - discountCents : null;
@@ -92,7 +91,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
   const handleCepChange = (text: string) => {
     const formatted = formatCep(text);
     setBuyerCep(formatted);
-    // Reset shipping if CEP changes
     setShippingOptions([]);
     setSelectedShipping(null);
   };
@@ -149,7 +147,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
     }
     setCreatingOrder(true);
     try {
-      // 1. Create the order
       const order = await OrdersApi.create({
         listingId:  listing.listingId,
         deliveryMethod,
@@ -158,7 +155,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
       });
 
       if (paymentMethod === 'PIX') {
-        // 2a. PIX flow
         const pix = await PaymentsApi.initiatePixPayment(order.orderId);
         navigation.replace('PixPayment', {
           orderId:      order.orderId,
@@ -169,7 +165,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
           teamName:     listing.teamName,
         });
       } else {
-        // 2b. Credit card flow
         const [expMonth, expYear] = cardExpiry.split('/').map(Number);
         const result = await PaymentsApi.initiateCardPayment({
           orderId:        order.orderId,
@@ -199,7 +194,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#F4EFE3' }}>
 
       {/* Header */}
       <View style={{
@@ -218,7 +213,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 24 }}>
 
         {/* Product card */}
         <View style={{
@@ -321,12 +316,12 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 value={buyerCep}
                 onChangeText={handleCepChange}
                 placeholder="00000-000"
-                placeholderTextColor="#9C9486"
+                placeholderTextColor="#C4BDB5"
                 keyboardType="numeric"
                 maxLength={9}
                 style={{
                   flex: 1,
-                  backgroundColor: '#EFEFEF',
+                  backgroundColor: '#fff',
                   borderWidth: 1,
                   borderColor: '#E5DCC4',
                   borderRadius: 12,
@@ -339,19 +334,19 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 onPress={handleCalculateShipping}
                 disabled={cleanCep.length < 8 || calculatingShipping}
                 style={({ pressed }) => ({
-                  backgroundColor: pressed ? '#B8942E' : '#D4AF37',
+                  backgroundColor: cleanCep.length < 8 ? '#E5DCC4' : pressed ? '#B8942E' : '#D4AF37',
                   borderRadius: 12,
                   paddingHorizontal: 20,
                   paddingVertical: 14,
                   justifyContent: 'center',
                   alignItems: 'center',
-                  opacity: cleanCep.length < 8 ? 0.5 : 1,
-                  minWidth: 90,
+                  flexShrink: 0,
+                  width: 110,
                 })}
               >
                 {calculatingShipping
-                  ? <ActivityIndicator size="small" color="#211B15" />
-                  : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>Calcular</Text>
+                  ? <ActivityIndicator size="small" color="#9C9486" />
+                  : <Text style={{ color: cleanCep.length < 8 ? '#9C9486' : '#211B15', fontWeight: '800', fontSize: 15 }} numberOfLines={1}>Calcular</Text>
                 }
               </Pressable>
             </View>
@@ -421,7 +416,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
             </Text>
           </View>
 
-          {/* Coupon discount line */}
           {couponResult && (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -480,12 +474,13 @@ export function CheckoutScreen({ route, navigation }: Props) {
                   value={couponInput}
                   onChangeText={(t) => { setCouponInput(t.toUpperCase()); setCouponError(''); }}
                   placeholder="CÓDIGO DO CUPOM"
-                  placeholderTextColor="#9C9486"
+                  placeholderTextColor="#C4BDB5"
                   autoCapitalize="characters"
                   style={{
-                    flex: 1, borderWidth: 1, borderColor: couponError ? '#ef4444' : '#E5DCC4',
+                    flex: 1, borderWidth: 1,
+                    borderColor: couponError ? '#ef4444' : '#E5DCC4',
                     borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10,
-                    fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8',
+                    fontSize: 14, color: '#1C1A14', backgroundColor: '#F4EFE3',
                   }}
                 />
                 <Pressable
@@ -495,16 +490,18 @@ export function CheckoutScreen({ route, navigation }: Props) {
                     backgroundColor: pressed ? '#B8962B' : '#D4AF37',
                     borderRadius: 10,
                     paddingHorizontal: 20,
-                    paddingVertical: 14,
+                    paddingVertical: 12,
                     justifyContent: 'center',
                     alignItems: 'center',
-                    opacity: (!couponInput.trim() || couponLoading) ? 0.5 : 1,
                     minWidth: 90,
+                    flexShrink: 0,
                   })}
                 >
                   {couponLoading
                     ? <ActivityIndicator size="small" color="#211B15" />
-                    : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>Aplicar</Text>
+                    : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 15 }}>
+                        Aplicar
+                      </Text>
                   }
                 </Pressable>
               </View>
@@ -516,7 +513,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
         </View>
 
         {/* Payment method selector */}
-        <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>
+        <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 10 }}>
           FORMA DE PAGAMENTO
         </Text>
         <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
@@ -553,7 +550,6 @@ export function CheckoutScreen({ route, navigation }: Props) {
               DADOS DO CARTÃO
             </Text>
 
-            {/* Card number */}
             <TextInput
               value={cardNumber}
               onChangeText={(t) => setCardNumber(formatCardNumber(t))}
@@ -561,20 +557,18 @@ export function CheckoutScreen({ route, navigation }: Props) {
               placeholderTextColor="#C4BDB5"
               keyboardType="numeric"
               maxLength={19}
-              style={{ borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 16, color: '#1C1A14', backgroundColor: '#FAFAF8', marginBottom: 10, letterSpacing: 2 }}
+              style={{ borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 16, color: '#1C1A14', backgroundColor: '#F4EFE3', marginBottom: 10, letterSpacing: 2 }}
             />
 
-            {/* Card name */}
             <TextInput
               value={cardName}
               onChangeText={setCardName}
               placeholder="Nome como no cartão"
               placeholderTextColor="#C4BDB5"
               autoCapitalize="characters"
-              style={{ borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8', marginBottom: 10 }}
+              style={{ borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#F4EFE3', marginBottom: 10 }}
             />
 
-            {/* Expiry + CVV */}
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
               <TextInput
                 value={cardExpiry}
@@ -583,7 +577,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 placeholderTextColor="#C4BDB5"
                 keyboardType="numeric"
                 maxLength={5}
-                style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+                style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#F4EFE3' }}
               />
               <TextInput
                 value={cardCvv}
@@ -592,11 +586,10 @@ export function CheckoutScreen({ route, navigation }: Props) {
                 placeholderTextColor="#C4BDB5"
                 keyboardType="numeric"
                 maxLength={4}
-                style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#FAFAF8' }}
+                style={{ flex: 1, borderWidth: 1, borderColor: '#E5DCC4', borderRadius: 10, padding: 14, fontSize: 14, color: '#1C1A14', backgroundColor: '#F4EFE3' }}
               />
             </View>
 
-            {/* Installments */}
             <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '600', marginBottom: 8 }}>Parcelas</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {[1, 2, 3, 6, 12].map((n) => (
@@ -609,7 +602,7 @@ export function CheckoutScreen({ route, navigation }: Props) {
                     borderWidth: 1, borderColor: installments === n ? '#D4AF37' : '#E5DCC4',
                   }}
                 >
-                  <Text style={{ color: installments === n ? '#211B15' : '#5C5547', fontWeight: '700', fontSize: 13 }}>
+                  <Text style={{ color: installments === n ? '#211B15' : '#1C1A14', fontWeight: '700', fontSize: 13 }}>
                     {n}x
                   </Text>
                 </Pressable>
@@ -633,38 +626,39 @@ export function CheckoutScreen({ route, navigation }: Props) {
 
       </ScrollView>
 
-      {/* Fixed bottom bar */}
+      {/* Bottom pay bar */}
       <View style={{
-        position: 'absolute',
-        bottom: 0, left: 0, right: 0,
-        backgroundColor: '#fff',
+        backgroundColor: '#F4EFE3',
         borderTopWidth: 1,
         borderColor: '#E5DCC4',
         padding: 16,
-        paddingBottom: 28,
       }}>
         <Pressable
           onPress={handlePay}
-          disabled={creatingOrder || !canProceed}
+          disabled={creatingOrder}
           style={({ pressed }) => ({
-            backgroundColor: !canProceed ? '#9C9486' : creatingOrder ? '#B8942E' : pressed ? '#B8942E' : '#D4AF37',
-            borderRadius: 16, paddingVertical: 16, alignItems: 'center',
+            backgroundColor: creatingOrder ? '#B8942E' : pressed ? '#B8942E' : '#D4AF37',
+            borderRadius: 16,
+            paddingVertical: 18,
+            alignItems: 'center',
           })}
         >
           {creatingOrder ? (
             <ActivityIndicator color="#211B15" />
           ) : (
             <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 16 }}>
-              {!canProceed
-                ? (deliveryMethod === 'CORREIOS' && !selectedShipping ? 'Selecione o frete primeiro' : 'Preencha os dados do cartão')
-                : paymentMethod === 'PIX'
-                  ? `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com PIX`
-                  : `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com Cartão`}
+              {canProceed
+                ? (paymentMethod === 'PIX'
+                    ? `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com PIX`
+                    : `Pagar ${totalCents !== null ? fmt(totalCents) : fmt(priceCents)} com Cartão`)
+                : (deliveryMethod === 'CORREIOS' && !selectedShipping
+                    ? 'Selecione o frete primeiro'
+                    : 'Preencha os dados do cartão')}
             </Text>
           )}
         </Pressable>
         <Text style={{ color: '#9C9486', fontSize: 11, textAlign: 'center', marginTop: 8 }}>
-          Processamento via Pagar.me • Ambiente seguro
+          Processamento seguro via Pagar.me
         </Text>
       </View>
 

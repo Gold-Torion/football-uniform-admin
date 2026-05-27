@@ -57,7 +57,7 @@ export function QuizScreen() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceSubtle }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#3c3c3c' }}>
         <ActivityIndicator size="large" color={colors.arenaDourado} />
       </View>
     );
@@ -65,13 +65,13 @@ export function QuizScreen() {
 
   if (!quiz) {
     return (
-      <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: colors.surfaceSubtle }}>
+      <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 }}>
-          <HelpCircle size={56} color={colors.ink3} />
-          <Text style={{ fontSize: 18, fontWeight: '700', color: colors.ink1, marginTop: 16, textAlign: 'center' }}>
+          <HelpCircle size={56} color="rgba(234,234,234,0.55)" />
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#EAEAEA', marginTop: 16, textAlign: 'center' }}>
             Nenhum quiz disponível
           </Text>
-          <Text style={{ fontSize: 14, color: colors.ink3, marginTop: 8, textAlign: 'center' }}>
+          <Text style={{ fontSize: 14, color: 'rgba(234,234,234,0.55)', marginTop: 8, textAlign: 'center' }}>
             Volte em breve para responder o próximo quiz!
           </Text>
         </View>
@@ -83,7 +83,7 @@ export function QuizScreen() {
   const result   = answered && isResult(quiz) ? quiz : null;
 
   return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: colors.surfaceSubtle }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
 
         {/* Header */}
@@ -118,9 +118,9 @@ export function QuizScreen() {
               ? Math.round(((result.answerCounts[i] ?? 0) / result.totalAnswers) * 100)
               : 0;
 
-            let bg:       string = '#fff';
-            let border:   string = '#E5DCC4';
-            let txtColor: string = '#1C1A14';
+            let bg:       string = '#444444';
+            let border:   string = 'rgba(255,255,255,0.1)';
+            let txtColor: string = '#EAEAEA';
 
             if (isSelected && !result)   { bg = '#335336'; border = '#335336'; txtColor = '#fff'; }
             if (isCorrect)               { bg = '#dcfce7'; border = '#22c55e'; txtColor = '#166534'; }
@@ -155,7 +155,7 @@ export function QuizScreen() {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
                     <View style={{
                       width: 28, height: 28, borderRadius: 14,
-                      backgroundColor: isSelected && !result ? 'rgba(255,255,255,0.2)' : colors.surfaceSubtle,
+                      backgroundColor: isSelected && !result ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)',
                       alignItems: 'center', justifyContent: 'center',
                     }}>
                       <Text style={{ fontWeight: '800', fontSize: 13, color: txtColor }}>
@@ -184,15 +184,15 @@ export function QuizScreen() {
         {!result && (
           (isGuest || !accessToken) ? (
             <View style={{
-              backgroundColor: '#EFEFEF',
+              backgroundColor: 'rgba(255,255,255,0.06)',
               borderRadius: 16,
               paddingVertical: 16,
               alignItems: 'center',
               marginTop: 20,
               borderWidth: 1,
-              borderColor: '#E5DCC4',
+              borderColor: 'rgba(255,255,255,0.12)',
             }}>
-              <Text style={{ color: colors.ink3, fontWeight: '600', fontSize: 14 }}>
+              <Text style={{ color: 'rgba(234,234,234,0.55)', fontWeight: '600', fontSize: 14 }}>
                 Faça login para responder o quiz
               </Text>
             </View>

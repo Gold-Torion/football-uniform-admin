@@ -53,25 +53,25 @@ function MiniListingCard({ listing }: { listing: ListingPublic }) {
   return (
     <View style={{
       flex: 1,
-      backgroundColor: '#fff',
+      backgroundColor: '#2a2a2a',
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: '#E5DCC4',
+      borderColor: 'rgba(255,255,255,0.1)',
       padding: 12,
       minHeight: 120,
     }}>
       <View style={{
         width: '100%', aspectRatio: 1.2,
-        backgroundColor: '#EFEFEF', borderRadius: 10,
+        backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10,
         alignItems: 'center', justifyContent: 'center',
         marginBottom: 8,
       }}>
         <Shirt size={32} color="#335336" />
       </View>
-      <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 13, marginBottom: 2 }} numberOfLines={1}>
+      <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 13, marginBottom: 2 }} numberOfLines={1}>
         {listing.teamName}
       </Text>
-      <Text style={{ color: '#9C9486', fontSize: 11, marginBottom: 4 }} numberOfLines={1}>
+      <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 11, marginBottom: 4 }} numberOfLines={1}>
         {listing.season} · {listing.size}
       </Text>
       <Text style={{ color: '#335336', fontWeight: '800', fontSize: 14 }}>{price}</Text>
@@ -115,7 +115,7 @@ export function SellerProfileScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -167,10 +167,10 @@ export function SellerProfileScreen({ route, navigation }: Props) {
 
           {/* Rating card */}
           <View style={{
-            backgroundColor: '#fff',
+            backgroundColor: '#2a2a2a',
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: '#E5DCC4',
+            borderColor: 'rgba(255,255,255,0.1)',
             padding: 16,
             marginBottom: 16,
             flexDirection: 'row',
@@ -181,22 +181,22 @@ export function SellerProfileScreen({ route, navigation }: Props) {
             <View>
               {sellerCount > 0 ? (
                 <>
-                  <Text style={{ color: '#1C1A14', fontWeight: '800', fontSize: 22 }}>
-                    {sellerAvg.toFixed(1)} <Text style={{ color: '#9C9486', fontWeight: '400', fontSize: 16 }}>/ 5</Text>
+                  <Text style={{ color: '#EAEAEA', fontWeight: '800', fontSize: 22 }}>
+                    {sellerAvg.toFixed(1)} <Text style={{ color: 'rgba(234,234,234,0.5)', fontWeight: '400', fontSize: 16 }}>/ 5</Text>
                   </Text>
-                  <Text style={{ color: '#9C9486', fontSize: 13, marginTop: 2 }}>
+                  <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13, marginTop: 2 }}>
                     ({sellerCount} {sellerCount === 1 ? 'avaliação' : 'avaliações'})
                   </Text>
                 </>
               ) : (
-                <Text style={{ color: '#9C9486', fontSize: 15 }}>Sem avaliações ainda</Text>
+                <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 15 }}>Sem avaliações ainda</Text>
               )}
             </View>
           </View>
 
           {/* Listings section */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>
+            <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>
               ANÚNCIOS ATIVOS
             </Text>
             {listings.length > 0 && (
@@ -213,10 +213,10 @@ export function SellerProfileScreen({ route, navigation }: Props) {
 
           {listings.length === 0 ? (
             <View style={{
-              backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: '#E5DCC4',
+              backgroundColor: '#2a2a2a', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
               padding: 24, alignItems: 'center',
             }}>
-              <Text style={{ color: '#9C9486', fontSize: 15 }}>Nenhum anúncio ativo</Text>
+              <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 15 }}>Nenhum anúncio ativo</Text>
             </View>
           ) : (
             rows.map((row, rowIdx) => (

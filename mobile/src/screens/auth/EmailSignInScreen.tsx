@@ -136,6 +136,16 @@ export function EmailSignInScreen({ navigation }: Props) {
               }
             </Pressable>
 
+            {/* Link esqueci senha */}
+            <Pressable
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={{ marginTop: 12, alignItems: 'center' }}
+            >
+              <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14 }}>
+                Esqueci minha senha
+              </Text>
+            </Pressable>
+
             {/* Link para criar conta */}
             <Pressable
               onPress={() => navigation.navigate('SignUp')}

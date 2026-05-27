@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -327,8 +327,24 @@ export function NewListingScreen() {
   const [skuSearching, setSkuSearching]         = useState(false);
   const skuTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef               = useRef<ScrollView>(null);
+  const submittedRef            = useRef(false);
   const setListingsCount        = useAuthStore((s) => s.setListingsActiveCount);
   const nav                     = useNavigation<BottomTabNavigationProp<MainTabParamList>>();
+
+  // Reset form when returning to this tab after a successful submission
+  useFocusEffect(
+    useCallback(() => {
+      if (submittedRef.current) {
+        setForm(INITIAL);
+        setPhotoUris([]);
+        setPhotoKeys([]);
+        setCreatedListingId(null);
+        setAttempted(false);
+        setShowSuccess(false);
+        submittedRef.current = false;
+      }
+    }, []),
+  );
 
   async function pickAndUpload(slotIndex: number) {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -471,6 +487,7 @@ export function NewListingScreen() {
       setListingsCount(result.listingsActiveCount);
       setCreatedListingId(listingId);
       setShowSuccess(true);
+      submittedRef.current = true;
       scrollRef.current?.scrollTo({ y: 0, animated: true });
     } catch {
       webAlert('Erro', 'Não foi possível publicar o anúncio. Verifique sua conexão.');
@@ -519,25 +536,48 @@ export function NewListingScreen() {
             <Text style={{ color: '#166534', fontSize: 13, marginBottom: 12 }}>
               Agora adicione fotos para atrair mais compradores. Quando terminar, clique em "Ver meus anúncios".
             </Text>
-            <Pressable
-              onPress={() => {
-                setForm(INITIAL);
-                setPhotoUris([]);
-                setPhotoKeys([]);
-                setCreatedListingId(null);
-                setAttempted(false);
-                setShowSuccess(false);
-                nav.navigate('Home');
-              }}
-              style={({ pressed }) => ({
-                backgroundColor: pressed ? '#166534' : '#22c55e',
-                borderRadius: 10, paddingVertical: 12, alignItems: 'center',
-              })}
-            >
-              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 14 }}>
-                Ver meus anúncios →
-              </Text>
-            </Pressable>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <Pressable
+                onPress={() => {
+                  setForm(INITIAL);
+                  setPhotoUris([]);
+                  setPhotoKeys([]);
+                  setCreatedListingId(null);
+                  setAttempted(false);
+                  setShowSuccess(false);
+                }}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  backgroundColor: pressed ? '#d1fae5' : '#fff',
+                  borderWidth: 1, borderColor: '#22c55e',
+                  borderRadius: 10, paddingVertical: 12, alignItems: 'center',
+                })}
+              >
+                <Text style={{ color: '#166534', fontWeight: '700', fontSize: 13 }}>
+                  + Anunciar outra
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setForm(INITIAL);
+                  setPhotoUris([]);
+                  setPhotoKeys([]);
+                  setCreatedListingId(null);
+                  setAttempted(false);
+                  setShowSuccess(false);
+                  nav.navigate('Home');
+                }}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  backgroundColor: pressed ? '#166534' : '#22c55e',
+                  borderRadius: 10, paddingVertical: 12, alignItems: 'center',
+                })}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>
+                  Ver anúncios →
+                </Text>
+              </Pressable>
+            </View>
           </View>
         )}
 

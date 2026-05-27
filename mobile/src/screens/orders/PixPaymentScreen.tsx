@@ -51,9 +51,9 @@ function CountdownTimer({ expiresAt }: { expiresAt: string }) {
   }
 
   return (
-    <Text style={{ color: '#9C9486', fontSize: 13 }}>
+    <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13 }}>
       Expira em{' '}
-      <Text style={{ color: '#1C1A14', fontWeight: '700' }}>
+      <Text style={{ color: '#EAEAEA', fontWeight: '700' }}>
         {h > 0 ? `${h}h ` : ''}{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
       </Text>
     </Text>
@@ -108,13 +108,13 @@ export function PixPaymentScreen({ route, navigation }: Props) {
 
   if (paid) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Text style={{ fontSize: 64, marginBottom: 20 }}>✅</Text>
           <Text style={{ color: '#335336', fontWeight: '900', fontSize: 24, textAlign: 'center', marginBottom: 8 }}>
             Pagamento confirmado!
           </Text>
-          <Text style={{ color: '#6B6357', fontSize: 15, textAlign: 'center', marginBottom: 32 }}>
+          <Text style={{ color: 'rgba(234,234,234,0.6)', fontSize: 15, textAlign: 'center', marginBottom: 32 }}>
             Seu pedido de{' '}
             <Text style={{ fontWeight: '700' }}>{teamName}</Text>
             {' '}foi pago com sucesso.
@@ -136,7 +136,7 @@ export function PixPaymentScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -157,16 +157,16 @@ export function PixPaymentScreen({ route, navigation }: Props) {
         {/* Amount */}
         <View style={{
           alignItems: 'center', marginBottom: 24,
-          backgroundColor: '#fff', borderRadius: 16, padding: 20,
-          borderWidth: 1, borderColor: '#E5DCC4',
+          backgroundColor: '#2a2a2a', borderRadius: 16, padding: 20,
+          borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
         }}>
-          <Text style={{ color: '#9C9486', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>
+          <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: '700', letterSpacing: 1, marginBottom: 6 }}>
             TOTAL A PAGAR
           </Text>
           <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 32 }}>
             {formatCents(totalCents)}
           </Text>
-          <Text style={{ color: '#6B6357', fontSize: 13, marginTop: 4 }}>
+          <Text style={{ color: 'rgba(234,234,234,0.55)', fontSize: 13, marginTop: 4 }}>
             {teamName}
           </Text>
         </View>
@@ -193,19 +193,19 @@ export function PixPaymentScreen({ route, navigation }: Props) {
 
         {/* PIX code */}
         <View style={{
-          backgroundColor: '#fff', borderRadius: 16,
-          borderWidth: 1, borderColor: '#E5DCC4',
+          backgroundColor: '#2a2a2a', borderRadius: 16,
+          borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
           padding: 16, marginBottom: 12,
         }}>
-          <Text style={{ color: '#9C9486', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>
+          <Text style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: '700', letterSpacing: 1, marginBottom: 8 }}>
             CÓDIGO PIX COPIA E COLA
           </Text>
           <Text
             selectable
             style={{
-              color: '#1C1A14', fontSize: 11, lineHeight: 18,
+              color: '#EAEAEA', fontSize: 11, lineHeight: 18,
               fontFamily: 'monospace',
-              backgroundColor: '#EFEFEF', borderRadius: 8,
+              backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 8,
               padding: 12, marginBottom: 12,
             }}
             numberOfLines={3}
@@ -234,8 +234,8 @@ export function PixPaymentScreen({ route, navigation }: Props) {
         {/* Polling indicator */}
         {polling && (
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <ActivityIndicator size="small" color="#9C9486" />
-            <Text style={{ color: '#9C9486', fontSize: 12 }}>
+            <ActivityIndicator size="small" color="rgba(234,234,234,0.5)" />
+            <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12 }}>
               Aguardando confirmação do pagamento...
             </Text>
           </View>
@@ -243,7 +243,7 @@ export function PixPaymentScreen({ route, navigation }: Props) {
 
         {!polling && !paid && (
           <View style={{ alignItems: 'center', marginTop: 8 }}>
-            <Text style={{ color: '#9C9486', fontSize: 12, textAlign: 'center' }}>
+            <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12, textAlign: 'center' }}>
               Não conseguimos confirmar o pagamento automaticamente.{'\n'}
               Verifique seus pedidos em alguns instantes.
             </Text>

@@ -41,7 +41,7 @@ function StarRow({
     <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Pressable key={star} onPress={() => onScore(star)} hitSlop={6}>
-          <Text style={{ fontSize: 28, color: star <= score ? '#D4AF37' : '#E5DCC4' }}>
+          <Text style={{ fontSize: 28, color: star <= score ? '#D4AF37' : 'rgba(255,255,255,0.2)' }}>
             {star <= score ? '★' : '☆'}
           </Text>
         </Pressable>
@@ -98,7 +98,7 @@ export function RateOrderScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#EFEFEF' }}>
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1, backgroundColor: '#3c3c3c' }}>
 
       {/* Header */}
       <View style={{
@@ -147,10 +147,10 @@ export function RateOrderScreen({ route, navigation }: Props) {
 
         {/* Criteria list */}
         <View style={{
-          backgroundColor: '#fff',
+          backgroundColor: '#2a2a2a',
           borderRadius: 16,
           borderWidth: 1,
-          borderColor: '#E5DCC4',
+          borderColor: 'rgba(255,255,255,0.1)',
           padding: 16,
           marginBottom: 16,
           gap: 4,
@@ -161,10 +161,10 @@ export function RateOrderScreen({ route, navigation }: Props) {
               style={{
                 paddingVertical: 12,
                 borderBottomWidth: idx < criteria.length - 1 ? 1 : 0,
-                borderColor: '#EFEFEF',
+                borderColor: 'rgba(255,255,255,0.1)',
               }}
             >
-              <Text style={{ color: '#1C1A14', fontSize: 14, lineHeight: 20 }}>
+              <Text style={{ color: '#EAEAEA', fontSize: 14, lineHeight: 20 }}>
                 {criterion}
               </Text>
               <StarRow score={scores[idx] ?? 0} onScore={(v) => setScore(idx, v)} />
@@ -175,17 +175,17 @@ export function RateOrderScreen({ route, navigation }: Props) {
         {/* Live average */}
         {allRated && (
           <View style={{
-            backgroundColor: '#fff',
+            backgroundColor: '#2a2a2a',
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: '#E5DCC4',
+            borderColor: 'rgba(255,255,255,0.1)',
             padding: 16,
             marginBottom: 16,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            <Text style={{ color: '#9C9486', fontSize: 14 }}>Média</Text>
+            <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14 }}>Média</Text>
             <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 22 }}>
               {average.toFixed(1)}
             </Text>
@@ -199,7 +199,7 @@ export function RateOrderScreen({ route, navigation }: Props) {
           style={({ pressed }) => ({
             backgroundColor:
               !allRated || submitting
-                ? '#E5DCC4'
+                ? 'rgba(255,255,255,0.15)'
                 : pressed
                   ? '#B8942E'
                   : '#D4AF37',
@@ -212,7 +212,7 @@ export function RateOrderScreen({ route, navigation }: Props) {
             <ActivityIndicator color="#211B15" />
           ) : (
             <Text style={{
-              color: !allRated ? '#9C9486' : '#211B15',
+              color: !allRated ? 'rgba(234,234,234,0.5)' : '#211B15',
               fontWeight: '800',
               fontSize: 16,
             }}>

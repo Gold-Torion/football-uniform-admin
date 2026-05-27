@@ -7,6 +7,7 @@ import { useAuthStore } from '../store/auth.store';
 import { SignInScreen } from '../screens/auth/SignInScreen';
 import { EmailSignInScreen } from '../screens/auth/EmailSignInScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
+import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { TotpLoginScreen } from '../screens/auth/TotpLoginScreen';
 import { VerifyPhoneScreen } from '../screens/auth/VerifyPhoneScreen';
 import { VerifyCpfScreen } from '../screens/auth/VerifyCpfScreen';
@@ -68,9 +69,10 @@ export function RootNavigator() {
           <Stack.Screen name="TotpLogin"   component={s(TotpLoginScreen)} />
         ) : !accessToken && !isGuest ? (
           <>
-            <Stack.Screen name="SignIn"      component={s(SignInScreen)} />
-            <Stack.Screen name="EmailSignIn" component={s(EmailSignInScreen)} />
-            <Stack.Screen name="SignUp"      component={s(SignUpScreen)} />
+            <Stack.Screen name="SignIn"         component={s(SignInScreen)} />
+            <Stack.Screen name="EmailSignIn"    component={s(EmailSignInScreen)} />
+            <Stack.Screen name="SignUp"         component={s(SignUpScreen)} />
+            <Stack.Screen name="ForgotPassword" component={s(ForgotPasswordScreen)} />
           </>
         ) : !isGuest && !user?.lgpdConsentAt ? (
           <Stack.Screen name="LgpdConsent" component={s(LgpdConsentScreen)} />

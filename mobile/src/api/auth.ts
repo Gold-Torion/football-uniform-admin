@@ -15,8 +15,8 @@ export interface TotpChallenge {
 export type GooglePlatform = 'android' | 'ios' | 'web';
 
 export const AuthApi = {
-  register(displayName: string, email: string, password: string): Promise<AuthSession> {
-    return api.post('/auth/register', { displayName, email, password }).then((r) => r.data);
+  register(displayName: string, email: string, password: string, contactPhone?: string, marketingConsent?: boolean): Promise<AuthSession> {
+    return api.post('/auth/register', { displayName, email, password, contactPhone, marketingConsent }).then((r) => r.data);
   },
   emailLogin(email: string, password: string): Promise<AuthSession | TotpChallenge> {
     return api.post('/auth/login', { email, password }).then((r) => r.data);
@@ -56,5 +56,11 @@ export const AuthApi = {
   },
   logout(refreshToken: string): Promise<void> {
     return api.post('/auth/logout', { refreshToken }).then(() => undefined);
+  },
+  forgotPassword(email: string): Promise<void> {
+    return api.post('/auth/forgot-password', { email }).then(() => undefined);
+  },
+  resetPassword(email: string, code: string, newPassword: string): Promise<AuthSession> {
+    return api.post('/auth/reset-password', { email, code, newPassword }).then((r) => r.data);
   },
 };
