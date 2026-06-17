@@ -4,6 +4,7 @@ import {
   Alert,
   FlatList,
   Image,
+  Keyboard,
   Modal,
   Pressable,
   ScrollView,
@@ -13,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { webAlert } from '../../utils/webAlert';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -159,7 +160,7 @@ function RadioGroup({ options, value, onChange }: {
         return (
           <Pressable
             key={o.value}
-            onPress={() => onChange(o.value)}
+            onPress={() => { Keyboard.dismiss(); onChange(o.value); }}
             style={{
               flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
               backgroundColor: active ? '#D4AF37' : '#EFEFEF',
@@ -192,7 +193,7 @@ function SelectField({ label, value, placeholder, options, onChange, error, disa
   return (
     <>
       <Pressable
-        onPress={() => { if (!disabled) setOpen(true); }}
+        onPress={() => { if (!disabled) { Keyboard.dismiss(); setOpen(true); } }}
         style={{
           borderRadius: 12, padding: 14,
           borderWidth: 1,
@@ -228,7 +229,7 @@ function SelectField({ label, value, placeholder, options, onChange, error, disa
             keyExtractor={(item) => item.value}
             renderItem={({ item }) => (
               <Pressable
-                onPress={() => { onChange(item.value); setOpen(false); }}
+                onPress={() => { onChange(item.value); setOpen(false); Keyboard.dismiss(); }}
                 style={{ padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderColor: '#EFEFEF', backgroundColor: value === item.value ? '#EFEFEF' : '#fff' }}
               >
                 <View style={{ flex: 1, marginRight: 8 }}>
@@ -267,7 +268,7 @@ function SizeGrid({ value, onChange, error }: { value: string; onChange: (v: str
           return (
             <Pressable
               key={s}
-              onPress={() => onChange(s)}
+              onPress={() => { Keyboard.dismiss(); onChange(s); }}
               style={{
                 paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10,
                 backgroundColor: active ? '#D4AF37' : '#EFEFEF',
@@ -520,6 +521,7 @@ export function NewListingScreen() {
         ref={scrollRef}
         contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         onTouchStart={() => setAttempted(false)}
       >
 
@@ -550,10 +552,10 @@ export function NewListingScreen() {
                   flex: 1,
                   backgroundColor: pressed ? '#d1fae5' : '#fff',
                   borderWidth: 1, borderColor: '#22c55e',
-                  borderRadius: 10, paddingVertical: 12, alignItems: 'center',
+                  borderRadius: 10, paddingVertical: 14, alignItems: 'center',
                 })}
               >
-                <Text style={{ color: '#166534', fontWeight: '700', fontSize: 13 }}>
+                <Text style={{ color: '#166534', fontWeight: '700', fontSize: 15 }}>
                   + Anunciar outra
                 </Text>
               </Pressable>
@@ -569,11 +571,11 @@ export function NewListingScreen() {
                 }}
                 style={({ pressed }) => ({
                   flex: 1,
-                  backgroundColor: pressed ? '#166534' : '#22c55e',
-                  borderRadius: 10, paddingVertical: 12, alignItems: 'center',
+                  backgroundColor: pressed ? '#B8962B' : '#D4AF37',
+                  borderRadius: 10, paddingVertical: 14, alignItems: 'center',
                 })}
               >
-                <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>
+                <Text style={{ color: '#211B15', fontWeight: '700', fontSize: 15 }}>
                   Ver anúncios →
                 </Text>
               </Pressable>
