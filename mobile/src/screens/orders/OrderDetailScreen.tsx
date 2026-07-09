@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -89,6 +90,8 @@ export function OrderDetailScreen({ route, navigation }: Props) {
   const [order, setOrder]   = useState<OrderPublic | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
+  const [trackingInput, setTrackingInput] = useState('');
+  const [savingTracking, setSavingTracking] = useState(false);
 
   const fetchOrder = () => {
     setLoading(true);
@@ -132,6 +135,28 @@ export function OrderDetailScreen({ route, navigation }: Props) {
     order !== null &&
     currentUser?.userId === order.buyerId &&
     (order.status === 'PAID' || order.status === 'SHIPPED');
+
+  const handleSaveTracking = async () => {
+    if (!trackingInput.trim() || !order) return;
+    setSavingTracking(true);
+    try {
+      const updated = await OrdersApi.addTracking(orderId, trackingInput.trim());
+      setOrder(updated);
+      setTrackingInput('');
+    } catch {
+      webAlert('Erro', 'Não foi possível salvar o código de rastreio.');
+    } finally {
+      setSavingTracking(false);
+    }
+  };
+
+  const isSeller = order !== null && currentUser?.userId === order.sellerId;
+  const canAddTracking =
+    isSeller &&
+    order.deliveryMethod === 'CORREIOS' &&
+    (order.status === 'PAID' || order.status === 'SHIPPED') &&
+    !order.correiosTracking &&
+    !order.shippingTrackingCode;
 
   const canRate =
     order !== null &&
@@ -284,8 +309,8 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                     Frete: {fmt(order.shippingCents)}
                   </Text>
 
-                  {/* Tracking code */}
-                  {order.shippingTrackingCode ? (
+                  {/* Tracking code — seller manual or Melhor Envio */}
+                  {(order.correiosTracking || order.shippingTrackingCode) ? (
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                         <Truck size={14} color="#335336" />
@@ -294,10 +319,57 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                         </Text>
                       </View>
                       <Text style={{ fontSize: 15, fontWeight: '800', color: '#EAEAEA', letterSpacing: 1 }}>
-                        {order.shippingTrackingCode}
+                        {order.correiosTracking ?? order.shippingTrackingCode}
                       </Text>
                     </View>
                   ) : null}
+
+                  {/* Seller: input tracking code if not yet set */}
+                  {canAddTracking && (
+                    <View style={{ marginBottom: 8 }}>
+                      <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 12, marginBottom: 6 }}>
+                        Informe o código de rastreio dos Correios:
+                      </Text>
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <TextInput
+                          value={trackingInput}
+                          onChangeText={(t) => setTrackingInput(t.toUpperCase())}
+                          placeholder="AA123456789BR"
+                          placeholderTextColor="rgba(255,255,255,0.3)"
+                          autoCapitalize="characters"
+                          style={{
+                            flex: 1,
+                            backgroundColor: 'rgba(255,255,255,0.08)',
+                            borderRadius: 10,
+                            paddingHorizontal: 12,
+                            paddingVertical: 10,
+                            color: '#EAEAEA',
+                            fontSize: 14,
+                            fontWeight: '700',
+                            letterSpacing: 1,
+                            borderWidth: 1,
+                            borderColor: 'rgba(255,255,255,0.15)',
+                          }}
+                        />
+                        <Pressable
+                          onPress={handleSaveTracking}
+                          disabled={!trackingInput.trim() || savingTracking}
+                          style={({ pressed }) => ({
+                            backgroundColor: trackingInput.trim() ? (pressed ? '#B8942E' : '#D4AF37') : 'rgba(255,255,255,0.15)',
+                            borderRadius: 10,
+                            paddingHorizontal: 14,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          })}
+                        >
+                          {savingTracking
+                            ? <ActivityIndicator size="small" color="#211B15" />
+                            : <Text style={{ color: '#211B15', fontWeight: '800', fontSize: 13 }}>Salvar</Text>
+                          }
+                        </Pressable>
+                      </View>
+                    </View>
+                  )}
 
                   {/* Label download */}
                   {order.shippingLabelUrl ? (

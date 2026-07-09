@@ -5,7 +5,7 @@ export interface CreateListingPayload {
   teamName: string;
   continent: 'AMERICA' | 'EUROPA' | 'ASIA' | 'AFRICA' | 'OCEANIA';
   country: string;
-  season: string;
+  season?: string;
   supplier: string;
   model: string;
   garmentType: 'LOJA' | 'JOGO';

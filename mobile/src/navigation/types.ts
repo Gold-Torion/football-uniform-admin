@@ -51,10 +51,13 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
+  VerifyPhone: undefined;
+  VerifyCpf: undefined;
   ListingDetail: { listing: ListingParam };
   SellerProfile: { sellerId: string; sellerName: string };
   RateOrder: { orderId: string; rateeId: string; rateeName: string; raterRole: 'BUYER' | 'SELLER' };
   AdminReports: { secret: string };
+  AdminUsers: { secret: string };
   Checkout: { listing: ListingParam };
   PixPayment: {
     orderId: string;

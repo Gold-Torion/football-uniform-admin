@@ -423,7 +423,7 @@ export function NewListingScreen() {
     teamName:  form.teamName.trim().length < 2,
     continent: form.continent === '',
     country:   form.country === '',
-    season:    form.season === '',
+
     supplier:  form.supplier === '',
     model:     form.model === '',
     size:      form.size === '',
@@ -452,7 +452,7 @@ export function NewListingScreen() {
         teamName: form.teamName.trim(),
         continent: form.continent as 'AMERICA' | 'EUROPA' | 'ASIA' | 'AFRICA' | 'OCEANIA',
         country: form.country,
-        season: form.season,
+        season: form.season || undefined,
         supplier: form.supplier,
         model: form.model,
         garmentType: form.garmentType,
@@ -777,8 +777,8 @@ export function NewListingScreen() {
           disabled={!form.continent}
         />
 
-        {/* Temporada */}
-        <SectionTitle text="TEMPORADA" error={e.season} />
+        {/* Temporada — opcional */}
+        <SectionTitle text="TEMPORADA (OPCIONAL)" />
         <Text style={{ color: '#9C9486', fontSize: 11, marginBottom: 8 }}>
           {isEuropeanSeason
             ? 'Formato: 2023/24, 2024/25… (Europa e Seleções)'
@@ -787,10 +787,9 @@ export function NewListingScreen() {
         <SelectField
           label="Temporada"
           value={form.season}
-          placeholder="Selecione..."
+          placeholder="Selecione (opcional)..."
           options={seasonOptions}
           onChange={(v) => set('season', v)}
-          error={e.season}
         />
 
         {/* Fornecedora */}

@@ -11,12 +11,15 @@ import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { TotpLoginScreen } from '../screens/auth/TotpLoginScreen';
 import { VerifyPhoneScreen } from '../screens/auth/VerifyPhoneScreen';
 import { VerifyCpfScreen } from '../screens/auth/VerifyCpfScreen';
+import { VerifyPhoneProfileScreen } from '../screens/auth/VerifyPhoneProfileScreen';
+import { VerifyCpfProfileScreen } from '../screens/auth/VerifyCpfProfileScreen';
 import { LgpdConsentScreen } from '../screens/auth/LgpdConsentScreen';
 import { MainTabs } from './MainTabs';
 import { ListingDetailScreen } from '../screens/listing/ListingDetailScreen';
 import { SellerProfileScreen } from '../screens/seller/SellerProfileScreen';
 import { RateOrderScreen } from '../screens/rating/RateOrderScreen';
 import { AdminReportsScreen } from '../screens/admin/AdminReportsScreen';
+import { AdminUsersScreen } from '../screens/admin/AdminUsersScreen';
 import { CheckoutScreen } from '../screens/orders/CheckoutScreen';
 import { OrdersScreen } from '../screens/orders/OrdersScreen';
 import { OrderDetailScreen } from '../screens/orders/OrderDetailScreen';
@@ -91,6 +94,9 @@ export function RootNavigator() {
             <Stack.Screen name="AdminReports" component={s(AdminReportsScreen)}
               options={{ animation: 'slide_from_right' }}
             />
+            <Stack.Screen name="AdminUsers" component={s(AdminUsersScreen)}
+              options={{ animation: 'slide_from_right' }}
+            />
             <Stack.Screen name="Checkout" component={s(CheckoutScreen)}
               options={{ animation: 'slide_from_right' }}
             />
@@ -108,6 +114,12 @@ export function RootNavigator() {
             />
             <Stack.Screen name="Cart" component={s(CartScreen)}
               options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen name="VerifyPhone" component={s(VerifyPhoneProfileScreen)}
+              options={{ animation: 'slide_from_bottom', headerShown: true, title: 'Verificar telefone', headerStyle: { backgroundColor: colors.arenaVerde }, headerTitleStyle: { color: colors.arenaDouradoClaro, fontWeight: '800' }, headerTintColor: colors.arenaDouradoClaro }}
+            />
+            <Stack.Screen name="VerifyCpf" component={s(VerifyCpfProfileScreen)}
+              options={{ animation: 'slide_from_bottom', headerShown: true, title: 'Confirmar CPF', headerStyle: { backgroundColor: colors.arenaVerde }, headerTitleStyle: { color: colors.arenaDouradoClaro, fontWeight: '800' }, headerTintColor: colors.arenaDouradoClaro }}
             />
           </>
         )}

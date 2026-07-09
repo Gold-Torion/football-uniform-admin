@@ -6,11 +6,12 @@ export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'SHIPPED' | 'DELIVERED' |
 export interface OrderPublic {
   orderId: string; buyerId: string; buyerName: string;
   sellerId: string; sellerName: string; listingId: string;
-  teamName: string; supplier: string; season: string;
+  teamName: string; supplier: string; season?: string;
   size: string; condition: string; priceCents: number; photoKeys: string[];
   deliveryMethod: DeliveryMethod; shippingCents: number; totalCents: number;
   buyerCep?: string; sellerCep?: string;
   status: OrderStatus; createdAt: string; updatedAt: string;
+  correiosTracking?:     string;
   // Melhor Envio fields
   shippingLabelUrl?:     string;
   shippingTrackingCode?: string;
@@ -36,4 +37,6 @@ export const OrdersApi = {
     api.patch(`/orders/${orderId}/confirm-receipt`),
   estimateShipping: (listingId: string, toCep: string) =>
     api.post<ShippingOption[]>('/orders/shipping-estimate', { listingId, toCep }).then((r: { data: ShippingOption[] }) => r.data),
+  addTracking: (orderId: string, correiosTracking: string) =>
+    api.patch<OrderPublic>(`/orders/${orderId}/tracking`, { correiosTracking }).then((r: { data: OrderPublic }) => r.data),
 };

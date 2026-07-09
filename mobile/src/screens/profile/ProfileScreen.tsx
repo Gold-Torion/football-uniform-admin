@@ -4,7 +4,7 @@ import { webAlert, webConfirm } from '../../utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X, CreditCard } from 'lucide-react-native';
+import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X, CreditCard, Phone, Lock } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import { AuthApi } from '../../api/auth';
@@ -239,7 +239,13 @@ export function ProfileScreen() {
           'Acesso Administrativo',
           'Digite o segredo de administrador:',
           (secret) => {
-            if (secret?.trim()) navigation.navigate('AdminReports', { secret: secret.trim() });
+            if (!secret?.trim()) return;
+            const s = secret.trim();
+            Alert.alert('Admin', 'Selecione a seção:', [
+              { text: 'Denúncias', onPress: () => navigation.navigate('AdminReports', { secret: s }) },
+              { text: 'Usuários', onPress: () => navigation.navigate('AdminUsers', { secret: s }) },
+              { text: 'Cancelar', style: 'cancel' },
+            ]);
           },
           'secure-text',
         );
@@ -330,9 +336,23 @@ export function ProfileScreen() {
           CONTA
         </Text>
         <Card>
-          <Row label="Telefone" value={user?.phoneE164 ?? '—'} />
+          <Row
+            label="Telefone"
+            icon={<Phone size={17} color="#9C9486" />}
+            value={user?.phoneE164
+              ? user.phoneE164.replace(/(\+55)(\d{2})(\d{5})(\d{4})/, '$1 ($2) $3-$4')
+              : 'Adicionar'}
+            onPress={user?.phoneE164 ? undefined : () => navigation.navigate('VerifyPhone')}
+          />
           <Divider />
-          <Row label="CPF" value={user?.cpf ? `***.***.${user.cpf.slice(6, 9)}-**` : '—'} />
+          <Row
+            label="CPF"
+            icon={user?.cpf ? <Lock size={15} color="#9C9486" /> : undefined}
+            value={user?.cpf
+              ? `${user.cpf.slice(0, 3)}.***.***-${user.cpf.slice(9)}`
+              : 'Adicionar'}
+            onPress={user?.cpf ? undefined : () => navigation.navigate('VerifyCpf')}
+          />
           <Divider />
           <Row label="Meus pedidos" icon={<ShoppingBag size={17} color="#9C9486" />} onPress={() => navigation.navigate('Orders')} />
           <Divider />
