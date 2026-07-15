@@ -21,7 +21,9 @@
       "permissions": [
         "READ_EXTERNAL_STORAGE",
         "CAMERA",
-        "INTERNET"
+        "INTERNET",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
       ]
     },
     "web": {
@@ -30,7 +32,15 @@
     "plugins": [
       "expo-secure-store",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#335336",
+          "sounds": []
+        }
+      ]
     ],
     "extra": {
       "eas": {

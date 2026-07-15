@@ -5,4 +5,7 @@ export const UsersApi = {
   updateSellerCep(cep: string, rua?: string, numero?: string, cidade?: string, estado?: string): Promise<PublicUser> {
     return api.patch('/users/me/cep', { cep, rua, numero, cidade, estado }).then((r) => r.data as PublicUser);
   },
+  updatePushToken(token: string): Promise<void> {
+    return api.patch('/users/me/push-token', { token }).then(() => undefined);
+  },
 };

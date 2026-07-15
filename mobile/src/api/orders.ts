@@ -21,13 +21,15 @@ export interface OrderPublic {
 }
 
 export interface ShippingOption {
-  service: 'PAC' | 'SEDEX';
+  id: number;
+  service: string;
+  company: string;
   priceCents: number;
   days: number;
 }
 
 export const OrdersApi = {
-  create: (data: { listingId: string; deliveryMethod: DeliveryMethod; buyerCep?: string; couponCode?: string }) =>
+  create: (data: { listingId: string; deliveryMethod: DeliveryMethod; buyerCep?: string; shippingServiceId?: number; couponCode?: string }) =>
     api.post<OrderPublic>('/orders', data).then((r: { data: OrderPublic }) => r.data),
   listMine: () =>
     api.get<OrderPublic[]>('/orders/mine').then((r: { data: OrderPublic[] }) => r.data),

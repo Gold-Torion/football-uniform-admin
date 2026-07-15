@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { webAlert, webConfirm } from '../../utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -178,6 +178,9 @@ export function ProfileScreen() {
 
   const versionTapCount = useRef(0);
   const versionTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [adminModalVisible, setAdminModalVisible] = useState(false);
+  const [adminSecretInput, setAdminSecretInput]   = useState('');
+  const [adminSection, setAdminSection]           = useState<'menu' | 'enter'>('enter');
 
   useEffect(() => {
     if (!user?.userId) return;
@@ -234,24 +237,9 @@ export function ProfileScreen() {
 
     if (versionTapCount.current >= 5) {
       versionTapCount.current = 0;
-      if (Platform.OS === 'ios') {
-        Alert.prompt(
-          'Acesso Administrativo',
-          'Digite o segredo de administrador:',
-          (secret) => {
-            if (!secret?.trim()) return;
-            const s = secret.trim();
-            Alert.alert('Admin', 'Selecione a seção:', [
-              { text: 'Denúncias', onPress: () => navigation.navigate('AdminReports', { secret: s }) },
-              { text: 'Usuários', onPress: () => navigation.navigate('AdminUsers', { secret: s }) },
-              { text: 'Cancelar', style: 'cancel' },
-            ]);
-          },
-          'secure-text',
-        );
-      } else {
-        Alert.alert('Acesso Administrativo', 'Funcionalidade disponível apenas no iOS por enquanto.');
-      }
+      setAdminSecretInput('');
+      setAdminSection('enter');
+      setAdminModalVisible(true);
     }
   };
 
@@ -601,6 +589,109 @@ export function ProfileScreen() {
         visible={totpSetupVisible}
         onClose={() => setTotpSetupVisible(false)}
       />
+
+      {/* Admin secret modal — cross-platform replacement for Alert.prompt */}
+      {adminModalVisible && (
+        <View style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          <View style={{
+            backgroundColor: '#2a2a2a',
+            borderRadius: 20,
+            padding: 24,
+            width: '85%',
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.1)',
+          }}>
+            {adminSection === 'enter' ? (
+              <>
+                <Text style={{ color: '#F5E6B8', fontWeight: '800', fontSize: 17, marginBottom: 6 }}>
+                  Acesso Administrativo
+                </Text>
+                <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 13, marginBottom: 16 }}>
+                  Digite o segredo de administrador:
+                </Text>
+                <TextInput
+                  value={adminSecretInput}
+                  onChangeText={setAdminSecretInput}
+                  secureTextEntry
+                  autoFocus
+                  placeholder="••••••••"
+                  placeholderTextColor="rgba(255,255,255,0.3)"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    borderRadius: 12,
+                    paddingHorizontal: 14,
+                    paddingVertical: 12,
+                    color: '#EAEAEA',
+                    fontSize: 16,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    marginBottom: 16,
+                  }}
+                />
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <Pressable
+                    onPress={() => setAdminModalVisible(false)}
+                    style={({ pressed }) => ({
+                      flex: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
+                      backgroundColor: pressed ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)',
+                    })}
+                  >
+                    <Text style={{ color: 'rgba(234,234,234,0.6)', fontWeight: '600' }}>Cancelar</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      if (adminSecretInput.trim()) setAdminSection('menu');
+                    }}
+                    style={({ pressed }) => ({
+                      flex: 1, borderRadius: 12, paddingVertical: 13, alignItems: 'center',
+                      backgroundColor: adminSecretInput.trim() ? (pressed ? '#B8942E' : '#D4AF37') : 'rgba(255,255,255,0.15)',
+                    })}
+                  >
+                    <Text style={{ color: '#211B15', fontWeight: '800' }}>Entrar</Text>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={{ color: '#F5E6B8', fontWeight: '800', fontSize: 17, marginBottom: 16 }}>
+                  Admin — Selecione a seção
+                </Text>
+                {[
+                  { label: 'Denúncias', screen: 'AdminReports' as const },
+                  { label: 'Usuários', screen: 'AdminUsers' as const },
+                ].map(({ label, screen }) => (
+                  <Pressable
+                    key={screen}
+                    onPress={() => {
+                      setAdminModalVisible(false);
+                      navigation.navigate(screen, { secret: adminSecretInput.trim() });
+                    }}
+                    style={({ pressed }) => ({
+                      backgroundColor: pressed ? '#2A4429' : '#335336',
+                      borderRadius: 12,
+                      paddingVertical: 14,
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    })}
+                  >
+                    <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 15 }}>{label}</Text>
+                  </Pressable>
+                ))}
+                <Pressable
+                  onPress={() => setAdminModalVisible(false)}
+                  style={{ alignItems: 'center', paddingVertical: 10 }}
+                >
+                  <Text style={{ color: 'rgba(234,234,234,0.4)', fontSize: 13 }}>Cancelar</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { useAuthStore } from '../store/auth.store';
+import { registerPushToken } from '../utils/pushNotifications';
 import { SignInScreen } from '../screens/auth/SignInScreen';
 import { EmailSignInScreen } from '../screens/auth/EmailSignInScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
@@ -56,6 +57,13 @@ export function RootNavigator() {
   useEffect(() => {
     void hydrate();
   }, [hydrate]);
+
+  // Register push token once user is fully authenticated
+  useEffect(() => {
+    if (accessToken && user?.lgpdConsentAt && !isGuest) {
+      void registerPushToken();
+    }
+  }, [accessToken, user?.lgpdConsentAt, isGuest]);
 
   if (!hydrated) {
     return (

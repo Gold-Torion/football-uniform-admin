@@ -148,10 +148,11 @@ export function CheckoutScreen({ route, navigation }: Props) {
     setCreatingOrder(true);
     try {
       const order = await OrdersApi.create({
-        listingId:  listing.listingId,
+        listingId:         listing.listingId,
         deliveryMethod,
-        buyerCep:   deliveryMethod === 'CORREIOS' ? buyerCep.replace(/\D/g, '') : undefined,
-        couponCode: couponResult?.code,
+        buyerCep:          deliveryMethod === 'CORREIOS' ? buyerCep.replace(/\D/g, '') : undefined,
+        shippingServiceId: deliveryMethod === 'CORREIOS' ? selectedShipping?.id : undefined,
+        couponCode:        couponResult?.code,
       });
 
       if (paymentMethod === 'PIX') {
@@ -356,23 +357,26 @@ export function CheckoutScreen({ route, navigation }: Props) {
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
                 {shippingOptions.map((opt) => (
                   <Pressable
-                    key={opt.service}
+                    key={opt.id}
                     onPress={() => setSelectedShipping(opt)}
                     style={{
                       flex: 1,
                       backgroundColor: '#fff',
                       borderRadius: 12,
-                      borderWidth: selectedShipping?.service === opt.service ? 2 : 1,
-                      borderColor: selectedShipping?.service === opt.service ? '#D4AF37' : '#E5DCC4',
+                      borderWidth: selectedShipping?.id === opt.id ? 2 : 1,
+                      borderColor: selectedShipping?.id === opt.id ? '#D4AF37' : '#E5DCC4',
                       padding: 12,
                       alignItems: 'center',
                     }}
                   >
-                    <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14 }}>
+                    <Text style={{ color: '#9C9486', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 }}>
+                      {opt.company.toUpperCase()}
+                    </Text>
+                    <Text style={{ color: '#1C1A14', fontWeight: '700', fontSize: 14, marginTop: 2 }}>
                       {opt.service}
                     </Text>
                     <Text style={{ color: '#9C9486', fontSize: 11, marginTop: 2 }}>
-                      {opt.days} {opt.days === 1 ? 'dia' : 'dias'}
+                      {opt.days} {opt.days === 1 ? 'dia útil' : 'dias úteis'}
                     </Text>
                     <Text style={{ color: '#335336', fontWeight: '700', fontSize: 13, marginTop: 4 }}>
                       {fmt(opt.priceCents)}
