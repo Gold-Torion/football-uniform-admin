@@ -2,7 +2,7 @@
   "expo": {
     "name": "Arena dos Mantos",
     "slug": "arena-dos-mantos",
-    "version": "0.9.7",
+    "version": "0.9.8",
     "orientation": "portrait",
     "scheme": "arenadosmantos",
     "userInterfaceStyle": "light",
@@ -36,7 +36,6 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification-icon.png",
           "color": "#335336",
           "sounds": []
         }
