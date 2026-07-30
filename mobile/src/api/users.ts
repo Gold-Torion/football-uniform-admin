@@ -22,7 +22,7 @@ export const UsersApi = {
     return api.patch('/users/me/push-token', { token }).then(() => undefined);
   },
   updateDadosPessoais(nomeCompleto: string, email: string): Promise<PublicUser> {
-    return api.patch('/users/me/dados-pessoais', { nomeCompleto, email }).then((r) => r.data as PublicUser);
+    return api.post('/users/me/dados-pessoais', { nomeCompleto, email }).then((r) => r.data as PublicUser);
   },
   updateBankData(data: {
     bankCode: string;
@@ -31,7 +31,7 @@ export const UsersApi = {
     bankAccount: string;
     bankAccountDigit: string;
   }): Promise<PublicUser> {
-    return api.patch('/users/me/financeiro/bank', data).then((r) => r.data as PublicUser);
+    return api.post('/users/me/financeiro/bank', data).then((r) => r.data as PublicUser);
   },
   getFinanceiroBalance(): Promise<FinanceiroBalance> {
     return api.get('/users/me/financeiro/balance').then((r) => r.data as FinanceiroBalance);
