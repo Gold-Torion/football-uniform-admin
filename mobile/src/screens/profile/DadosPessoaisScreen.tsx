@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Lock, User } from 'lucide-react-native';
+import { AxiosError } from 'axios';
 import { useAuthStore } from '../../store/auth.store';
 import { UsersApi } from '../../api/users';
 
@@ -75,8 +76,14 @@ export function DadosPessoaisScreen() {
         user: updated,
       });
       Alert.alert('Salvo!', 'Seus dados pessoais foram registrados.');
-    } catch {
-      Alert.alert('Erro', 'Não foi possível salvar. Tente novamente.');
+    } catch (err) {
+      let detail = '';
+      if (err instanceof AxiosError) {
+        const status = err.response?.status;
+        const msg = err.response?.data?.message ?? err.message;
+        detail = `\n[${status ?? 'rede'}] ${typeof msg === 'string' ? msg : JSON.stringify(msg)}`;
+      }
+      Alert.alert('Erro', `Não foi possível salvar. Tente novamente.${detail}`);
     } finally {
       setSaving(false);
     }
