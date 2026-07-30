@@ -6,7 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DollarSign, Lock, AlertTriangle } from 'lucide-react-native';
 import { useAuthStore } from '../../store/auth.store';
-import { UsersApi, type FinanceiroBalance } from '../../api/users';
+import { UsersApi, type FinanceiroBalance, type WithdrawalItem } from '../../api/users';
 
 const BANKS = [
   { code: '001', name: 'Banco do Brasil' },
@@ -65,6 +65,10 @@ export function FinanceiroScreen() {
   const [sacarValue, setSacarValue] = useState('');
   const [sacarLoading, setSacarLoading] = useState(false);
 
+  // Extrato
+  const [withdrawals, setWithdrawals] = useState<WithdrawalItem[]>([]);
+  const [loadingExtrato, setLoadingExtrato] = useState(false);
+
   // Bank picker modal
   const [showBankPicker, setShowBankPicker] = useState(false);
 
@@ -73,10 +77,32 @@ export function FinanceiroScreen() {
       .then(setBalance)
       .catch(() => setBalance({ available: 0, waitingFunds: 0, hasRecipient: false }))
       .finally(() => setLoadingBal(false));
+
+    setLoadingExtrato(true);
+    UsersApi.getWithdrawals()
+      .then(setWithdrawals)
+      .catch(() => setWithdrawals([]))
+      .finally(() => setLoadingExtrato(false));
   }, []);
 
   const fmt = (cents: number) =>
     (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  const fmtDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  const withdrawalStatusLabel = (status: string): { label: string; color: string } => {
+    switch (status) {
+      case 'transferred':      return { label: 'Transferido',            color: '#4CAF50' };
+      case 'waiting_transfer': return { label: 'Aguardando transf.',     color: '#D4AF37' };
+      case 'pending':          return { label: 'Pendente',               color: '#D4AF37' };
+      case 'failed':           return { label: 'Falhou',                 color: '#EF5350' };
+      case 'canceled':         return { label: 'Cancelado',              color: '#9C9486' };
+      default:                 return { label: status,                   color: '#9C9486' };
+    }
+  };
 
   const handleSaveBank = async () => {
     if (!bankCode || !bankAgency || !bankAccount || !bankAccountDigit) {
@@ -133,8 +159,12 @@ export function FinanceiroScreen() {
             await UsersApi.sacar(cents);
             Alert.alert('Saque solicitado!', 'O valor será transferido para sua conta em até 1 dia útil.');
             setSacarValue('');
-            const newBal = await UsersApi.getFinanceiroBalance();
+            const [newBal, newHistory] = await Promise.all([
+              UsersApi.getFinanceiroBalance(),
+              UsersApi.getWithdrawals(),
+            ]);
             setBalance(newBal);
+            setWithdrawals(newHistory);
           } catch {
             Alert.alert('Erro', 'Não foi possível processar o saque.');
           } finally {
@@ -212,6 +242,41 @@ export function FinanceiroScreen() {
                 </View>
               )}
             </>
+          )}
+        </View>
+
+        {/* ── Extrato ── */}
+        <SectionTitle title="EXTRATO DE SAQUES" />
+        <View style={{ backgroundColor: '#444', borderRadius: 16, padding: 16, marginBottom: 20 }}>
+          {loadingExtrato ? (
+            <ActivityIndicator color="#D4AF37" />
+          ) : withdrawals.length === 0 ? (
+            <Text style={{ color: 'rgba(234,234,234,0.4)', fontSize: 13, textAlign: 'center', paddingVertical: 8 }}>
+              Nenhum saque realizado ainda.
+            </Text>
+          ) : (
+            withdrawals.map((w, idx) => {
+              const { label, color } = withdrawalStatusLabel(w.status);
+              return (
+                <View
+                  key={w.id}
+                  style={{
+                    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+                    paddingVertical: 12,
+                    borderBottomWidth: idx < withdrawals.length - 1 ? 1 : 0,
+                    borderColor: 'rgba(255,255,255,0.07)',
+                  }}
+                >
+                  <View>
+                    <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 15 }}>{fmt(w.amount)}</Text>
+                    <Text style={{ color: 'rgba(234,234,234,0.45)', fontSize: 12, marginTop: 2 }}>{fmtDate(w.createdAt)}</Text>
+                  </View>
+                  <View style={{ backgroundColor: `${color}22`, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
+                    <Text style={{ color, fontSize: 12, fontWeight: '700' }}>{label}</Text>
+                  </View>
+                </View>
+              );
+            })
           )}
         </View>
 

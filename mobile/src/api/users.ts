@@ -7,6 +7,13 @@ export interface FinanceiroBalance {
   hasRecipient: boolean;
 }
 
+export interface WithdrawalItem {
+  id: string;
+  status: string;
+  amount: number;
+  createdAt: string;
+}
+
 export const UsersApi = {
   updateSellerCep(cep: string, rua?: string, numero?: string, cidade?: string, estado?: string): Promise<PublicUser> {
     return api.patch('/users/me/cep', { cep, rua, numero, cidade, estado }).then((r) => r.data as PublicUser);
@@ -31,5 +38,8 @@ export const UsersApi = {
   },
   sacar(amountCents: number): Promise<{ id: string; status: string; amount: number }> {
     return api.post('/users/me/financeiro/sacar', { amountCents }).then((r) => r.data as { id: string; status: string; amount: number });
+  },
+  getWithdrawals(): Promise<WithdrawalItem[]> {
+    return api.get('/users/me/financeiro/withdrawals').then((r) => r.data as WithdrawalItem[]);
   },
 };
