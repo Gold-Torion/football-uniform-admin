@@ -28,7 +28,7 @@ function LockedField({ label, value }: { label: string; value: string }) {
       <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 11, fontWeight: '700', letterSpacing: 0.5, marginBottom: 5 }}>
         {label}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 }}>
         <Lock size={13} color="rgba(234,234,234,0.25)" />
         <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14 }}>{value || '—'}</Text>
       </View>
@@ -305,7 +305,7 @@ export function FinanceiroScreen() {
           {/* Bank selector */}
           <Text style={{ color: 'rgba(234,234,234,0.6)', fontSize: 11, fontWeight: '700', letterSpacing: 0.5, marginBottom: 6 }}>BANCO</Text>
           {isBankLocked ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 14 }}>
               <Lock size={13} color="rgba(234,234,234,0.25)" />
               <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 14 }}>{selectedBank ? `${selectedBank.code} — ${selectedBank.name}` : bankCode}</Text>
             </View>
