@@ -58,6 +58,8 @@ export type RootStackParamList = {
   RateOrder: { orderId: string; rateeId: string; rateeName: string; raterRole: 'BUYER' | 'SELLER' };
   AdminReports: { secret: string };
   AdminUsers: { secret: string };
+  DadosPessoais: undefined;
+  Financeiro: undefined;
   Checkout: { listing: ListingParam };
   PixPayment: {
     orderId: string;

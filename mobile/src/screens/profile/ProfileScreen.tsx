@@ -4,7 +4,7 @@ import { webAlert, webConfirm } from '../../utils/webAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X, CreditCard, Phone, Lock } from 'lucide-react-native';
+import { ShoppingBag, Shield, ShieldOff, Ticket, AtSign, MapPin, HelpCircle, X, CreditCard, User, DollarSign } from 'lucide-react-native';
 
 import { useAuthStore } from '../../store/auth.store';
 import { AuthApi } from '../../api/auth';
@@ -325,21 +325,15 @@ export function ProfileScreen() {
         </Text>
         <Card>
           <Row
-            label="Telefone"
-            icon={<Phone size={17} color="#9C9486" />}
-            value={user?.phoneE164
-              ? user.phoneE164.replace(/(\+55)(\d{2})(\d{5})(\d{4})/, '$1 ($2) $3-$4')
-              : 'Adicionar'}
-            onPress={user?.phoneE164 ? undefined : () => navigation.navigate('VerifyPhone')}
+            label="Dados Pessoais"
+            icon={<User size={17} color="#9C9486" />}
+            onPress={() => navigation.navigate('DadosPessoais')}
           />
           <Divider />
           <Row
-            label="CPF"
-            icon={user?.cpf ? <Lock size={15} color="#9C9486" /> : undefined}
-            value={user?.cpf
-              ? `${user.cpf.slice(0, 3)}.***.***-${user.cpf.slice(9)}`
-              : 'Adicionar'}
-            onPress={user?.cpf ? undefined : () => navigation.navigate('VerifyCpf')}
+            label="Financeiro"
+            icon={<DollarSign size={17} color="#9C9486" />}
+            onPress={() => navigation.navigate('Financeiro')}
           />
           <Divider />
           <Row label="Meus pedidos" icon={<ShoppingBag size={17} color="#9C9486" />} onPress={() => navigation.navigate('Orders')} />

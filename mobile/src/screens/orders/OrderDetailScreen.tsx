@@ -394,9 +394,25 @@ export function OrderDetailScreen({ route, navigation }: Props) {
                     <Package size={18} color="rgba(234,234,234,0.4)" />
                     <Text style={{ color: '#EAEAEA', fontWeight: '600', fontSize: 14 }}>Entrega em Mãos</Text>
                   </View>
-                  <Text style={{ color: '#9C9486', fontSize: 13 }}>
+                  <Text style={{ color: '#9C9486', fontSize: 13, marginBottom: canConfirm ? 16 : 0 }}>
                     Entrega pessoal combinada entre comprador e vendedor
                   </Text>
+                  {canConfirm && (
+                    <Pressable
+                      onPress={handleConfirmReceipt}
+                      disabled={confirming}
+                      style={({ pressed }) => ({
+                        backgroundColor: confirming ? '#9C9486' : pressed ? '#243B26' : '#335336',
+                        borderRadius: 12, paddingVertical: 14, alignItems: 'center',
+                        marginTop: 4,
+                      })}
+                    >
+                      {confirming
+                        ? <ActivityIndicator color="#D4AF37" />
+                        : <Text style={{ color: '#D4AF37', fontWeight: '800', fontSize: 15 }}>✓ Confirmar recebimento</Text>
+                      }
+                    </Pressable>
+                  )}
                 </>
               )}
             </SectionCard>

@@ -14,6 +14,15 @@ export interface PublicUser {
   sellerCidade?:  string;
   sellerEstado?:  string;
   lgpdConsentAt?: string;
+  nomeCompleto?: string;
+  dadosPessoaisLockedAt?: string;
+  bankCode?: string;
+  bankAgency?: string;
+  bankAgencyDigit?: string;
+  bankAccount?: string;
+  bankAccountDigit?: string;
+  bankLockedAt?: string;
+  pagarmeRecipientId?: string;
   ratingAvgAsSeller?: number;
   ratingCountAsSeller: number;
   ratingAvgAsBuyer?: number;

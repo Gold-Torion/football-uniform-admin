@@ -21,6 +21,8 @@ import { SellerProfileScreen } from '../screens/seller/SellerProfileScreen';
 import { RateOrderScreen } from '../screens/rating/RateOrderScreen';
 import { AdminReportsScreen } from '../screens/admin/AdminReportsScreen';
 import { AdminUsersScreen } from '../screens/admin/AdminUsersScreen';
+import { DadosPessoaisScreen } from '../screens/profile/DadosPessoaisScreen';
+import { FinanceiroScreen } from '../screens/profile/FinanceiroScreen';
 import { CheckoutScreen } from '../screens/orders/CheckoutScreen';
 import { OrdersScreen } from '../screens/orders/OrdersScreen';
 import { OrderDetailScreen } from '../screens/orders/OrderDetailScreen';
@@ -104,6 +106,12 @@ export function RootNavigator() {
             />
             <Stack.Screen name="AdminUsers" component={s(AdminUsersScreen)}
               options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen name="DadosPessoais" component={s(DadosPessoaisScreen)}
+              options={{ animation: 'slide_from_right', headerShown: true, title: 'Dados Pessoais', headerStyle: { backgroundColor: '#335336' }, headerTitleStyle: { color: '#D4AF37', fontWeight: '800' }, headerTintColor: '#D4AF37' }}
+            />
+            <Stack.Screen name="Financeiro" component={s(FinanceiroScreen)}
+              options={{ animation: 'slide_from_right', headerShown: true, title: 'Financeiro', headerStyle: { backgroundColor: '#335336' }, headerTitleStyle: { color: '#D4AF37', fontWeight: '800' }, headerTintColor: '#D4AF37' }}
             />
             <Stack.Screen name="Checkout" component={s(CheckoutScreen)}
               options={{ animation: 'slide_from_right' }}

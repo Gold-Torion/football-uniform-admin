@@ -606,17 +606,17 @@ export function ListingDetailScreen({ route, navigation }: Props) {
               </Text>
             </Pressable>
 
-            {/* Buy now — filled gold button */}
+            {/* Buy now — filled green button */}
             <Pressable
               onPress={() => navigation.navigate('Checkout', { listing: { ...listing, priceCents } })}
               style={({ pressed }) => ({
-                backgroundColor: pressed ? '#B8942E' : '#D4AF37',
+                backgroundColor: pressed ? '#243B26' : '#335336',
                 borderRadius: 16,
                 paddingVertical: 16,
                 alignItems: 'center',
               })}
             >
-              <Text style={{ color: '#211B15', fontWeight: '900', fontSize: 17 }} numberOfLines={1}>
+              <Text style={{ color: '#D4AF37', fontWeight: '900', fontSize: 17 }} numberOfLines={1}>
                 Comprar — {price}
               </Text>
             </Pressable>

@@ -1,11 +1,35 @@
 import { api } from './client';
 import type { PublicUser } from '../store/auth.store';
 
+export interface FinanceiroBalance {
+  available: number;
+  waitingFunds: number;
+  hasRecipient: boolean;
+}
+
 export const UsersApi = {
   updateSellerCep(cep: string, rua?: string, numero?: string, cidade?: string, estado?: string): Promise<PublicUser> {
     return api.patch('/users/me/cep', { cep, rua, numero, cidade, estado }).then((r) => r.data as PublicUser);
   },
   updatePushToken(token: string): Promise<void> {
     return api.patch('/users/me/push-token', { token }).then(() => undefined);
+  },
+  updateDadosPessoais(nomeCompleto: string, email: string): Promise<PublicUser> {
+    return api.patch('/users/me/dados-pessoais', { nomeCompleto, email }).then((r) => r.data as PublicUser);
+  },
+  updateBankData(data: {
+    bankCode: string;
+    bankAgency: string;
+    bankAgencyDigit?: string;
+    bankAccount: string;
+    bankAccountDigit: string;
+  }): Promise<PublicUser> {
+    return api.patch('/users/me/financeiro/bank', data).then((r) => r.data as PublicUser);
+  },
+  getFinanceiroBalance(): Promise<FinanceiroBalance> {
+    return api.get('/users/me/financeiro/balance').then((r) => r.data as FinanceiroBalance);
+  },
+  sacar(amountCents: number): Promise<{ id: string; status: string; amount: number }> {
+    return api.post('/users/me/financeiro/sacar', { amountCents }).then((r) => r.data as { id: string; status: string; amount: number });
   },
 };
