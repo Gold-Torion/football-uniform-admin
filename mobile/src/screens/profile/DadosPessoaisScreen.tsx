@@ -30,7 +30,7 @@ function Field({ label, value, onChangeText, locked, placeholder, keyboardType, 
         backgroundColor: locked ? 'rgba(255,255,255,0.04)' : 'rgba(51,83,54,0.15)',
         paddingHorizontal: 14, paddingVertical: 12,
       }}>
-        {locked && <Lock size={14} color="rgba(234,234,234,0.3)" style={{ marginRight: 8 }} />}
+        {locked && <View style={{ marginRight: 8 }}><Lock size={14} color="rgba(234,234,234,0.3)" /></View>}
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -47,9 +47,7 @@ function Field({ label, value, onChangeText, locked, placeholder, keyboardType, 
 }
 
 export function DadosPessoaisScreen() {
-  const user     = useAuthStore((s) => s.user);
-  const setUser  = useAuthStore((s) => s.setSession);
-  const session  = useAuthStore((s) => ({ accessToken: useAuthStore.getState().accessToken!, refreshToken: useAuthStore.getState().refreshToken! }));
+  const user = useAuthStore((s) => s.user);
 
   const isLocked = !!user?.dadosPessoaisLockedAt;
 

@@ -173,7 +173,7 @@ export function FinanceiroScreen() {
                     {fmt(balance?.available ?? 0)}
                   </Text>
                 </View>
-                <View style={{ width: 1, backgroundColor: 'rgba(255,255,255,0.1)' }} />
+                <View style={{ width: 1, alignSelf: 'stretch', backgroundColor: 'rgba(255,255,255,0.1)' }} />
                 <View style={{ alignItems: 'center', flex: 1 }}>
                   <Text style={{ color: 'rgba(234,234,234,0.5)', fontSize: 11, marginBottom: 4 }}>A RECEBER</Text>
                   <Text style={{ color: '#EAEAEA', fontWeight: '700', fontSize: 18 }}>
@@ -221,7 +221,7 @@ export function FinanceiroScreen() {
 
           {/* Warning CPF */}
           <View style={{ flexDirection: 'row', gap: 8, backgroundColor: 'rgba(245,158,11,0.1)', borderRadius: 10, padding: 12, marginBottom: 16 }}>
-            <AlertTriangle size={14} color="#F59E0B" style={{ marginTop: 1 }} />
+            <View style={{ marginTop: 1 }}><AlertTriangle size={14} color="#F59E0B" /></View>
             <Text style={{ color: '#F59E0B', fontSize: 12, flex: 1, lineHeight: 17 }}>
               O CPF da conta bancária deve ser o mesmo registrado no perfil.
             </Text>

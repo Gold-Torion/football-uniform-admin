@@ -473,8 +473,8 @@ export function OrderDetailScreen({ route, navigation }: Props) {
 
           </ScrollView>
 
-          {/* Confirm receipt button */}
-          {canConfirm && (
+          {/* Confirm receipt button — only for Correios/non-hand-delivery (hand-delivery has it inside the card) */}
+          {canConfirm && order.deliveryMethod !== 'ENTREGA_EM_MAOS' && (
             <View style={{ backgroundColor: '#2a2a2a', borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)', padding: 16, paddingBottom: 28 }}>
               <Pressable
                 onPress={handleConfirmReceipt}
