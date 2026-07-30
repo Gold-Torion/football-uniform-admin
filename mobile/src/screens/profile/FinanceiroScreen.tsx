@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DollarSign, Lock, AlertTriangle } from 'lucide-react-native';
+import { AxiosError } from 'axios';
 import { useAuthStore } from '../../store/auth.store';
 import { UsersApi, type FinanceiroBalance, type WithdrawalItem } from '../../api/users';
 
@@ -132,8 +133,14 @@ export function FinanceiroScreen() {
               Alert.alert('Salvo!', 'Conta bancária registrada com sucesso.');
               const newBal = await UsersApi.getFinanceiroBalance();
               setBalance(newBal);
-            } catch {
-              Alert.alert('Erro', 'Não foi possível salvar os dados bancários.');
+            } catch (err) {
+              let detail = '';
+              if (err instanceof AxiosError) {
+                const status = err.response?.status;
+                const msg = err.response?.data?.message ?? err.message;
+                detail = `\n[${status ?? 'rede'}] ${typeof msg === 'string' ? msg : JSON.stringify(msg)}`;
+              }
+              Alert.alert('Erro', `Não foi possível salvar os dados bancários.${detail}`);
             } finally {
               setSavingBank(false);
             }
@@ -165,8 +172,11 @@ export function FinanceiroScreen() {
             ]);
             setBalance(newBal);
             setWithdrawals(newHistory);
-          } catch {
-            Alert.alert('Erro', 'Não foi possível processar o saque.');
+          } catch (err) {
+            const detail = err instanceof AxiosError
+              ? `\n[${err.response?.status ?? 'rede'}] ${err.response?.data?.message ?? err.message}`
+              : '';
+            Alert.alert('Erro', `Não foi possível processar o saque.${detail}`);
           } finally {
             setSacarLoading(false);
           }
