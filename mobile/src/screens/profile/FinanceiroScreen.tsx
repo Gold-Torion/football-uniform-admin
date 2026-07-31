@@ -74,6 +74,15 @@ export function FinanceiroScreen() {
   const [showBankPicker, setShowBankPicker] = useState(false);
 
   useEffect(() => {
+    // Refresh user from backend so bankLockedAt / nomeCompleto are always current
+    UsersApi.getMe().then((fresh) => {
+      useAuthStore.getState().setSession({
+        accessToken: useAuthStore.getState().accessToken!,
+        refreshToken: useAuthStore.getState().refreshToken!,
+        user: fresh,
+      });
+    }).catch(() => {});
+
     UsersApi.getFinanceiroBalance()
       .then(setBalance)
       .catch(() => setBalance({ available: 0, waitingFunds: 0, hasRecipient: false }))
@@ -131,8 +140,10 @@ export function FinanceiroScreen() {
                 user: updated,
               });
               Alert.alert('Salvo!', 'Conta bancária registrada com sucesso.');
-              const newBal = await UsersApi.getFinanceiroBalance();
-              setBalance(newBal);
+              // Fetch balance separately — don't let it throw into the outer catch
+              UsersApi.getFinanceiroBalance()
+                .then(setBalance)
+                .catch(() => {});
             } catch (err) {
               let detail = '';
               if (err instanceof AxiosError) {
